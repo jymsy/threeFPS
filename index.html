@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -10,6 +11,7 @@
 		"imports": {
 			"three": "./three/three.module.js",
       "three/addons/": "./three/addons/"
+      "@tweenjs/tween.js": "./tween/tween.esm.js"
 		}
 	}
 </script>
@@ -58,7 +60,7 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
-    
+
     import Stats from 'three/addons/libs/stats.module.js';
     // 引入dat.gui.js的一个类GUI
     import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
@@ -116,7 +118,7 @@
     scene.add(axesHelper);
 
     initLight(scene);
-    
+
     initEventHandlers(camera, pointerControl);
 
     const gun = new Gun(scene);
@@ -130,9 +132,12 @@
     // 渲染函数
     function render() {
       // stats.update();
-      camera.render(pointerControl);
-      gun.render(camera);
-      renderer.render(scene, camera.getCamera()); //执行渲染操作
+      if (pointerControl.isLocked) {
+        camera.render(pointerControl);
+        gun.render(camera);
+        renderer.render(scene, camera.getCamera()); //执行渲染操作
+      }
+
       requestAnimationFrame(render);//请求再次执行渲染函数render，渲染下一帧
     }
     render();
