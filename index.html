@@ -8,17 +8,29 @@
   <title>threejs fps</title>
   <script type="importmap">
     {
-		"imports": {
-			"three": "./three/three.module.js",
-      "three/addons/": "./three/addons/"
-      "@tweenjs/tween.js": "./tween/tween.esm.js"
-		}
-	}
-</script>
+		  "imports": {
+        "three": "./three/three.module.js",
+        "three/addons/": "./three/addons/",
+        "@tweenjs/tween.js": "./tween/tween.esm.js"
+		  }
+	  }
+  </script>
   <style>
     body {
       overflow: hidden;
       margin: 0px;
+    }
+
+    .aim {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      border: 2px solid white;
+      z-index: 2;
     }
 
     #blocker {
@@ -26,6 +38,7 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
+      z-index: 3;
     }
 
     #instructions {
@@ -55,6 +68,7 @@
       </p>
     </div>
   </div>
+  <div class="aim"></div>
   <div id="webgl"></div>
   <script type="module">
     import * as THREE from 'three';
@@ -120,6 +134,7 @@
     initLight(scene);
 
     initEventHandlers(camera, pointerControl);
+
 
     const gun = new Gun(scene);
 
