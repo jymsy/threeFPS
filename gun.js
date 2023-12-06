@@ -19,9 +19,11 @@ class Gun {
   aimingStartAnimation;
   aimingEndAnimation;
   flashAnimation;
-  flashOpacity = 1;
+  flashMesh;
+  audio;
 
   constructor(scene) {
+    this.audio = new Audio("./audio/single-shoot-ak47.wav");
     // 创建GLTF加载器对象
     const loader = new GLTFLoader();
     this.group = new THREE.Group();
@@ -33,13 +35,13 @@ class Gun {
     const texture = texLoader.load("./img/flash_shoot.png");
     const material = new THREE.MeshBasicMaterial({
       map: texture,
-      // transparent: true,
-      // opacity: this.flashOpacity,
-      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0,
     });
 
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(-0.1, -0.25, 0.2);
+    this.flashMesh = new THREE.Mesh(geometry, material);
+    this.flashMesh.position.set(-0.1, -0.27, 0.35);
+    this.flashMesh.rotateY(Math.PI);
 
     loader.load("gltf/gun/scene.gltf", (gltf) => {
       this.gltf = gltf;
@@ -50,7 +52,7 @@ class Gun {
         }
       });
       gltf.scene.position.set(-0.1, -0.25, 0.2);
-      this.recoilGroup.add(mesh);
+      this.recoilGroup.add(this.flashMesh);
       this.recoilGroup.add(gltf.scene);
       this.swayingGroup.add(this.recoilGroup);
       this.group.add(this.swayingGroup);
@@ -59,6 +61,7 @@ class Gun {
       this.initSwayingAnimation();
       this.initRecoilAnimation();
       this.initAimingAnimation();
+      this.initFlashAnimation();
     });
   }
 
@@ -103,14 +106,19 @@ class Gun {
   initFlashAnimation() {
     const currentFlash = { opacity: 0 };
     this.flashAnimation = new TWEEN.Tween(currentFlash)
-      .to({ opacity: 1 }, 80)
+      .to({ opacity: 1 }, 40)
       .easing(TWEEN.Easing.Quadratic.Out)
-      .onUpdate(() => {});
+      .onUpdate(() => {
+        this.flashMesh.material.opacity = currentFlash.opacity;
+      })
+      .onComplete(() => {
+        this.flashMesh.material.opacity = 0;
+      });
   }
 
   initAimingAnimation() {
     const currentPosition = this.swayingGroup.position;
-    const finalPosition = new THREE.Vector3(0.1, 0, 0);
+    const finalPosition = new THREE.Vector3(0.1, 0.05, 0);
 
     this.aimingStartAnimation = new TWEEN.Tween(currentPosition)
       .to(finalPosition, 200)
@@ -129,7 +137,6 @@ class Gun {
 
   initRecoilAnimation() {
     const currentPosition = { x: 0, y: 0, z: 0, rotation: 0 };
-    const initialPosition = { x: 0, y: 0, z: 0, rotation: 0 };
     const newPosition = this.generateRecoilPosition(currentPosition);
     const duration = 80;
 
@@ -223,13 +230,15 @@ class Gun {
 
       if (this.isShooting && this.recoilAnimationFinished) {
         this.recoilAnimationFinished = false;
+        this.audio.currentTime = 0;
+        this.audio.play();
         this.recoilAnimation.start();
+        this.flashAnimation.start();
       }
 
       this.group.rotation.copy(cameraObj.rotation);
       this.group.rotateY(Math.PI);
       this.group.rotateX(-Math.PI / 6);
-
       this.group.position.copy(cameraObj.position);
     }
   }
