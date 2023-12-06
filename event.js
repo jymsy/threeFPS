@@ -1,4 +1,4 @@
-const initEventHandlers = (camera, pointerControl) => {
+const initEventHandlers = (camera, pointerControl, gun) => {
   const instructions = document.getElementById("instructions");
   const blocker = document.getElementById("blocker");
 
@@ -25,6 +25,18 @@ const initEventHandlers = (camera, pointerControl) => {
   document.addEventListener("keyup", (ev) => {
     if (pointerControl.isLocked) {
       camera.handleKeyUp(ev.key);
+    }
+  });
+
+  document.addEventListener("mousedown", (ev) => {
+    if (pointerControl.isLocked) {
+      gun.handleMouseDown(ev.button);
+    }
+  });
+
+  document.addEventListener("mouseup", (ev) => {
+    if (pointerControl.isLocked) {
+      gun.handleMouseUp(ev.button);
     }
   });
 };

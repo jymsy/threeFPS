@@ -74,7 +74,7 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
-
+    import TWEEN from "@tweenjs/tween.js";
     import Stats from 'three/addons/libs/stats.module.js';
     // 引入dat.gui.js的一个类GUI
     import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
@@ -132,11 +132,11 @@
     scene.add(axesHelper);
 
     initLight(scene);
-
-    initEventHandlers(camera, pointerControl);
-
-
     const gun = new Gun(scene);
+    initEventHandlers(camera, pointerControl, gun);
+
+
+    
 
     // const stats = new Stats();
     // document.body.appendChild(stats.domElement);
@@ -148,6 +148,7 @@
     function render() {
       // stats.update();
       if (pointerControl.isLocked) {
+        TWEEN.update();
         camera.render(pointerControl);
         gun.render(camera);
         renderer.render(scene, camera.getCamera()); //执行渲染操作
