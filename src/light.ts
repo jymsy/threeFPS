@@ -1,11 +1,11 @@
-import * as THREE from "three";
+import { Scene, AmbientLight, DirectionalLight, CameraHelper } from "three";
 
-const initLight = (scene) => {
+const initLight = (scene: Scene) => {
   // // 环境光。没有特定方向，只是整体改变场景的光照明暗。
-  const ambient = new THREE.AmbientLight(0xffffff, 1.4);
+  const ambient = new AmbientLight(0xffffff, 1.4);
   scene.add(ambient);
   // 平行光
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  const directionalLight = new DirectionalLight(0xffffff, 1);
   directionalLight.position.set(8, 10, 5);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.set(2048, 2048);
@@ -20,7 +20,7 @@ const initLight = (scene) => {
   // directionalLight.shadow.camera.far = 600;
 
   // 可视化平行光阴影对应的正投影相机对象
-  const cameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+  const cameraHelper = new CameraHelper(directionalLight.shadow.camera);
   scene.add(cameraHelper);
 };
 

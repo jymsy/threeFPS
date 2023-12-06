@@ -3,7 +3,7 @@ import * as THREE from "three";
 class Wall {
   mesh;
 
-  constructor(vertex) {
+  constructor() {
     // const indices = [
     //   // 下面索引值对应顶点位置数据中的顶点坐标
     //   0, 1, 2, 2, 3, 0,

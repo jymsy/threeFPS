@@ -1,4 +1,5 @@
-import * as THREE from "three";
+import { Vector3, Clock, PerspectiveCamera } from "three";
+import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 class Camera {
   instance;
@@ -8,16 +9,16 @@ class Camera {
   goLeft = false;
   jumping = false;
   speed = 10; //控制器移动速度
-  clock = new THREE.Clock();
+  clock = new Clock();
   spaceUp = true;
 
-  velocity = new THREE.Vector3(); //移动速度向量
-  direction = new THREE.Vector3(); //移动的方向向量
-  rotation = new THREE.Vector3(); //当前的相机朝向
+  velocity = new Vector3(); //移动速度向量
+  direction = new Vector3(); //移动的方向向量
+  rotation = new Vector3(); //当前的相机朝向
 
-  constructor(aspect) {
+  constructor(aspect: number) {
     // 实例化一个透视投影相机对象
-    const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 300);
+    const camera = new PerspectiveCamera(50, aspect, 0.1, 300);
     //相机在Three.js三维坐标系中的位置
     // 根据需要设置相机位置具体值
     camera.position.set(0, 0, 0);
@@ -31,7 +32,7 @@ class Camera {
     return this.instance;
   }
 
-  handleKeyDown(key) {
+  handleKeyDown(key: string) {
     switch (key) {
       case "w":
         this.goForward = true;
@@ -57,7 +58,7 @@ class Camera {
     }
   }
 
-  handleKeyUp(key) {
+  handleKeyUp(key: string) {
     switch (key) {
       case "w":
         this.goForward = false;
@@ -78,7 +79,7 @@ class Camera {
     }
   }
 
-  render(pointerControl) {
+  render(pointerControl: PointerLockControls) {
     const delta = this.clock.getDelta();
     const object = pointerControl.getObject();
 

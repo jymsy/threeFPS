@@ -1,6 +1,14 @@
-const initEventHandlers = (camera, pointerControl, gun) => {
-  const instructions = document.getElementById("instructions");
-  const blocker = document.getElementById("blocker");
+import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
+import Camera from "./camera";
+import Gun from "./gun";
+
+const initEventHandlers = (
+  camera: Camera,
+  pointerControl: PointerLockControls,
+  gun: Gun
+) => {
+  const instructions = document.getElementById("instructions")!;
+  const blocker = document.getElementById("blocker")!;
 
   instructions.addEventListener("click", () => {
     pointerControl.lock();

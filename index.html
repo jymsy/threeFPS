@@ -6,15 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="theme-color" content="#000000">
   <title>threejs fps</title>
-  <script type="importmap">
-    {
-		  "imports": {
-        "three": "./three/three.module.js",
-        "three/addons/": "./three/addons/",
-        "@tweenjs/tween.js": "./tween/tween.esm.js"
-		  }
-	  }
-  </script>
   <style>
     body {
       overflow: hidden;
@@ -70,94 +61,6 @@
   </div>
   <div class="aim"></div>
   <div id="webgl"></div>
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
-    import TWEEN from "@tweenjs/tween.js";
-    import Stats from 'three/addons/libs/stats.module.js';
-    // 引入dat.gui.js的一个类GUI
-    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-    import Wall from './wall.js';
-    import Floor from './floor.js';
-    import Sky from './sky.js';
-    import initEventHandlers from './event.js';
-    import Camera from './camera.js';
-    import initLight from './light.js';
-    import Gun from './gun.js';
-
-    const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
-    const height = window.innerHeight; //窗口文档显示区的高度作为画布高度
-    // 实例化一个gui对象
-    // const gui = new GUI();
-    // 创建渲染器对象
-    const renderer = new THREE.WebGLRenderer({ antialias: true }); // 抗锯齿
-    const camera = new Camera(width / height);
-    const pointerControl = new PointerLockControls(camera.getCamera(), document.body);
-
-    renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
-    renderer.shadowMap.enabled = true; // 允许渲染器渲染阴影
-    // renderer.shadowMap.type = THREE.VSMShadowMap;
-
-    const scene = new THREE.Scene();
-
-    const frontWall = new Wall();
-    frontWall.mesh.translateZ(-2);
-    scene.add(frontWall.mesh);
-
-    const leftWall = new Wall();
-    leftWall.mesh.translateX(-2);
-    leftWall.mesh.rotateY(Math.PI / 2);
-    scene.add(leftWall.mesh);
-
-    const rightWall = new Wall();
-    rightWall.mesh.translateX(2);
-    rightWall.mesh.rotateY(Math.PI / 2);
-    scene.add(rightWall.mesh);
-
-    // const backWall = new Wall();
-    // backWall.mesh.translateZ(2);
-    // scene.add(backWall.mesh);
-
-    const floor = new Floor();
-    floor.mesh.translateY(-0.5);
-    floor.mesh.rotateX(Math.PI / 2);
-    scene.add(floor.mesh);
-
-    const sky = new Sky();
-    scene.background = sky.skyBox;
-
-    // AxesHelper：辅助观察的坐标系
-    const axesHelper = new THREE.AxesHelper(150);
-    scene.add(axesHelper);
-
-    initLight(scene);
-    const gun = new Gun(scene);
-    initEventHandlers(camera, pointerControl, gun);
-
-
-    
-
-    // const stats = new Stats();
-    // document.body.appendChild(stats.domElement);
-    // const controls = new OrbitControls(camera, renderer.domElement);
-    // controls.update();
-    document.getElementById('webgl').appendChild(renderer.domElement);
-
-    // 渲染函数
-    function render() {
-      // stats.update();
-      if (pointerControl.isLocked) {
-        TWEEN.update();
-        camera.render(pointerControl);
-        gun.render(camera);
-        renderer.render(scene, camera.getCamera()); //执行渲染操作
-      }
-
-      requestAnimationFrame(render);//请求再次执行渲染函数render，渲染下一帧
-    }
-    render();
-  </script>
+  <script type="module" src="/src/index.ts"></script>
 </body>
-
 </html>
