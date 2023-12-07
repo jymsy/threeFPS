@@ -10,10 +10,12 @@ import {
   AnimationMixer,
   Clock,
 } from "three";
+import { Tween, Easing } from "@tweenjs/tween.js";
 
 class Enemy {
   mixer?: AnimationMixer;
   clock = new Clock();
+  model?: Group;
 
   constructor(scene: Scene) {
     const loader = new GLTFLoader();
@@ -26,6 +28,7 @@ class Enemy {
           node.castShadow = true;
         }
       });
+      this.model = gltf.scene;
       scene.add(gltf.scene);
 
       console.log(gltf.animations);
@@ -33,7 +36,18 @@ class Enemy {
       this.mixer = new AnimationMixer(gltf.scene);
       const action = this.mixer.clipAction(runAnimation);
       action.play();
+      this.initRunAnimation();
     });
+  }
+
+  initRunAnimation() {
+    const runAnimation = new Tween(this.model!.position)
+      .to(new Vector3(0, -0.5, 4), 4000)
+      .easing(Easing.Quadratic.InOut)
+      .repeat(Infinity)
+      .yoyo(true);
+
+    runAnimation.start();
   }
 
   render() {
