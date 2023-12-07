@@ -11,6 +11,7 @@ import initEventHandlers from "./event";
 import Camera from "./camera";
 import initLight from "./light";
 import Gun from "./gun";
+import Enemy from "./enemy";
 
 const init = () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
@@ -25,6 +26,7 @@ const init = () => {
     document.body
   );
 
+  renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比。通常用于避免HiDPI设备上绘图模糊
   renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
   renderer.shadowMap.enabled = true; // 允许渲染器渲染阴影
   // renderer.shadowMap.type = THREE.VSMShadowMap;
@@ -63,6 +65,7 @@ const init = () => {
 
   initLight(scene);
   const gun = new Gun(scene);
+  const enemy = new Enemy(scene);
   initEventHandlers(camera, pointerControl, gun);
 
   // const stats = new Stats();
@@ -76,8 +79,9 @@ const init = () => {
     // stats.update();
     if (pointerControl.isLocked) {
       TWEEN.update();
-      camera.render(pointerControl);
+      camera.render(pointerControl, scene);
       gun.render(camera);
+      enemy.render();
       renderer.render(scene, camera.getCamera()); //执行渲染操作
     }
 

@@ -1,4 +1,11 @@
-import { Vector3, Clock, PerspectiveCamera } from "three";
+import {
+  Vector3,
+  Clock,
+  PerspectiveCamera,
+  Raycaster,
+  Scene,
+  Euler,
+} from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 class Camera {
@@ -16,6 +23,8 @@ class Camera {
   direction = new Vector3(); //移动的方向向量
   rotation = new Vector3(); //当前的相机朝向
 
+  horizontalRaycaster; // 碰撞检测
+
   constructor(aspect: number) {
     // 实例化一个透视投影相机对象
     const camera = new PerspectiveCamera(50, aspect, 0.1, 300);
@@ -26,6 +35,12 @@ class Camera {
     camera.lookAt(0, 0, -1); //指向mesh对应的位置
 
     this.instance = camera;
+    this.horizontalRaycaster = new Raycaster(
+      new Vector3(),
+      new Vector3(),
+      0,
+      0.5
+    );
   }
 
   getCamera() {
@@ -79,7 +94,7 @@ class Camera {
     }
   }
 
-  render(pointerControl: PointerLockControls) {
+  render(pointerControl: PointerLockControls, scene: Scene) {
     const delta = this.clock.getDelta();
     const object = pointerControl.getObject();
 
@@ -94,19 +109,41 @@ class Camera {
     //将法向量的值归一化
     this.direction.normalize();
 
-    if (this.goForward || this.goBack) {
-      this.velocity.z -= this.direction.z * this.speed * delta;
-    }
-    if (this.goLeft || this.goRight) {
-      this.velocity.x -= this.direction.x * this.speed * delta;
-    }
+    const euler = new Euler();
+    const front = this.getCamera().getWorldDirection(new Vector3());
 
-    // x = x * 0.83
-    // x = x - 6.8
+    if (this.direction.z > 0) {
+      euler.y = (this.direction.x * -Math.PI) / 4;
+    } else if (this.direction.z < 0) {
+      euler.y =
+        this.direction.x === 0
+          ? Math.PI
+          : (this.direction.x * 3 * -Math.PI) / 4;
+    } else {
+      euler.y = (this.direction.x * -Math.PI) / 2;
+    }
+    const dir = front.applyEuler(euler);
+    this.horizontalRaycaster.set(this.getCamera().position, dir);
+    const horizontalIntersections = this.horizontalRaycaster.intersectObjects(
+      scene.children.filter((item) => item.type === "Mesh")
+    );
+    const horOnObject = horizontalIntersections.length > 0;
 
-    pointerControl.moveForward(-this.velocity.z * delta);
-    pointerControl.moveRight(-this.velocity.x * delta);
-    object.position.y += this.velocity.y * delta;
+    if (!horOnObject) {
+      if (this.goForward || this.goBack) {
+        this.velocity.z -= this.direction.z * this.speed * delta;
+      }
+      if (this.goLeft || this.goRight) {
+        this.velocity.x -= this.direction.x * this.speed * delta;
+      }
+
+      // x = x * 0.83
+      // x = x - 6.8
+
+      pointerControl.moveForward(-this.velocity.z * delta);
+      pointerControl.moveRight(-this.velocity.x * delta);
+      object.position.y += this.velocity.y * delta;
+    }
 
     if (object.position.y < 0) {
       this.velocity.y = 0;

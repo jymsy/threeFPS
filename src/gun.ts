@@ -61,7 +61,6 @@ class Gun {
       this.gltf = gltf;
       gltf.scene.scale.set(0.1, 0.1, 0.1);
       gltf.scene.traverse((node) => {
-        console.log(node);
         if ((node as Mesh).isMesh) {
           node.castShadow = true;
         }
