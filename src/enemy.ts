@@ -22,8 +22,8 @@ class Enemy {
       scene.add(gltf.scene);
 
       console.log(gltf.animations);
-      const runAnimation = gltf.animations[3];
       this.mixer = new AnimationMixer(gltf.scene);
+      const runAnimation = gltf.animations[3];
       const action = this.mixer.clipAction(runAnimation);
       action.play();
       this.initRunAnimation();
