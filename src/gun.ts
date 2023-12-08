@@ -7,9 +7,12 @@ import {
   TextureLoader,
   MeshBasicMaterial,
   Mesh,
+  Raycaster,
+  Vector2,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import Camera from "./camera";
+import Enemy from "./enemy";
 
 class Gun {
   gltf: GLTF | null = null;
@@ -35,8 +38,10 @@ class Gun {
   flashAnimation: Tween<{ opacity: number }> | null = null;
   flashMesh;
   audio;
+  enemy;
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, enemy: Enemy) {
+    this.enemy = enemy;
     this.audio = new Audio("./audio/single-shoot-ak47.wav");
     // 创建GLTF加载器对象
     const loader = new GLTFLoader();
@@ -77,6 +82,13 @@ class Gun {
       this.initAimingAnimation();
       this.initFlashAnimation();
     });
+  }
+
+  isHitEnemy(camera: Camera) {
+    const raycaster = new Raycaster();
+    raycaster.setFromCamera(new Vector2(0, 0), camera.getCamera());
+    const intersects = raycaster.intersectObjects([this.enemy.model!]);
+    console.log(intersects);
   }
 
   handleMouseDown(button: number) {
@@ -235,6 +247,7 @@ class Gun {
         this.audio.play();
         this.recoilAnimation!.start();
         this.flashAnimation!.start();
+        this.isHitEnemy(camera);
       }
 
       this.group.rotation.copy(cameraObj.rotation);

@@ -64,8 +64,8 @@ const init = () => {
   scene.add(axesHelper);
 
   initLight(scene);
-  const gun = new Gun(scene);
   const enemy = new Enemy(scene);
+  const gun = new Gun(scene, enemy);
   initEventHandlers(camera, pointerControl, gun);
 
   // const stats = new Stats();

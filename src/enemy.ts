@@ -1,15 +1,5 @@
-import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
-import {
-  Scene,
-  Vector3,
-  Group,
-  PlaneGeometry,
-  TextureLoader,
-  MeshBasicMaterial,
-  Mesh,
-  AnimationMixer,
-  Clock,
-} from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { Scene, Vector3, Group, Mesh, AnimationMixer, Clock } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 
 class Enemy {
@@ -41,13 +31,16 @@ class Enemy {
   }
 
   initRunAnimation() {
-    const runAnimation = new Tween(this.model!.position)
+    new Tween(this.model!.position)
       .to(new Vector3(0, -0.5, 4), 4000)
       .easing(Easing.Quadratic.InOut)
       .repeat(Infinity)
-      .yoyo(true);
-
-    runAnimation.start();
+      .repeatDelay(800)
+      .yoyo(true)
+      .onRepeat(() => {
+        this.model?.rotateY(Math.PI);
+      })
+      .start();
   }
 
   render() {
