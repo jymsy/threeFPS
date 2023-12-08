@@ -30,9 +30,28 @@ class Enemy {
     });
   }
 
+  generateMoveVector() {
+    const startPosition = new Vector3(
+      Math.random() * 2 - 1,
+      -0.5,
+      Math.random() * 2 - 1
+    );
+    const direction = new Vector3(
+      Math.random() * 2 - 1,
+      0,
+      Math.random() * 2 - 1
+    ).normalize();
+    const endPosition = startPosition.clone().add(direction.multiplyScalar(2));
+
+    return [startPosition, direction, endPosition];
+  }
+
   initRunAnimation() {
+    const [start, end] = this.generateMoveVector();
+    this.model?.position.copy(start);
+
     new Tween(this.model!.position)
-      .to(new Vector3(0, -0.5, 4), 4000)
+      .to(end, 4000)
       .easing(Easing.Quadratic.InOut)
       .repeat(Infinity)
       .repeatDelay(800)
