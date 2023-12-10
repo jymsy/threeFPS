@@ -88,7 +88,7 @@ class Gun {
     const raycaster = new Raycaster();
     raycaster.setFromCamera(new Vector2(0, 0), camera.getCamera());
     const intersects = raycaster.intersectObjects([this.enemy.model!]);
-    console.log(intersects);
+    // console.log(intersects);
   }
 
   handleMouseDown(button: number) {
@@ -225,8 +225,8 @@ class Gun {
   render(camera: Camera) {
     if (this.gltf) {
       const cameraObj = camera.getCamera();
-      const front = new Vector3();
-      cameraObj.getWorldDirection(front);
+      // const front = new Vector3();
+      // cameraObj.getWorldDirection(front);
       // const right = front.clone().cross(cameraObj.up).normalize();
       // const down = front.clone().cross(right).normalize();
       if (!this.isMoving && camera.direction.length() > 0) {

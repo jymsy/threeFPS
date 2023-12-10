@@ -1,5 +1,13 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { Scene, Vector3, Group, Mesh, AnimationMixer, Clock } from "three";
+import {
+  Scene,
+  Vector3,
+  Group,
+  Mesh,
+  AnimationMixer,
+  Clock,
+  Quaternion,
+} from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 
 class Enemy {
@@ -10,7 +18,7 @@ class Enemy {
   constructor(scene: Scene) {
     const loader = new GLTFLoader();
 
-    loader.load("gltf/Xbot.glb", (gltf) => {
+    loader.load("gltf/soldier.glb", (gltf) => {
       gltf.scene.scale.set(0.35, 0.35, 0.35);
       gltf.scene.position.set(0, -0.5, 2);
       gltf.scene.traverse((node) => {
@@ -23,7 +31,7 @@ class Enemy {
 
       console.log(gltf.animations);
       this.mixer = new AnimationMixer(gltf.scene);
-      const runAnimation = gltf.animations[3];
+      const runAnimation = gltf.animations[1];
       const action = this.mixer.clipAction(runAnimation);
       action.play();
       this.initRunAnimation();
@@ -41,17 +49,25 @@ class Enemy {
       0,
       Math.random() * 2 - 1
     ).normalize();
-    const endPosition = startPosition.clone().add(direction.multiplyScalar(2));
 
+    const endPosition = startPosition
+      .clone()
+      .add(direction.clone().multiplyScalar(2));
     return [startPosition, direction, endPosition];
   }
 
   initRunAnimation() {
-    const [start, end] = this.generateMoveVector();
+    const initDirection = new Vector3(0, 0, 1);
+    const [start, direction, end] = this.generateMoveVector();
     this.model?.position.copy(start);
 
+    // 通过四元数旋转模型到前进方向
+    const quaternion = new Quaternion();
+    quaternion.setFromUnitVectors(initDirection, direction);
+    this.model?.quaternion.multiply(quaternion);
+
     new Tween(this.model!.position)
-      .to(end, 4000)
+      .to(end, 3000)
       .easing(Easing.Quadratic.InOut)
       .repeat(Infinity)
       .repeatDelay(800)
