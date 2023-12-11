@@ -7,6 +7,8 @@ import {
   AnimationMixer,
   Clock,
   Quaternion,
+  AnimationAction,
+  LoopOnce,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 
@@ -14,6 +16,9 @@ class Enemy {
   mixer?: AnimationMixer;
   clock = new Clock();
   model?: Group;
+  runAnimation?: Tween<Vector3>;
+  runAction?: AnimationAction;
+  fallAction?: AnimationAction;
 
   constructor(scene: Scene) {
     const loader = new GLTFLoader();
@@ -31,9 +36,15 @@ class Enemy {
 
       console.log(gltf.animations);
       this.mixer = new AnimationMixer(gltf.scene);
+      const fallAnimation = gltf.animations[0];
       const runAnimation = gltf.animations[1];
-      const action = this.mixer.clipAction(runAnimation);
-      action.play();
+      this.fallAction = this.mixer.clipAction(fallAnimation);
+      // 只播放一次
+      this.fallAction.loop = LoopOnce;
+      // 物体状态停留在动画结束的时候
+      this.fallAction.clampWhenFinished = true;
+      this.runAction = this.mixer.clipAction(runAnimation);
+      this.runAction.play();
       this.initRunAnimation();
     });
   }
@@ -57,7 +68,8 @@ class Enemy {
   }
 
   initRunAnimation() {
-    const initDirection = new Vector3(0, 0, 1);
+    const initDirection = new Vector3();
+    this.model?.getWorldDirection(initDirection);
     const [start, direction, end] = this.generateMoveVector();
     this.model?.position.copy(start);
 
@@ -66,7 +78,7 @@ class Enemy {
     quaternion.setFromUnitVectors(initDirection, direction);
     this.model?.quaternion.multiply(quaternion);
 
-    new Tween(this.model!.position)
+    this.runAnimation = new Tween(this.model!.position)
       .to(end, 3000)
       .easing(Easing.Quadratic.InOut)
       .repeat(Infinity)
@@ -76,6 +88,18 @@ class Enemy {
         this.model?.rotateY(Math.PI);
       })
       .start();
+  }
+
+  getShot() {
+    this.runAnimation?.stop();
+    this.runAction?.stop();
+    this.fallAction?.play();
+
+    setTimeout(() => {
+      this.fallAction?.stop();
+      this.runAction?.play();
+      this.initRunAnimation();
+    }, 2000);
   }
 
   render() {

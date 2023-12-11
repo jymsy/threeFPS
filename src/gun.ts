@@ -85,10 +85,12 @@ class Gun {
   }
 
   isHitEnemy(camera: Camera) {
-    const raycaster = new Raycaster();
+    const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 10);
     raycaster.setFromCamera(new Vector2(0, 0), camera.getCamera());
     const intersects = raycaster.intersectObjects([this.enemy.model!]);
-    // console.log(intersects);
+    if (intersects.length > 0) {
+      this.enemy.getShot();
+    }
   }
 
   handleMouseDown(button: number) {
