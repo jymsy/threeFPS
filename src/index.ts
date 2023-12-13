@@ -1,4 +1,13 @@
 import * as THREE from "three";
+import {
+  Body,
+  Vec3,
+  Sphere,
+  World,
+  Material,
+  Plane,
+  ContactMaterial,
+} from "cannon-es";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
@@ -68,6 +77,50 @@ const init = () => {
   const gun = new Gun(scene, enemy);
   initEventHandlers(camera, pointerControl, gun);
 
+  const sphereMaterial = new Material();
+  const body = new Body({
+    mass: 0.3,
+    // 碰撞体的三维空间中位置
+    position: new Vec3(1, 10, -1),
+    material: sphereMaterial,
+    shape: new Sphere(1),
+  });
+
+  // 物理地面
+  const groundMaterial = new Material();
+  const groundBody = new Body({
+    mass: 0, // 质量为0，始终保持静止，不会受到力碰撞或加速度影响
+    shape: new Plane(),
+    material: groundMaterial,
+  });
+  groundBody.position.y = -0.5;
+  // 改变平面默认的方向，法线默认沿着z轴，旋转到平面向上朝着y方向
+  groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); //旋转规律类似threejs 平面
+
+  // World创建物理世界对象
+  const world = new World();
+  // 设置物理世界重力加速度
+  world.gravity.set(0, -9.8, 0); //单位：m/s²
+  world.addBody(body);
+  world.addBody(groundBody);
+
+  // 设置地面材质和小球材质之间的碰撞反弹恢复系数
+  const contactMaterial = new ContactMaterial(groundMaterial, sphereMaterial, {
+    restitution: 0, //反弹恢复系数
+  });
+  // 把关联的材质添加到物理世界中
+  world.addContactMaterial(contactMaterial);
+
+  // 网格小球
+  const geometry = new THREE.SphereGeometry(1);
+  const material = new THREE.MeshLambertMaterial({
+    color: 0xffff00,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.y = 100;
+
+  scene.add(mesh);
+
   // const stats = new Stats();
   // document.body.appendChild(stats.domElement);
   // const controls = new OrbitControls(camera, renderer.domElement);
@@ -78,6 +131,11 @@ const init = () => {
   function render() {
     // stats.update();
     if (pointerControl.isLocked) {
+      console.log("球位置", body.position, groundBody.position);
+      world.step(1 / 60); //更新物理计算
+      mesh.position.copy(
+        new THREE.Vector3(body.position.x, body.position.y, body.position.z)
+      );
       TWEEN.update();
       camera.render(pointerControl, scene);
       gun.render(camera);
