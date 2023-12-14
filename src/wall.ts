@@ -1,4 +1,10 @@
-import * as THREE from "three";
+import {
+  BoxGeometry,
+  TextureLoader,
+  RepeatWrapping,
+  MeshLambertMaterial,
+  Mesh,
+} from "three";
 
 class Wall {
   mesh;
@@ -25,19 +31,18 @@ class Wall {
     // geometry.attributes.uv = new THREE.BufferAttribute(uvs, 2);
     // geometry.computeVertexNormals();
 
-    const geometry = new THREE.PlaneGeometry(4, 1);
-    const texLoader = new THREE.TextureLoader();
+    const geometry = new BoxGeometry(4, 1, 0.1);
+    const texLoader = new TextureLoader();
     const texture = texLoader.load("./img/wall.jpg");
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
     texture.repeat.set(4, 2);
-    const material = new THREE.MeshLambertMaterial({
+    const material = new MeshLambertMaterial({
       map: texture,
-      side: THREE.DoubleSide,
     });
 
     // 两个参数分别为几何体geometry、材质material
-    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh = new Mesh(geometry, material);
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
   }

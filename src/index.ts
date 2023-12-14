@@ -105,11 +105,11 @@ const init = () => {
   world.addBody(groundBody);
 
   // 设置地面材质和小球材质之间的碰撞反弹恢复系数
-  const contactMaterial = new ContactMaterial(groundMaterial, sphereMaterial, {
-    restitution: 0, //反弹恢复系数
-  });
-  // 把关联的材质添加到物理世界中
-  world.addContactMaterial(contactMaterial);
+  // const contactMaterial = new ContactMaterial(groundMaterial, sphereMaterial, {
+  //   restitution: 0, //反弹恢复系数
+  // });
+  // // 把关联的材质添加到物理世界中
+  // world.addContactMaterial(contactMaterial);
 
   // 网格小球
   const geometry = new THREE.SphereGeometry(1);
