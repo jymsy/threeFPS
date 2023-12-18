@@ -21,6 +21,7 @@ import Camera from "./camera";
 import initLight from "./light";
 import Gun from "./gun";
 import Enemy from "./enemy";
+import Player from "./player";
 
 const init = () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
@@ -65,6 +66,11 @@ const init = () => {
   floor.mesh.rotateX(Math.PI / 2);
   scene.add(floor.mesh);
 
+  const floor2 = new Floor(1, 4);
+  floor2.mesh.position.set(-1, 0, 2);
+  floor2.mesh.rotateX(Math.PI / 3);
+  scene.add(floor2.mesh);
+
   const sky = new Sky();
   scene.background = sky.skyBox;
 
@@ -75,7 +81,7 @@ const init = () => {
   initLight(scene);
   const enemy = new Enemy(scene);
   const gun = new Gun(scene, enemy);
-  initEventHandlers(camera, pointerControl, gun);
+  
 
   const sphereMaterial = new Material();
   const body = new Body({
@@ -87,11 +93,11 @@ const init = () => {
   });
 
   // 物理地面
-  const groundMaterial = new Material();
+  const plane = new Plane();
   const groundBody = new Body({
     mass: 0, // 质量为0，始终保持静止，不会受到力碰撞或加速度影响
-    shape: new Plane(),
-    material: groundMaterial,
+    shape: plane,
+    // material: groundMaterial,
   });
   groundBody.position.y = -0.5;
   // 改变平面默认的方向，法线默认沿着z轴，旋转到平面向上朝着y方向
@@ -101,7 +107,7 @@ const init = () => {
   const world = new World();
   // 设置物理世界重力加速度
   world.gravity.set(0, -9.8, 0); //单位：m/s²
-  world.addBody(body);
+  // world.addBody(body);
   world.addBody(groundBody);
 
   // 设置地面材质和小球材质之间的碰撞反弹恢复系数
@@ -112,15 +118,17 @@ const init = () => {
   // world.addContactMaterial(contactMaterial);
 
   // 网格小球
-  const geometry = new THREE.SphereGeometry(1);
-  const material = new THREE.MeshLambertMaterial({
-    color: 0xffff00,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.y = 100;
+  // const geometry = new THREE.SphereGeometry(1);
+  // const material = new THREE.MeshLambertMaterial({
+  //   color: 0xffff00,
+  // });
+  // const mesh = new THREE.Mesh(geometry, material);
+  // mesh.position.y = 100;
 
-  scene.add(mesh);
+  // scene.add(mesh);
 
+  const player = new Player(scene, world);
+  initEventHandlers(camera, pointerControl, gun, player);
   // const stats = new Stats();
   // document.body.appendChild(stats.domElement);
   // const controls = new OrbitControls(camera, renderer.domElement);
@@ -131,11 +139,12 @@ const init = () => {
   function render() {
     // stats.update();
     if (pointerControl.isLocked) {
-      console.log("球位置", body.position, groundBody.position);
-      world.step(1 / 60); //更新物理计算
-      mesh.position.copy(
-        new THREE.Vector3(body.position.x, body.position.y, body.position.z)
-      );
+      // console.log("球位置", body.position, groundBody.position);
+      world.fixedStep(); //更新物理计算
+      // mesh.position.copy(
+      //   new THREE.Vector3(body.position.x, body.position.y, body.position.z)
+      // );
+      player.render();
       TWEEN.update();
       camera.render(pointerControl, scene);
       gun.render(camera);

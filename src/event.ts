@@ -1,11 +1,13 @@
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Camera from "./camera";
 import Gun from "./gun";
+import Player from "./player";
 
 const initEventHandlers = (
   camera: Camera,
   pointerControl: PointerLockControls,
-  gun: Gun
+  gun: Gun,
+  player: Player
 ) => {
   const instructions = document.getElementById("instructions")!;
   const blocker = document.getElementById("blocker")!;
@@ -27,6 +29,7 @@ const initEventHandlers = (
   document.addEventListener("keydown", (ev) => {
     if (pointerControl.isLocked) {
       camera.handleKeyDown(ev.key);
+      player.handleKeyDown(ev.key);
     }
   });
 
