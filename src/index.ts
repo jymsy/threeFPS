@@ -22,6 +22,7 @@ import initLight from "./light";
 import Gun from "./gun";
 import Enemy from "./enemy";
 import Player from "./player";
+import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 
 const init = () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
@@ -31,10 +32,10 @@ const init = () => {
   // 创建渲染器对象
   const renderer = new THREE.WebGLRenderer({ antialias: true }); // 抗锯齿
   const camera = new Camera(width / height);
-  const pointerControl = new PointerLockControls(
-    camera.getCamera(),
-    document.body
-  );
+  // const pointerControl = new PointerLockControls(
+  //   camera.getCamera(),
+  //   document.body
+  // );
 
   renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比。通常用于避免HiDPI设备上绘图模糊
   renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
@@ -81,7 +82,6 @@ const init = () => {
   initLight(scene);
   const enemy = new Enemy(scene);
   const gun = new Gun(scene, enemy);
-  
 
   const sphereMaterial = new Material();
   const body = new Body({
@@ -128,7 +128,12 @@ const init = () => {
   // scene.add(mesh);
 
   const player = new Player(scene, world);
-  initEventHandlers(camera, pointerControl, gun, player);
+  const controls = new PointerLockControlsCannon(
+    camera.getCamera(),
+    player.body
+  );
+  scene.add(controls.getObject());
+  initEventHandlers(camera, controls, gun, player);
   // const stats = new Stats();
   // document.body.appendChild(stats.domElement);
   // const controls = new OrbitControls(camera, renderer.domElement);
@@ -138,7 +143,7 @@ const init = () => {
   // 渲染函数
   function render() {
     // stats.update();
-    if (pointerControl.isLocked) {
+    if (controls.enabled) {
       // console.log("球位置", body.position, groundBody.position);
       world.fixedStep(); //更新物理计算
       // mesh.position.copy(
@@ -146,7 +151,8 @@ const init = () => {
       // );
       player.render();
       TWEEN.update();
-      camera.render(pointerControl, scene);
+      controls.render();
+      // camera.render(controls, scene);
       gun.render(camera);
       enemy.render();
       renderer.render(scene, camera.getCamera()); //执行渲染操作
