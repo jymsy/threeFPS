@@ -6,18 +6,10 @@ import {
   Vector3,
   Clock,
 } from "three";
-import {
-  Body,
-  Vec3,
-  Sphere,
-  World,
-  Material,
-  Plane,
-  ContactMaterial,
-} from "cannon-es";
+import { Body, Vec3, Sphere, Material, World } from "cannon-es";
 
 class Player {
-  mesh;
+  // mesh;
   body;
   goForward = false;
   goBack = false;
@@ -28,23 +20,23 @@ class Player {
   clock = new Clock();
   spaceUp = true;
 
-  constructor(scene: Scene, world: World) {
-    const geometry = new SphereGeometry(0.15);
-    const material = new MeshLambertMaterial({
-      color: 0xffff00,
-    });
-    this.mesh = new Mesh(geometry, material);
-    this.mesh.position.set(1, 0, 1);
+  constructor(scene: Scene, world: World, material: Material) {
+    // const geometry = new SphereGeometry(0.15);
+    // const material = new MeshLambertMaterial({
+    //   color: 0xffff00,
+    // });
+    // this.mesh = new Mesh(geometry, material);
+    // this.mesh.position.set(1, 0, 1);
 
-    scene.add(this.mesh);
+    // scene.add(this.mesh);
     const shape = new Sphere(0.15);
     this.body = new Body({
       mass: 3,
       // 碰撞体的三维空间中位置
-      position: new Vec3(1, -0.2, 1),
-      // fixedRotation: true,
-      // material: sphereMaterial,
-      // shape: new Sphere(1),
+      position: new Vec3(0, -0.2, 0),
+      fixedRotation: true,
+      // linearDamping: 0.9,
+      material: material,
     });
     // this.body.updateMassProperties();
     // 两个圆球，组成胶囊形状
@@ -54,44 +46,16 @@ class Player {
     world.addBody(this.body);
   }
 
-  handleKeyDown(key: string) {
-    switch (key) {
-      case "w":
-        this.goForward = true;
-        break;
-      case "s":
-        this.goBack = true;
-        break;
-      case "a":
-        this.goLeft = true;
-        break;
-      case "d":
-        this.goRight = true;
-        break;
-      case " ":
-        // if (!this.jumping && this.spaceUp) {
-        //   this.velocity.y += 15;
-        //   this.jumping = true;
-        //   this.spaceUp = false;
-        // }
-        break;
-      default:
-        break;
-    }
-  }
-
   render() {
-    console.log(this.body.position, this.body.velocity);
-
-    this.body.velocity = new Vec3(0, 1, 0);
-
-    this.mesh.position.copy(
-      new Vector3(
-        this.body.position.x,
-        this.body.position.y,
-        this.body.position.z
-      )
-    );
+    // console.log(this.body.position, this.body.velocity);
+    // this.body.velocity = new Vec3(0, 1, 0);
+    // this.mesh.position.copy(
+    //   new Vector3(
+    //     this.body.position.x,
+    //     this.body.position.y,
+    //     this.body.position.z
+    //   )
+    // );
   }
 }
 

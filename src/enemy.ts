@@ -34,7 +34,7 @@ class Enemy {
       this.model = gltf.scene;
       scene.add(gltf.scene);
 
-      console.log(gltf.animations);
+      // console.log(gltf.animations);
       this.mixer = new AnimationMixer(gltf.scene);
       const fallAnimation = gltf.animations[0];
       const runAnimation = gltf.animations[1];

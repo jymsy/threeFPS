@@ -28,12 +28,10 @@ class PointerLockControlsCannon extends EventDispatcher {
   moveRight;
   canJump;
   enabled = false;
-  lockEvent = { type: "lock" };
-  unlockEvent = { type: "unlock" };
   jumpVelocity = 20;
   velocity;
   clock = new Clock();
-  velocityFactor = 0.2;
+  velocityFactor = 0.4;
   euler = new Euler();
 
   constructor(camera: PerspectiveCamera, cannonBody: Body) {
@@ -45,7 +43,7 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.pitchObject.add(camera);
 
     this.yawObject = new Group();
-    this.yawObject.position.y = 2;
+    // this.yawObject.position.y = 0;
     this.yawObject.add(this.pitchObject);
 
     this.quaternion = new Quaternion();
@@ -72,7 +70,7 @@ class PointerLockControlsCannon extends EventDispatcher {
     document.exitPointerLock();
   }
 
-  onMouseMove(event: MouseEvent) {
+  onMouseMove = (event: MouseEvent) => {
     if (!this.enabled) {
       return;
     }
@@ -86,17 +84,19 @@ class PointerLockControlsCannon extends EventDispatcher {
       -Math.PI / 2,
       Math.min(Math.PI / 2, this.pitchObject.rotation.x)
     );
-  }
+  };
 
-  onPointerlockChange() {
+  onPointerlockChange = () => {
     if (document.pointerLockElement) {
-      this.dispatchEvent(this.lockEvent);
+      this.dispatchEvent({ type: "lock" });
+      this.enabled = true;
     } else {
-      this.dispatchEvent(this.unlockEvent);
+      this.dispatchEvent({ type: "unlock" });
+      this.enabled = false;
     }
-  }
+  };
 
-  onKeyDown(event: KeyboardEvent) {
+  onKeyDown = (event: KeyboardEvent) => {
     if (!this.enabled) {
       return;
     }
@@ -128,7 +128,7 @@ class PointerLockControlsCannon extends EventDispatcher {
       default:
         break;
     }
-  }
+  };
 
   onKeyUp = (event: KeyboardEvent) => {
     if (!this.enabled) {
@@ -156,11 +156,9 @@ class PointerLockControlsCannon extends EventDispatcher {
     return this.yawObject;
   }
 
-  // getDirection() {
-  //   const vector = new Vec3(0, 0, -1)
-  //   vector.applyQuaternion(this.quaternion)
-  //   return vector
-  // }
+  getDirection() {
+    return new Vector3(0, 0, -1).applyQuaternion(this.quaternion);
+  }
 
   render() {
     if (this.enabled === false) {
@@ -185,13 +183,12 @@ class PointerLockControlsCannon extends EventDispatcher {
 
     this.euler.x = this.pitchObject.rotation.x;
     this.euler.y = this.yawObject.rotation.y;
-    // this.euler.order = "XYZ";
     this.quaternion.setFromEuler(this.euler);
     inputVelocity.applyQuaternion(this.quaternion);
 
     // Add to the object
-    this.velocity.x += inputVelocity.x;
-    this.velocity.z += inputVelocity.z;
+    this.velocity.x = inputVelocity.x;
+    this.velocity.z = inputVelocity.z;
 
     this.yawObject.position.copy(
       new Vector3(

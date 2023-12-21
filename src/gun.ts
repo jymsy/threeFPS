@@ -13,6 +13,7 @@ import {
 import { Tween, Easing } from "@tweenjs/tween.js";
 import Camera from "./camera";
 import Enemy from "./enemy";
+import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 
 class Gun {
   gltf: GLTF | null = null;
@@ -224,38 +225,38 @@ class Gun {
     this.initSwayingAnimation();
   }
 
-  render(camera: Camera) {
+  render(controls: PointerLockControlsCannon, camera: Camera) {
     if (this.gltf) {
+      // const direction = controls.getDirection();
       const cameraObj = camera.getCamera();
       // const front = new Vector3();
       // cameraObj.getWorldDirection(front);
       // const right = front.clone().cross(cameraObj.up).normalize();
       // const down = front.clone().cross(right).normalize();
-      if (!this.isMoving && camera.direction.length() > 0) {
-        this.isMoving = true;
-        this.updateSwayingAnimation();
-      } else if (this.isMoving && camera.direction.length() === 0) {
-        this.isMoving = false;
-        this.updateSwayingAnimation();
-      }
-      if (this.swayingAnimation && this.swayingAnimationFinished) {
-        this.swayingAnimationFinished = false;
-        this.swayingAnimation.start();
-      }
-
-      if (this.isShooting && this.recoilAnimationFinished) {
-        this.recoilAnimationFinished = false;
-        this.audio.currentTime = 0;
-        this.audio.play();
-        this.recoilAnimation!.start();
-        this.flashAnimation!.start();
-        this.isHitEnemy(camera);
-      }
-
-      this.group.rotation.copy(cameraObj.rotation);
+      // if (!this.isMoving && camera.direction.length() > 0) {
+      //   this.isMoving = true;
+      //   this.updateSwayingAnimation();
+      // } else if (this.isMoving && camera.direction.length() === 0) {
+      //   this.isMoving = false;
+      //   this.updateSwayingAnimation();
+      // }
+      // if (this.swayingAnimation && this.swayingAnimationFinished) {
+      //   this.swayingAnimationFinished = false;
+      //   this.swayingAnimation.start();
+      // }
+      // if (this.isShooting && this.recoilAnimationFinished) {
+      //   this.recoilAnimationFinished = false;
+      //   this.audio.currentTime = 0;
+      //   this.audio.play();
+      //   this.recoilAnimation!.start();
+      //   this.flashAnimation!.start();
+      //   // this.isHitEnemy(camera);
+      // }
+      this.group.rotation.copy(controls.getObject().rotation);
       this.group.rotateY(Math.PI);
       this.group.rotateX(-Math.PI / 6);
-      this.group.position.copy(cameraObj.position);
+      // this.group.position.copy(controls.yawObject.position);
+      // this.group.position.copy(cameraObj.position);
     }
   }
 }
