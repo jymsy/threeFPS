@@ -25,15 +25,15 @@ class Player {
     this.body = new Body({
       mass: 3,
       // 碰撞体的三维空间中位置
-      position: new Vec3(0, -0.2, 0),
+      position: new Vec3(0, 0, 0),
       fixedRotation: true,
       // linearDamping: 0.9,
       material: material,
     });
     // this.body.updateMassProperties();
     // 两个圆球，组成胶囊形状
-    this.body.addShape(shape, new Vec3(0, -0.15, 0));
-    this.body.addShape(shape, new Vec3(0, 0.15, 0));
+    this.body.addShape(shape, new Vec3(0, -0.25, 0));
+    this.body.addShape(shape, new Vec3(0, 0.25, 0));
 
     world.addBody(this.body);
   }

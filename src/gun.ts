@@ -85,9 +85,10 @@ class Gun {
     });
   }
 
-  isHitEnemy(camera: Camera) {
+  isHitEnemy(controls: PointerLockControlsCannon) {
     const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 10);
-    raycaster.setFromCamera(new Vector2(0, 0), camera.getCamera());
+    raycaster.set(controls.yawObject.position, controls.getDirection());
+    // raycaster.setFromCamera(new Vector2(0, 0), camera.getCamera());
     const intersects = raycaster.intersectObjects([this.enemy.model!]);
     if (intersects.length > 0) {
       this.enemy.getShot();
@@ -250,7 +251,7 @@ class Gun {
         this.audio.play();
         this.recoilAnimation!.start();
         this.flashAnimation!.start();
-        // this.isHitEnemy(camera);
+        this.isHitEnemy(controls);
       }
       this.group.rotation.copy(controls.getObject().rotation);
       // this.group.applyQuaternion(controls.quaternion);

@@ -32,23 +32,19 @@ const init = () => {
   // renderer.shadowMap.type = THREE.VSMShadowMap;
 
   const scene = new THREE.Scene();
-  // World创建物理世界对象
   const world = new World();
-  // 设置物理世界重力加速度
   world.gravity.set(0, -9.8, 0); //单位：m/s²
   const material = new Material(world);
 
   const frontWall = new Wall(world, material.physics, scene);
-  frontWall.setPosition(0, -2, 0);
+  frontWall.setPosition(0, 0, -2);
 
   const leftWall = new Wall(world, material.physics, scene);
   leftWall.setPosition(-2, 0, 0);
-  // leftWall.mesh.rotateY(Math.PI / 2);
   leftWall.setRotation(0, Math.PI / 2, 0);
 
   const rightWall = new Wall(world, material.physics, scene);
   rightWall.setPosition(2, 0, 0);
-  // rightWall.mesh.rotateY(Math.PI / 2);
   rightWall.setRotation(0, Math.PI / 2, 0);
 
   // const backWall = new Wall();

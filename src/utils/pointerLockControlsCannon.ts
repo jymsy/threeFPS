@@ -15,6 +15,7 @@ import {
   Material,
   Plane,
   ContactMaterial,
+  ContactEquation,
 } from "cannon-es";
 
 class PointerLockControlsCannon extends EventDispatcher {
@@ -28,7 +29,7 @@ class PointerLockControlsCannon extends EventDispatcher {
   moveRight;
   canJump;
   enabled = false;
-  jumpVelocity = 20;
+  jumpVelocity = 3;
   velocity;
   clock = new Clock();
   velocityFactor = 0.4;
@@ -45,7 +46,6 @@ class PointerLockControlsCannon extends EventDispatcher {
 
     this.euler.order = "YXZ";
     this.yawObject = new Group();
-    // this.yawObject.position.y = 0;
     this.yawObject.add(camera);
 
     this.quaternion = new Quaternion();
@@ -62,6 +62,27 @@ class PointerLockControlsCannon extends EventDispatcher {
     // document.addEventListener("pointerlockerror", this.onPointerlockError);
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
+
+    const contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
+    const upAxis = new Vec3(0, 1, 0);
+
+    this.cannonBody.addEventListener(
+      "collide",
+      (event: { contact: ContactEquation }) => {
+        const { contact } = event;
+        if (contact.bi.id === this.cannonBody.id) {
+          // bi is the player body, flip the contact normal
+          contact.ni.negate(contactNormal);
+        } else {
+          contactNormal.copy(contact.ni);
+        }
+
+        if (contactNormal.dot(upAxis) > 0.5) {
+          // Use a "good" threshold value between 0 and 1 here!
+          this.canJump = true;
+        }
+      }
+    );
   }
 
   lock() {
@@ -91,6 +112,7 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.euler.x));
 
     this.yawObject.setRotationFromEuler(this.euler);
+    this.quaternion.setFromEuler(this.euler);
   };
 
   onPointerlockChange = () => {
@@ -121,11 +143,6 @@ class PointerLockControlsCannon extends EventDispatcher {
         this.moveRight = true;
         break;
       case " ":
-        // if (!this.jumping && this.spaceUp) {
-        //   this.velocity.y += 15;
-        //   this.jumping = true;
-        //   this.spaceUp = false;
-        // }
         if (this.canJump) {
           this.velocity.y = this.jumpVelocity;
           this.canJump = false;
@@ -191,7 +208,6 @@ class PointerLockControlsCannon extends EventDispatcher {
     // this.euler.x = this.pitchObject.rotation.x;
     // this.euler.y = this.yawObject.rotation.y;
 
-    this.quaternion.setFromEuler(this.euler);
     this.moveVelocity.applyQuaternion(this.quaternion);
 
     // Add to the object

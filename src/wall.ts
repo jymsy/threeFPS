@@ -36,7 +36,7 @@ class Wall {
       // fixedRotation: true,
       // linearDamping: 0.9,
       material: cannonMaterial,
-      shape: new Box(new Vec3(4, 1, 0.1)),
+      shape: new Box(new Vec3(2, 0.5, 0.05)),
     });
 
     world.addBody(this.body);
