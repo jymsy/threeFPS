@@ -1,12 +1,4 @@
-import {
-  Body,
-  Vec3,
-  Sphere,
-  World,
-  Material as CannonMaterial,
-  Plane,
-  ContactMaterial,
-} from "cannon-es";
+import { World, Material as CannonMaterial, ContactMaterial } from "cannon-es";
 
 class Material {
   physics;

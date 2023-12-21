@@ -19,7 +19,7 @@ import {
 
 class PointerLockControlsCannon extends EventDispatcher {
   cannonBody;
-  pitchObject;
+  // pitchObject;
   yawObject;
   quaternion;
   moveForward;
@@ -33,18 +33,20 @@ class PointerLockControlsCannon extends EventDispatcher {
   clock = new Clock();
   velocityFactor = 0.4;
   euler = new Euler();
+  moveVelocity = new Vector3();
 
   constructor(camera: PerspectiveCamera, cannonBody: Body) {
     super();
 
     this.cannonBody = cannonBody;
     this.velocity = this.cannonBody.velocity;
-    this.pitchObject = new Group();
-    this.pitchObject.add(camera);
+    // this.pitchObject = new Group();
+    // this.pitchObject.add(camera);
 
+    this.euler.order = "YXZ";
     this.yawObject = new Group();
     // this.yawObject.position.y = 0;
-    this.yawObject.add(this.pitchObject);
+    this.yawObject.add(camera);
 
     this.quaternion = new Quaternion();
 
@@ -77,13 +79,18 @@ class PointerLockControlsCannon extends EventDispatcher {
 
     const { movementX, movementY } = event;
 
-    this.yawObject.rotation.y -= movementX * 0.002;
-    this.pitchObject.rotation.x -= movementY * 0.002;
+    this.euler.y -= movementX * 0.002;
+    this.euler.x -= movementY * 0.002;
+    // this.yawObject.rotation.y -= movementX * 0.002;
+    // this.pitchObject.rotation.x -= movementY * 0.002;
 
-    this.pitchObject.rotation.x = Math.max(
-      -Math.PI / 2,
-      Math.min(Math.PI / 2, this.pitchObject.rotation.x)
-    );
+    // this.pitchObject.rotation.x = Math.max(
+    //   -Math.PI / 2,
+    //   Math.min(Math.PI / 2, this.pitchObject.rotation.x)
+    // );
+    this.euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.euler.x));
+
+    this.yawObject.setRotationFromEuler(this.euler);
   };
 
   onPointerlockChange = () => {
@@ -165,30 +172,31 @@ class PointerLockControlsCannon extends EventDispatcher {
       return;
     }
     const delta = this.clock.getDelta();
-    const inputVelocity = new Vector3();
+    this.moveVelocity = new Vector3();
 
     if (this.moveForward) {
-      inputVelocity.z = -this.velocityFactor * delta * 100;
+      this.moveVelocity.z = -this.velocityFactor * delta * 100;
     }
     if (this.moveBackward) {
-      inputVelocity.z = this.velocityFactor * delta * 100;
+      this.moveVelocity.z = this.velocityFactor * delta * 100;
     }
 
     if (this.moveLeft) {
-      inputVelocity.x = -this.velocityFactor * delta * 100;
+      this.moveVelocity.x = -this.velocityFactor * delta * 100;
     }
     if (this.moveRight) {
-      inputVelocity.x = this.velocityFactor * delta * 100;
+      this.moveVelocity.x = this.velocityFactor * delta * 100;
     }
 
-    this.euler.x = this.pitchObject.rotation.x;
-    this.euler.y = this.yawObject.rotation.y;
+    // this.euler.x = this.pitchObject.rotation.x;
+    // this.euler.y = this.yawObject.rotation.y;
+
     this.quaternion.setFromEuler(this.euler);
-    inputVelocity.applyQuaternion(this.quaternion);
+    this.moveVelocity.applyQuaternion(this.quaternion);
 
     // Add to the object
-    this.velocity.x = inputVelocity.x;
-    this.velocity.z = inputVelocity.z;
+    this.velocity.x = this.moveVelocity.x;
+    this.velocity.z = this.moveVelocity.z;
 
     this.yawObject.position.copy(
       new Vector3(

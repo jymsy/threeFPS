@@ -21,14 +21,6 @@ class Player {
   spaceUp = true;
 
   constructor(scene: Scene, world: World, material: Material) {
-    // const geometry = new SphereGeometry(0.15);
-    // const material = new MeshLambertMaterial({
-    //   color: 0xffff00,
-    // });
-    // this.mesh = new Mesh(geometry, material);
-    // this.mesh.position.set(1, 0, 1);
-
-    // scene.add(this.mesh);
     const shape = new Sphere(0.15);
     this.body = new Body({
       mass: 3,

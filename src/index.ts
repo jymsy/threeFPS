@@ -32,20 +32,24 @@ const init = () => {
   // renderer.shadowMap.type = THREE.VSMShadowMap;
 
   const scene = new THREE.Scene();
+  // World创建物理世界对象
+  const world = new World();
+  // 设置物理世界重力加速度
+  world.gravity.set(0, -9.8, 0); //单位：m/s²
+  const material = new Material(world);
 
-  const frontWall = new Wall();
-  frontWall.mesh.translateZ(-2);
-  scene.add(frontWall.mesh);
+  const frontWall = new Wall(world, material.physics, scene);
+  frontWall.setPosition(0, -2, 0);
 
-  const leftWall = new Wall();
-  leftWall.mesh.translateX(-2);
-  leftWall.mesh.rotateY(Math.PI / 2);
-  scene.add(leftWall.mesh);
+  const leftWall = new Wall(world, material.physics, scene);
+  leftWall.setPosition(-2, 0, 0);
+  // leftWall.mesh.rotateY(Math.PI / 2);
+  leftWall.setRotation(0, Math.PI / 2, 0);
 
-  const rightWall = new Wall();
-  rightWall.mesh.translateX(2);
-  rightWall.mesh.rotateY(Math.PI / 2);
-  scene.add(rightWall.mesh);
+  const rightWall = new Wall(world, material.physics, scene);
+  rightWall.setPosition(2, 0, 0);
+  // rightWall.mesh.rotateY(Math.PI / 2);
+  rightWall.setRotation(0, Math.PI / 2, 0);
 
   // const backWall = new Wall();
   // backWall.mesh.translateZ(2);
@@ -71,13 +75,6 @@ const init = () => {
   initLight(scene);
   const enemy = new Enemy(scene);
   const gun = new Gun(scene, enemy);
-
-  // World创建物理世界对象
-  const world = new World();
-  // 设置物理世界重力加速度
-  world.gravity.set(0, -9.8, 0); //单位：m/s²
-
-  const material = new Material(world);
 
   // 物理地面
   const plane = new Plane();
@@ -113,7 +110,7 @@ const init = () => {
       TWEEN.update();
       controls.render();
       // camera.render(controls, scene);
-      gun.render(controls, camera);
+      gun.render(controls);
       enemy.render();
       renderer.render(scene, camera.getCamera()); //执行渲染操作
     }

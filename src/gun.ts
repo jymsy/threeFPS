@@ -225,37 +225,41 @@ class Gun {
     this.initSwayingAnimation();
   }
 
-  render(controls: PointerLockControlsCannon, camera: Camera) {
+  render(controls: PointerLockControlsCannon) {
     if (this.gltf) {
-      // const direction = controls.getDirection();
-      const cameraObj = camera.getCamera();
+      const direction = controls.moveVelocity;
+      // const cameraObj = camera.getCamera();
       // const front = new Vector3();
       // cameraObj.getWorldDirection(front);
       // const right = front.clone().cross(cameraObj.up).normalize();
       // const down = front.clone().cross(right).normalize();
-      // if (!this.isMoving && camera.direction.length() > 0) {
-      //   this.isMoving = true;
-      //   this.updateSwayingAnimation();
-      // } else if (this.isMoving && camera.direction.length() === 0) {
-      //   this.isMoving = false;
-      //   this.updateSwayingAnimation();
-      // }
-      // if (this.swayingAnimation && this.swayingAnimationFinished) {
-      //   this.swayingAnimationFinished = false;
-      //   this.swayingAnimation.start();
-      // }
-      // if (this.isShooting && this.recoilAnimationFinished) {
-      //   this.recoilAnimationFinished = false;
-      //   this.audio.currentTime = 0;
-      //   this.audio.play();
-      //   this.recoilAnimation!.start();
-      //   this.flashAnimation!.start();
-      //   // this.isHitEnemy(camera);
-      // }
+      if (!this.isMoving && direction.length() > 0) {
+        this.isMoving = true;
+        this.updateSwayingAnimation();
+      } else if (this.isMoving && direction.length() === 0) {
+        this.isMoving = false;
+        this.updateSwayingAnimation();
+      }
+      if (this.swayingAnimation && this.swayingAnimationFinished) {
+        this.swayingAnimationFinished = false;
+        this.swayingAnimation.start();
+      }
+      if (this.isShooting && this.recoilAnimationFinished) {
+        this.recoilAnimationFinished = false;
+        this.audio.currentTime = 0;
+        this.audio.play();
+        this.recoilAnimation!.start();
+        this.flashAnimation!.start();
+        // this.isHitEnemy(camera);
+      }
       this.group.rotation.copy(controls.getObject().rotation);
+      // this.group.applyQuaternion(controls.quaternion);
       this.group.rotateY(Math.PI);
+      // this.group.rotation.y = Math.PI;
       this.group.rotateX(-Math.PI / 6);
-      // this.group.position.copy(controls.yawObject.position);
+      // this.group.rotation.y = Math.PI + controls.yawObject.rotation.y;
+      // this.group.rotation.x = controls.pitchObject.rotation.x;
+      this.group.position.copy(controls.yawObject.position);
       // this.group.position.copy(cameraObj.position);
     }
   }
