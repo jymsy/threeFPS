@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { Body, Vec3, Sphere, World, Plane } from "cannon-es";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import TWEEN from "@tweenjs/tween.js";
 import Stats from "three/examples/jsm/libs/stats.module";
 import Wall from "./wall";
@@ -51,15 +50,13 @@ const init = () => {
   // backWall.mesh.translateZ(2);
   // scene.add(backWall.mesh);
 
-  const floor = new Floor();
-  floor.mesh.translateY(-0.5);
-  floor.mesh.rotateX(Math.PI / 2);
-  scene.add(floor.mesh);
+  const floor = new Floor(world, material.physics, scene);
+  floor.setPosition(0, -0.5, 0);
+  floor.setRotation(-Math.PI / 2, 0, 0);
 
-  const floor2 = new Floor(1, 4);
-  floor2.mesh.position.set(-1, 0, 2);
-  floor2.mesh.rotateX(Math.PI / 3);
-  scene.add(floor2.mesh);
+  const floor2 = new Floor(world, material.physics, scene, 1, 4);
+  floor2.setPosition(-1, 0, 2);
+  floor2.setRotation((-2 * Math.PI) / 3, 0, 0);
 
   const sky = new Sky();
   scene.background = sky.skyBox;
@@ -71,18 +68,6 @@ const init = () => {
   initLight(scene);
   const enemy = new Enemy(scene);
   const gun = new Gun(scene, enemy);
-
-  // 物理地面
-  const plane = new Plane();
-  const groundBody = new Body({
-    mass: 0, // 质量为0，始终保持静止，不会受到力碰撞或加速度影响
-    shape: plane,
-    material: material.physics,
-  });
-  groundBody.position.y = -0.5;
-  // 改变平面默认的方向，法线默认沿着z轴，旋转到平面向上朝着y方向
-  groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); //旋转规律类似threejs 平面
-  world.addBody(groundBody);
 
   const player = new Player(scene, world, material.physics);
   const controls = new PointerLockControlsCannon(
