@@ -68,12 +68,9 @@ const init = () => {
   initLight(scene);
   const enemy = new Enemy(scene);
   const gun = new Gun(scene, enemy);
+  const controls = new PointerLockControlsCannon(camera.getCamera());
+  const player = new Player(world, material.physics, controls);
 
-  const player = new Player(scene, world, material.physics);
-  const controls = new PointerLockControlsCannon(
-    camera.getCamera(),
-    player.body
-  );
   scene.add(controls.getObject());
   initEventHandlers(camera, controls, gun, player);
   // const stats = new Stats();
@@ -89,7 +86,7 @@ const init = () => {
       world.fixedStep(); //更新物理计算
       player.render();
       TWEEN.update();
-      controls.render();
+      controls.render(player.body);
       // camera.render(controls, scene);
       gun.render(controls);
       enemy.render();
