@@ -27,7 +27,7 @@ class Player {
       // 碰撞体的三维空间中位置
       position: new Vec3(0, 0, 0),
       fixedRotation: true,
-      linearDamping: 0.9,
+      // linearDamping: 0.9,
       material: material,
     });
     // this.body.updateMassProperties();

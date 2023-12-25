@@ -35,6 +35,7 @@ class PointerLockControlsCannon extends EventDispatcher {
   velocityFactor = 0.4;
   euler = new Euler();
   moveVelocity = new Vector3();
+  firstPerson = true;
 
   constructor(camera: PerspectiveCamera, cannonBody: Body) {
     super();
@@ -147,8 +148,11 @@ class PointerLockControlsCannon extends EventDispatcher {
           this.velocity.y = this.jumpVelocity;
           this.canJump = false;
         }
-
         break;
+      case "v":
+        this.firstPerson = !this.firstPerson;
+        this.yawObject.children[0].translateZ(this.firstPerson ? -0.5 : 0.5);
+        this.yawObject.children[0].translateY(this.firstPerson ? -0.2 : 0.2);
       default:
         break;
     }
