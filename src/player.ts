@@ -143,21 +143,13 @@ class Player {
 
   render(enemyArray: EnemyModel[]) {
     const delta = this.clock.getDelta();
+    const factor = VELOCITY_FACTOR * delta * 100;
     this.moveVelocity = new Vector3();
 
-    if (this.moveForward) {
-      this.moveVelocity.z = -VELOCITY_FACTOR * delta * 100;
-    }
-    if (this.moveBackward) {
-      this.moveVelocity.z = VELOCITY_FACTOR * delta * 100;
-    }
-
-    if (this.moveLeft) {
-      this.moveVelocity.x = -VELOCITY_FACTOR * delta * 100;
-    }
-    if (this.moveRight) {
-      this.moveVelocity.x = VELOCITY_FACTOR * delta * 100;
-    }
+    this.moveVelocity.z =
+      (Number(this.moveBackward) - Number(this.moveForward)) * factor;
+    this.moveVelocity.x =
+      (Number(this.moveRight) - Number(this.moveLeft)) * factor;
 
     this.moveVelocity.applyQuaternion(this.pointerControl.quaternion);
 
