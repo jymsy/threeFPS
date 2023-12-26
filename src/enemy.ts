@@ -12,6 +12,11 @@ import {
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 
+export type EnemyModel = {
+  id: number;
+  model: Enemy;
+};
+
 class Enemy {
   mixer?: AnimationMixer;
   clock = new Clock();
@@ -20,7 +25,7 @@ class Enemy {
   runAction?: AnimationAction;
   fallAction?: AnimationAction;
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, enemyArray: EnemyModel[]) {
     const loader = new GLTFLoader();
 
     loader.load("gltf/soldier.glb", (gltf) => {
@@ -32,6 +37,9 @@ class Enemy {
         }
       });
       this.model = gltf.scene;
+      this.model.name = "enemy";
+
+      enemyArray.push({ id: this.model!.id, model: this });
       scene.add(gltf.scene);
 
       // console.log(gltf.animations);

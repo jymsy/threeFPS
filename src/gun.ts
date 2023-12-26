@@ -8,11 +8,10 @@ import {
   MeshBasicMaterial,
   Mesh,
   Raycaster,
-  Vector2,
+  Object3D,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
-import Camera from "./camera";
-import Enemy from "./enemy";
+import Enemy, { EnemyModel } from "./enemy";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 
 class Gun {
@@ -39,10 +38,8 @@ class Gun {
   flashAnimation: Tween<{ opacity: number }> | null = null;
   flashMesh;
   audio;
-  enemy;
 
-  constructor(scene: Scene, enemy: Enemy) {
-    this.enemy = enemy;
+  constructor(scene: Scene) {
     this.audio = new Audio("./audio/single-shoot-ak47.wav");
     // 创建GLTF加载器对象
     const loader = new GLTFLoader();
@@ -85,13 +82,26 @@ class Gun {
     });
   }
 
-  isHitEnemy(controls: PointerLockControlsCannon) {
+  findEnemyId = (model: Object3D): number => {
+    if (model.name === "enemy") {
+      return model.id;
+    }
+    if (model.parent) {
+      return this.findEnemyId(model.parent);
+    }
+    return 0;
+  };
+
+  isHitEnemy(controls: PointerLockControlsCannon, enemyArray: EnemyModel[]) {
     const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 10);
     raycaster.set(controls.yawObject.position, controls.getDirection());
-    // raycaster.setFromCamera(new Vector2(0, 0), camera.getCamera());
-    const intersects = raycaster.intersectObjects([this.enemy.model!]);
+    const intersects = raycaster.intersectObjects(
+      enemyArray.map((item) => item.model.model!)
+    );
     if (intersects.length > 0) {
-      this.enemy.getShot();
+      const id = this.findEnemyId(intersects[0].object);
+      const enemy = enemyArray.find((item) => item.id === id);
+      enemy?.model.getShot();
     }
   }
 
@@ -226,18 +236,16 @@ class Gun {
     this.initSwayingAnimation();
   }
 
-  render(controls: PointerLockControlsCannon) {
+  render(
+    controls: PointerLockControlsCannon,
+    enemyArray: EnemyModel[],
+    moveVelocity: Vector3
+  ) {
     if (this.gltf) {
-      const direction = controls.moveVelocity;
-      // const cameraObj = camera.getCamera();
-      // const front = new Vector3();
-      // cameraObj.getWorldDirection(front);
-      // const right = front.clone().cross(cameraObj.up).normalize();
-      // const down = front.clone().cross(right).normalize();
-      if (!this.isMoving && direction.length() > 0) {
+      if (!this.isMoving && moveVelocity.length() > 0) {
         this.isMoving = true;
         this.updateSwayingAnimation();
-      } else if (this.isMoving && direction.length() === 0) {
+      } else if (this.isMoving && moveVelocity.length() === 0) {
         this.isMoving = false;
         this.updateSwayingAnimation();
       }
@@ -251,9 +259,9 @@ class Gun {
         this.audio.play();
         this.recoilAnimation!.start();
         this.flashAnimation!.start();
-        this.isHitEnemy(controls);
+        this.isHitEnemy(controls, enemyArray);
       }
-      this.group.rotation.copy(controls.getObject().rotation);
+      this.group.rotation.copy(controls.yawObject.rotation);
       // this.group.applyQuaternion(controls.quaternion);
       this.group.rotateY(Math.PI);
       // this.group.rotation.y = Math.PI;

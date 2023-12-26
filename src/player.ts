@@ -1,22 +1,15 @@
-import {
-  Scene,
-  SphereGeometry,
-  MeshLambertMaterial,
-  Mesh,
-  Vector3,
-  Clock,
-} from "three";
+import { Scene, Vector3, Clock } from "three";
 import {
   Body,
   Vec3,
   Sphere,
   World,
   Material,
-  Plane,
-  ContactMaterial,
   ContactEquation,
 } from "cannon-es";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
+import Weapon from "./gun";
+import { EnemyModel } from "./enemy";
 
 const JUMP_VELOCITY = 3;
 const VELOCITY_FACTOR = 0.4;
@@ -33,13 +26,16 @@ class Player {
   spaceUp = true;
   pointerControl;
   moveVelocity = new Vector3();
+  weapon;
 
   constructor(
     world: World,
     material: Material,
-    pointerControl: PointerLockControlsCannon
+    pointerControl: PointerLockControlsCannon,
+    scene: Scene
   ) {
     this.pointerControl = pointerControl;
+    this.weapon = new Weapon(scene);
     const shape = new Sphere(0.15);
     this.body = new Body({
       mass: 3,
@@ -58,6 +54,8 @@ class Player {
 
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
+    document.addEventListener("mousedown", this.handleMouseDown);
+    document.addEventListener("mouseup", this.handleMouseUp);
 
     const contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
     const upAxis = new Vec3(0, 1, 0);
@@ -80,6 +78,18 @@ class Player {
       }
     );
   }
+
+  handleMouseDown = (event: MouseEvent) => {
+    if (this.pointerControl.enabled) {
+      this.weapon.handleMouseDown(event.button);
+    }
+  };
+
+  handleMouseUp = (event: MouseEvent) => {
+    if (this.pointerControl.enabled) {
+      this.weapon.handleMouseUp(event.button);
+    }
+  };
 
   onKeyDown = (event: KeyboardEvent) => {
     if (!this.pointerControl.enabled) {
@@ -131,7 +141,7 @@ class Player {
     }
   };
 
-  render() {
+  render(enemyArray: EnemyModel[]) {
     const delta = this.clock.getDelta();
     this.moveVelocity = new Vector3();
 
@@ -153,6 +163,8 @@ class Player {
 
     this.body.velocity.x = this.moveVelocity.x;
     this.body.velocity.z = this.moveVelocity.z;
+
+    this.weapon.render(this.pointerControl, enemyArray, this.moveVelocity);
   }
 }
 
