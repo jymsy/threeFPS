@@ -1,4 +1,4 @@
-import { Scene, Vector3, Clock } from "three";
+import { Scene, Vector3, Clock, Euler } from "three";
 import {
   Body,
   Vec3,
@@ -161,7 +161,7 @@ class Player {
     this.moveVelocity.x =
       (Number(this.moveRight) - Number(this.moveLeft)) * factor;
 
-    this.moveVelocity.applyQuaternion(this.pointerControl.quaternion);
+    this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
 
     this.body.velocity.x = this.moveVelocity.x;
     this.body.velocity.z = this.moveVelocity.z;
