@@ -81,16 +81,16 @@ class Gun {
       this.initFlashAnimation();
     });
 
-    // loader.load("gltf/m16.glb", (gltf) => {
-    //   gltf.scene.scale.set(0.0005, 0.0005, 0.0005);
-    //   gltf.scene.traverse((node) => {
-    //     if ((node as Mesh).isMesh) {
-    //       node.castShadow = true;
-    //     }
-    //   });
-    //   gltf.scene.position.set(-0.1, -0.25, 0.2);
-    //   scene.add(gltf.scene);
-    // });
+    loader.load("gltf/m16.glb", (gltf) => {
+      gltf.scene.scale.set(0.0005, 0.0005, 0.0005);
+      gltf.scene.traverse((node) => {
+        if ((node as Mesh).isMesh) {
+          node.castShadow = true;
+        }
+      });
+      gltf.scene.position.set(-0.1, -0.25, 0.2);
+      scene.add(gltf.scene);
+    });
   }
 
   findEnemyId = (model: Object3D): number => {

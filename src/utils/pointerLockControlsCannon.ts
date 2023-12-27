@@ -17,6 +17,7 @@ class PointerLockControlsCannon extends EventDispatcher {
   clock = new Clock();
   euler = new Euler();
   firstPerson = true;
+  offset = new Vector3();
 
   constructor(scene: Scene, camera: PerspectiveCamera) {
     super();
@@ -36,6 +37,10 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.firstPerson = !this.firstPerson;
     this.yawObject.children[0].translateZ(this.firstPerson ? -0.6 : 0.6);
     this.yawObject.children[0].translateY(this.firstPerson ? -0.1 : 0.1);
+  }
+
+  setOffset(offset: Vector3) {
+    this.offset = offset;
   }
 
   lock() {
@@ -80,13 +85,15 @@ class PointerLockControlsCannon extends EventDispatcher {
   }
 
   render(cannonBody: Body) {
-    this.yawObject.position.copy(
-      new Vector3(
-        cannonBody.position.x,
-        cannonBody.position.y,
-        cannonBody.position.z
+    this.yawObject.position
+      .copy(
+        new Vector3(
+          cannonBody.position.x,
+          cannonBody.position.y,
+          cannonBody.position.z
+        )
       )
-    );
+      .add(this.offset);
   }
 }
 
