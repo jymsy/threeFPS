@@ -1,4 +1,12 @@
-import { Scene, Vector3, Clock, Euler } from "three";
+import {
+  Scene,
+  Vector3,
+  Clock,
+  Euler,
+  Mesh,
+  AnimationMixer,
+  Group,
+} from "three";
 import {
   Body,
   Vec3,
@@ -7,6 +15,7 @@ import {
   Material,
   ContactEquation,
 } from "cannon-es";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import Weapon from "./gun";
 import { EnemyModel } from "./enemy";
@@ -28,6 +37,7 @@ class Player {
   moveVelocity = new Vector3();
   weapon;
   crouch = false; // 下蹲
+  model?: Group;
 
   constructor(
     world: World,
@@ -78,6 +88,33 @@ class Player {
         }
       }
     );
+    const loader = new GLTFLoader();
+    loader.load("gltf/player.glb", (gltf) => {
+      gltf.scene.scale.set(0.35, 0.35, 0.35);
+      gltf.scene.position.set(0, -0.5, 0);
+      gltf.scene.traverse((node) => {
+        if ((node as Mesh).isMesh) {
+          node.castShadow = true;
+        }
+      });
+      this.model = gltf.scene;
+      // this.model.name = "enemy";
+
+      scene.add(gltf.scene);
+
+      console.log(gltf.animations);
+      // this.mixer = new AnimationMixer(gltf.scene);
+      const shotting = gltf.animations[2];
+      const walking = gltf.animations[3];
+      // this.fallAction = this.mixer.clipAction(fallAnimation);
+      // // 只播放一次
+      // this.fallAction.loop = LoopOnce;
+      // // 物体状态停留在动画结束的时候
+      // this.fallAction.clampWhenFinished = true;
+      // this.runAction = this.mixer.clipAction(runAnimation);
+      // this.runAction.play();
+      // this.initRunAnimation();
+    });
   }
 
   handleMouseDown = (event: MouseEvent) => {
@@ -165,6 +202,19 @@ class Player {
 
     this.body.velocity.x = this.moveVelocity.x;
     this.body.velocity.z = this.moveVelocity.z;
+
+    if (this.model) {
+      this.model.position.copy(
+        new Vector3(
+          this.body.position.x,
+          this.body.position.y - 0.5,
+          this.body.position.z
+        )
+      );
+      this.model.setRotationFromEuler(
+        new Euler(0, this.pointerControl.euler.y - Math.PI, 0)
+      );
+    }
 
     this.weapon.render(this.pointerControl, enemyArray, this.moveVelocity);
   }
