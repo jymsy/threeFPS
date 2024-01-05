@@ -6,6 +6,9 @@ import {
   Mesh,
   AnimationMixer,
   Group,
+  AnimationAction,
+  LoopOnce,
+  SkeletonHelper,
 } from "three";
 import {
   Body,
@@ -38,6 +41,9 @@ class Player {
   weapon;
   crouch = false; // 下蹲
   model?: Group;
+  mixer?: AnimationMixer;
+  shottingAction?: AnimationAction;
+  walkingAction?: AnimationAction;
 
   constructor(
     world: World,
@@ -90,7 +96,7 @@ class Player {
     );
     const loader = new GLTFLoader();
     loader.load("gltf/player.glb", (gltf) => {
-      gltf.scene.scale.set(0.35, 0.35, 0.35);
+      gltf.scene.scale.set(0.34, 0.34, 0.34);
       gltf.scene.position.set(0, -0.5, 0);
       gltf.scene.traverse((node) => {
         if ((node as Mesh).isMesh) {
@@ -102,29 +108,45 @@ class Player {
 
       scene.add(gltf.scene);
 
-      console.log(gltf.animations);
-      // this.mixer = new AnimationMixer(gltf.scene);
+      // 骨骼辅助显示
+      const skeletonHelper = new SkeletonHelper(gltf.scene);
+      scene.add(skeletonHelper);
+
+      console.log(gltf);
+      this.mixer = new AnimationMixer(gltf.scene);
+      this.mixer.addEventListener("finished", (e) => {
+        console.log(e);
+      });
       const shotting = gltf.animations[2];
       const walking = gltf.animations[3];
-      // this.fallAction = this.mixer.clipAction(fallAnimation);
+      this.shottingAction = this.mixer.clipAction(shotting);
       // // 只播放一次
-      // this.fallAction.loop = LoopOnce;
+      // this.shottingAction.loop = LoopOnce;
       // // 物体状态停留在动画结束的时候
-      // this.fallAction.clampWhenFinished = true;
-      // this.runAction = this.mixer.clipAction(runAnimation);
-      // this.runAction.play();
-      // this.initRunAnimation();
+      this.shottingAction.clampWhenFinished = true;
+      this.walkingAction = this.mixer.clipAction(walking);
+      this.shottingAction.weight = 1;
+      // this.shottingAction.timeScale = 7.5;
+      this.walkingAction.weight = 0;
+      this.shottingAction.play();
+      this.shottingAction.paused = true;
+      // this.shottingAction.time = 1;
+      this.walkingAction.play();
     });
   }
 
   handleMouseDown = (event: MouseEvent) => {
     if (this.pointerControl.enabled) {
+      this.shottingAction!.paused = false;
+      // this.shottingAction?.play();
       this.weapon.handleMouseDown(event.button);
     }
   };
 
   handleMouseUp = (event: MouseEvent) => {
     if (this.pointerControl.enabled) {
+      this.shottingAction!.paused = true;
+      this.shottingAction!.time = 0;
       this.weapon.handleMouseUp(event.button);
     }
   };
@@ -207,7 +229,7 @@ class Player {
       this.model.position.copy(
         new Vector3(
           this.body.position.x,
-          this.body.position.y - 0.5,
+          this.body.position.y - 0.55,
           this.body.position.z
         )
       );
@@ -215,6 +237,8 @@ class Player {
         new Euler(0, this.pointerControl.euler.y - Math.PI, 0)
       );
     }
+
+    this.mixer?.update(delta);
 
     this.weapon.render(this.pointerControl, enemyArray, this.moveVelocity);
   }
