@@ -62,8 +62,8 @@ const init = () => {
   scene.background = sky.skyBox;
 
   // AxesHelper：辅助观察的坐标系
-  const axesHelper = new AxesHelper(150);
-  scene.add(axesHelper);
+  // const axesHelper = new AxesHelper(150);
+  // scene.add(axesHelper);
 
   initLight(scene);
   const enemy = new Enemy(scene, enemyArray);
@@ -80,12 +80,13 @@ const init = () => {
   // 渲染函数
   function render() {
     // stats.update();
-    if (controls.enabled) {
+    if (1) {
+      // if (controls.enabled) {
       world.fixedStep(); //更新物理计算
       TWEEN.update();
       controls.render(player.body);
       player.render(enemyArray);
-      enemy.render();
+      // enemy.render();
 
       renderer.render(scene, camera.getCamera()); //执行渲染操作
     }

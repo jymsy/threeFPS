@@ -29,7 +29,7 @@ class Enemy {
     const loader = new GLTFLoader();
 
     loader.load("gltf/soldier.glb", (gltf) => {
-      gltf.scene.scale.set(0.35, 0.35, 0.35);
+      gltf.scene.scale.set(0.2, 0.2, 0.2);
       gltf.scene.position.set(0, -0.5, 2);
       gltf.scene.traverse((node) => {
         if ((node as Mesh).isMesh) {
@@ -53,7 +53,7 @@ class Enemy {
       this.fallAction.clampWhenFinished = true;
       this.runAction = this.mixer.clipAction(runAnimation);
       this.runAction.play();
-      this.initRunAnimation();
+      // this.initRunAnimation();
     });
   }
 

@@ -59,7 +59,7 @@ class PointerLockControlsCannon extends EventDispatcher {
     const { movementX, movementY } = event;
 
     this.euler.y -= movementX * 0.002;
-    this.euler.x -= movementY * 0.002;
+    this.euler.x += movementY * 0.002;
     this.euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.euler.x));
 
     this.yawObject.setRotationFromEuler(this.euler);
@@ -81,7 +81,7 @@ class PointerLockControlsCannon extends EventDispatcher {
   }
 
   getDirection() {
-    return new Vector3(0, 0, -1).applyQuaternion(this.quaternion);
+    return new Vector3(0, 0, 1).applyQuaternion(this.quaternion);
   }
 
   render(cannonBody: Body) {

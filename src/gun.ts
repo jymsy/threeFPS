@@ -57,7 +57,7 @@ class Gun {
     });
 
     this.flashMesh = new Mesh(geometry, material);
-    this.flashMesh.position.set(-0.1, -0.27, 0.35);
+    this.flashMesh.position.set(-0.05, -0.27, 0.35);
     this.flashMesh.rotateY(Math.PI);
 
     loader.load("gltf/gun/scene.gltf", (gltf) => {
@@ -68,7 +68,7 @@ class Gun {
           node.castShadow = true;
         }
       });
-      gltf.scene.position.set(-0.1, -0.25, 0.2);
+      gltf.scene.position.set(-0.1, -0.18, 0.2);
       this.recoilGroup.add(this.flashMesh);
       this.recoilGroup.add(gltf.scene);
       this.swayingGroup.add(this.recoilGroup);
@@ -273,14 +273,8 @@ class Gun {
         this.isHitEnemy(controls, enemyArray);
       }
       this.group.rotation.copy(controls.yawObject.rotation);
-      // this.group.applyQuaternion(controls.quaternion);
-      this.group.rotateY(Math.PI);
-      // this.group.rotation.y = Math.PI;
       this.group.rotateX(-Math.PI / 6);
-      // this.group.rotation.y = Math.PI + controls.yawObject.rotation.y;
-      // this.group.rotation.x = controls.pitchObject.rotation.x;
       this.group.position.copy(controls.yawObject.position);
-      // this.group.position.copy(cameraObj.position);
     }
   }
 }
