@@ -62,7 +62,7 @@ class Gun {
 
     loader.load("gltf/gun/scene.gltf", (gltf) => {
       this.gltf = gltf;
-      gltf.scene.scale.set(0.1, 0.1, 0.1);
+      gltf.scene.scale.set(0.05, 0.05, 0.05);
       gltf.scene.traverse((node) => {
         if ((node as Mesh).isMesh) {
           node.castShadow = true;
