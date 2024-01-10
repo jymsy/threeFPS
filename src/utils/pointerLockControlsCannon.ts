@@ -36,7 +36,7 @@ class PointerLockControlsCannon extends EventDispatcher {
   changeView() {
     this.firstPerson = !this.firstPerson;
     this.yawObject.children[0].translateZ(this.firstPerson ? -0.6 : 0.6);
-    this.yawObject.children[0].translateY(this.firstPerson ? -0.1 : 0.1);
+    this.yawObject.children[0].translateY(this.firstPerson ? -0.15 : 0.15);
   }
 
   setOffset(offset: Vector3) {

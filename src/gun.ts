@@ -11,7 +11,7 @@ import {
   Object3D,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
-import Enemy, { EnemyModel } from "./enemy";
+import { EnemyModel } from "./enemy";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 
 class Gun {
@@ -68,7 +68,7 @@ class Gun {
           node.castShadow = true;
         }
       });
-      gltf.scene.position.set(-0.1, -0.18, 0.2);
+      gltf.scene.position.set(-0.03, -0.02, 0.19);
       this.recoilGroup.add(this.flashMesh);
       this.recoilGroup.add(gltf.scene);
       this.swayingGroup.add(this.recoilGroup);

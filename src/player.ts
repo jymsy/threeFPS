@@ -30,6 +30,15 @@ import { EnemyModel } from "./enemy";
 const JUMP_VELOCITY = 3;
 const VELOCITY_FACTOR = 0.4;
 
+const boneMap = {
+  mixamorigLeftArm: "leftArm",
+  mixamorigLeftForeArm: "leftForeArm",
+  mixamorigLeftShoulder: "leftShoulder",
+  mixamorigRightArm: "rightArm",
+  mixamorigRightForeArm: "rightForeArm",
+  mixamorigRightShoulder: "rightShoulder",
+};
+
 class Player {
   body;
   moveForward = false;
@@ -50,6 +59,9 @@ class Player {
   leftArm?: Object3D;
   leftForeArm?: Object3D;
   leftShoulder?: Object3D;
+  rightArm?: Object3D;
+  rightShoulder?: Object3D;
+  rightForeArm?: Object3D;
   gui = new GUI();
 
   constructor(
@@ -106,21 +118,17 @@ class Player {
     loader.load("gltf/player.glb", (gltf) => {
       gltf.scene.scale.set(0.3, 0.3, 0.3);
       gltf.scene.position.set(0, -0.5, 0);
+      const keys = Object.keys(boneMap);
       gltf.scene.traverse((node) => {
         if ((node as Mesh).isMesh) {
           node.castShadow = true;
         }
         if ((node as Bone).isBone) {
           console.log(node.name);
-          if (node.name === "mixamorigLeftArm") {
+          if (keys.includes(node.name as keyof typeof boneMap)) {
             bones.push(node as Bone);
-            this.leftArm = node;
-          } else if (node.name === "mixamorigLeftForeArm") {
-            bones.push(node as Bone);
-            this.leftForeArm = node;
-          } else if (node.name === "mixamorigLeftShoulder") {
-            bones.push(node as Bone);
-            this.leftShoulder = node;
+            // @ts-ignore
+            this[boneMap[node.name]] = node;
           }
         }
       });
@@ -139,8 +147,10 @@ class Player {
       const walking = gltf.animations[3];
       this.walkingAction = this.mixer.clipAction(walking);
       // this.walkingAction.play();
-      this.leftArm?.setRotationFromEuler(new Euler(Math.PI / 2, 0.103, 1.338));
+      this.leftArm?.setRotationFromEuler(new Euler(1.841, 0.163, 1.439));
       this.leftForeArm?.setRotationFromEuler(new Euler(0.411, -0.05, -0.166));
+      this.rightArm?.setRotationFromEuler(new Euler(1.131, 0.207, -1.106));
+      this.rightForeArm?.setRotationFromEuler(new Euler(0.905, 0.283, -0.722));
       this.initGui(bones);
       // this.leftArm!.rotation.z = Math.PI / 2;
     });
@@ -280,9 +290,9 @@ class Player {
       );
       this.model.rotation.y = this.pointerControl.euler.y;
 
-      this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
-      const { x, y, z } = this.pointerControl.yawObject.position;
-      this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
+      // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      // const { x, y, z } = this.pointerControl.yawObject.position;
+      // this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
       // this.leftShoulder?.position.copy(
       //   new Vector3(x, y, z)
       // );
