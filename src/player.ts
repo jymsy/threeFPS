@@ -41,6 +41,21 @@ const boneMap = {
   mixamorigRightHand: "rightHand",
 };
 
+const bodyBaseRotation = {
+  pistol: {
+    leftArm: [1.841, 0.163, 1.439],
+    leftForeArm: [0.411, -0.05, -0.166],
+    rightArm: [1.131, 0.207, -1.106],
+    rightForeArm: [0.905, 0.283, -0.722],
+  },
+  rifle: {
+    leftArm: [1.841, 0.163, 1.439],
+    leftForeArm: [0.411, -0.05, -0.166],
+    rightArm: [0.961, 0.006, -0.471],
+    rightForeArm: [0.905, -0.232, -1.589],
+  },
+};
+
 class Player {
   body;
   moveForward = false;
@@ -120,7 +135,7 @@ class Player {
     const bones: Bone[] = [];
     loader.load("gltf/player.glb", (gltf) => {
       gltf.scene.scale.set(0.3, 0.3, 0.3);
-      gltf.scene.position.set(0, -0.5, 0);
+      gltf.scene.position.set(0, -0.47, 0);
       const keys = Object.keys(boneMap);
       gltf.scene.traverse((node) => {
         if ((node as Mesh).isMesh) {
@@ -137,8 +152,6 @@ class Player {
       });
 
       this.model = gltf.scene;
-      // this.model.name = "enemy";
-
       scene.add(gltf.scene);
 
       // 骨骼辅助显示
@@ -150,12 +163,9 @@ class Player {
       const walking = gltf.animations[3];
       this.walkingAction = this.mixer.clipAction(walking);
       // this.walkingAction.play();
-      this.leftArm?.setRotationFromEuler(new Euler(1.841, 0.163, 1.439));
-      this.leftForeArm?.setRotationFromEuler(new Euler(0.411, -0.05, -0.166));
-      this.rightArm?.setRotationFromEuler(new Euler(1.131, 0.207, -1.106));
-      this.rightForeArm?.setRotationFromEuler(new Euler(0.905, 0.283, -0.722));
+
+      this.updateArmRotations("pistol"); // 暂时默认手枪
       this.initGui(bones);
-      // this.leftArm!.rotation.z = Math.PI / 2;
     });
   }
 
@@ -209,6 +219,30 @@ class Player {
     }
   };
 
+  updateArmRotations = (type: "pistol" | "rifle") => {
+    const rotation = bodyBaseRotation[type];
+    this.leftArm?.rotation.set(
+      rotation.leftArm[0],
+      rotation.leftArm[1],
+      rotation.leftArm[2]
+    );
+    this.leftForeArm?.rotation.set(
+      rotation.leftForeArm[0],
+      rotation.leftForeArm[1],
+      rotation.leftForeArm[2]
+    );
+    this.rightArm?.rotation.set(
+      rotation.rightArm[0],
+      rotation.rightArm[1],
+      rotation.rightArm[2]
+    );
+    this.rightForeArm?.rotation.set(
+      rotation.rightForeArm[0],
+      rotation.rightForeArm[1],
+      rotation.rightForeArm[2]
+    );
+  };
+
   onKeyDown = (event: KeyboardEvent) => {
     if (!this.pointerControl.enabled) {
       return;
@@ -243,6 +277,9 @@ class Player {
       case "1":
       case "2":
         this.weapon.switchWeapon(Number(event.key));
+        this.updateArmRotations(
+          this.weapon.loader.weapons[this.weapon.currentIndex].config.type
+        );
       default:
         break;
     }
@@ -288,13 +325,11 @@ class Player {
     this.body.velocity.z = this.moveVelocity.z;
 
     if (this.model) {
-      this.model.position.copy(
-        new Vector3(
-          this.body.position.x,
-          this.body.position.y - 0.37,
-          this.body.position.z
-        )
-      );
+      // this.model.position.set(
+      //   this.body.position.x,
+      //   this.body.position.y - 0.37,
+      //   this.body.position.z
+      // );
       // this.model.rotation.y = this.pointerControl.euler.y;
 
       this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;

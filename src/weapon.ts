@@ -58,11 +58,16 @@ class Weapon {
     });
 
     this.flashMesh = new Mesh(geometry, material);
-    this.flashMesh.position.set(0.03, 0, 0.13);
     this.flashMesh.rotateY(Math.PI);
 
     this.loader.load().then((weapons) => {
       this.model = weapons[0].model;
+      const flashPosition = weapons[0].config.flashPosition;
+      this.flashMesh.position.set(
+        flashPosition[0],
+        flashPosition[1],
+        flashPosition[2]
+      );
       this.recoilGroup.add(this.flashMesh);
       this.recoilGroup.add(this.model);
       this.swayingGroup.add(this.recoilGroup);
@@ -238,6 +243,15 @@ class Weapon {
     this.recoilGroup.remove(this.model!);
     this.model = this.loader.weapons[this.currentIndex].model;
     this.recoilGroup.add(this.model);
+
+    const flashPosition =
+      this.loader.weapons[this.currentIndex].config.flashPosition;
+    this.flashMesh.position.set(
+      flashPosition[0],
+      flashPosition[1],
+      flashPosition[2]
+    );
+    
   }
 
   render(
@@ -266,13 +280,9 @@ class Weapon {
         this.flashAnimation!.start();
         this.isHitEnemy(controls, enemyArray);
       }
-      // this.group.rotation.copy(controls.yawObject.rotation);
 
-      // if (State.firstPerson) {
-      //   this.group.position.copy(controls.yawObject.position); // 枪跟随相机(fps)
-      // } else {
+      this.group.rotation.copy(controls.yawObject.rotation);
       this.group.position.copy(handPosition); // 枪跟随手(tps)
-      // }
     }
   }
 }
