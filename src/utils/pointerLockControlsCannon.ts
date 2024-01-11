@@ -9,6 +9,7 @@ import {
   Scene,
 } from "three";
 import { Body } from "cannon-es";
+import State from "../state";
 
 class PointerLockControlsCannon extends EventDispatcher {
   yawObject;
@@ -16,7 +17,7 @@ class PointerLockControlsCannon extends EventDispatcher {
   enabled = false;
   clock = new Clock();
   euler = new Euler();
-  firstPerson = true;
+  // firstPerson = true;
   offset = new Vector3();
 
   constructor(scene: Scene, camera: PerspectiveCamera) {
@@ -34,9 +35,10 @@ class PointerLockControlsCannon extends EventDispatcher {
   }
 
   changeView() {
-    this.firstPerson = !this.firstPerson;
-    this.yawObject.children[0].translateZ(this.firstPerson ? -0.6 : 0.6);
-    this.yawObject.children[0].translateY(this.firstPerson ? -0.15 : 0.15);
+    State.firstPerson = !State.firstPerson;
+    // moving camera
+    this.yawObject.children[0].translateZ(State.firstPerson ? -0.6 : 0.6);
+    this.yawObject.children[0].translateY(State.firstPerson ? -0.15 : 0.15);
   }
 
   setOffset(offset: Vector3) {
@@ -88,7 +90,7 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.yawObject.position
       .copy(
         new Vector3(
-          cannonBody.position.x,
+          cannonBody.position.x - 0.05,
           cannonBody.position.y,
           cannonBody.position.z
         )

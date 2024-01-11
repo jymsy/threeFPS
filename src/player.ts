@@ -24,8 +24,9 @@ import {
 } from "cannon-es";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
-import Weapon from "./gun";
+import Weapon from "./weapon";
 import { EnemyModel } from "./enemy";
+import State from "./state";
 
 const JUMP_VELOCITY = 3;
 const VELOCITY_FACTOR = 0.4;
@@ -37,6 +38,7 @@ const boneMap = {
   mixamorigRightArm: "rightArm",
   mixamorigRightForeArm: "rightForeArm",
   mixamorigRightShoulder: "rightShoulder",
+  mixamorigRightHand: "rightHand",
 };
 
 class Player {
@@ -62,6 +64,7 @@ class Player {
   rightArm?: Object3D;
   rightShoulder?: Object3D;
   rightForeArm?: Object3D;
+  rightHand?: Object3D;
   gui = new GUI();
 
   constructor(
@@ -210,6 +213,7 @@ class Player {
     if (!this.pointerControl.enabled) {
       return;
     }
+    console.log(event.key);
     switch (event.key) {
       case "w":
         this.moveForward = true;
@@ -236,6 +240,9 @@ class Player {
         this.crouch = true;
         this.pointerControl.setOffset(new Vector3(0, -0.2, 0));
         break;
+      case "1":
+      case "2":
+        this.weapon.switchWeapon(Number(event.key));
       default:
         break;
     }
@@ -288,9 +295,10 @@ class Player {
           this.body.position.z
         )
       );
-      this.model.rotation.y = this.pointerControl.euler.y;
+      // this.model.rotation.y = this.pointerControl.euler.y;
 
-      // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // const { x, y, z } = this.pointerControl.yawObject.position;
       // this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
       // this.leftShoulder?.position.copy(
@@ -300,7 +308,14 @@ class Player {
 
     this.mixer?.update(delta);
 
-    this.weapon.render(this.pointerControl, enemyArray, this.moveVelocity);
+    const handPosition = new Vector3();
+    this.rightHand?.getWorldPosition(handPosition);
+    this.weapon.render(
+      this.pointerControl,
+      enemyArray,
+      this.moveVelocity,
+      handPosition
+    );
   }
 }
 

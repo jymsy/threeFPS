@@ -42,7 +42,6 @@ class Enemy {
       enemyArray.push({ id: this.model!.id, model: this });
       scene.add(gltf.scene);
 
-      // console.log(gltf.animations);
       this.mixer = new AnimationMixer(gltf.scene);
       const fallAnimation = gltf.animations[0];
       const runAnimation = gltf.animations[1];
@@ -52,7 +51,7 @@ class Enemy {
       // 物体状态停留在动画结束的时候
       this.fallAction.clampWhenFinished = true;
       this.runAction = this.mixer.clipAction(runAnimation);
-      this.runAction.play();
+      // this.runAction.play();
       // this.initRunAnimation();
     });
   }
@@ -99,15 +98,14 @@ class Enemy {
   }
 
   getShot() {
-    this.runAnimation?.stop();
-    this.runAction?.stop();
-    this.fallAction?.play();
-
-    setTimeout(() => {
-      this.fallAction?.stop();
-      this.runAction?.play();
-      this.initRunAnimation();
-    }, 2000);
+    // this.runAnimation?.stop();
+    // this.runAction?.stop();
+    // this.fallAction?.play();
+    // setTimeout(() => {
+    //   this.fallAction?.stop();
+    //   this.runAction?.play();
+    //   this.initRunAnimation();
+    // }, 2000);
   }
 
   render() {
