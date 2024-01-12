@@ -17,8 +17,12 @@ class TrimeshCollider {
       ),
       material,
       // @ts-ignore
-      shape: threeToCannon(mesh, { type: ShapeType.MESH })?.shape,
     });
+    // @ts-ignore
+    const { shape, offset, orientation } = threeToCannon(mesh, {
+      type: ShapeType.MESH,
+    });
+    this.body.addShape(shape, offset, orientation);
   }
 }
 

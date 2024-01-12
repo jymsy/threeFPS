@@ -94,7 +94,7 @@ class Player {
     this.body = new Body({
       mass: 3,
       // 碰撞体的三维空间中位置
-      position: new Vec3(0, 3, 0),
+      position: new Vec3(0, 5, 0),
       fixedRotation: true,
       // linearDamping: 0.9,
       material: material,
