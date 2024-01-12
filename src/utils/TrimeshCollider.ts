@@ -16,8 +16,10 @@ class TrimeshCollider {
         mesh.quaternion.w
       ),
       material,
-      // @ts-ignore
     });
+    const position = mesh.geometry.attributes.position;
+    const vertices = new Float32Array(position.count * 3);
+    //https://blog.csdn.net/qq_34568700/article/details/127878838
     // @ts-ignore
     const { shape, offset, orientation } = threeToCannon(mesh, {
       type: ShapeType.MESH,

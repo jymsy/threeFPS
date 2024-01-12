@@ -33,7 +33,6 @@ class Map {
           if (node.type === "Mesh") {
             node.castShadow = true;
             node.receiveShadow = true;
-            node.material.color = new Color(1, 0, 0);
             const phys = new TrimeshCollider(node, material);
             console.log(node);
             world.addBody(phys.body);
