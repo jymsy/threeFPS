@@ -9,6 +9,7 @@ import {
   Mesh,
   Raycaster,
   Object3D,
+  MeshPhongMaterial,
 } from "three";
 
 type Config = {

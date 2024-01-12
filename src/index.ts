@@ -1,5 +1,13 @@
-import { LoadingManager, WebGLRenderer, Scene, AxesHelper } from "three";
-import { Body, Vec3, Sphere, World, Plane } from "cannon-es";
+import {
+  LoadingManager,
+  WebGLRenderer,
+  Scene,
+  AxesHelper,
+  Mesh,
+  ACESFilmicToneMapping,
+} from "three";
+import { Body, Vec3, Sphere, World, Plane, SAPBroadphase } from "cannon-es";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import TWEEN from "@tweenjs/tween.js";
@@ -14,8 +22,9 @@ import Enemy, { EnemyModel } from "./enemy";
 import Player from "./player";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import Material from "./material";
+import Map from "./map";
 
-const init = () => {
+const init = async () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
   const height = window.innerHeight; //窗口文档显示区的高度作为画布高度
   // 实例化一个gui对象
@@ -27,48 +36,33 @@ const init = () => {
 
   renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比。通常用于避免HiDPI设备上绘图模糊
   renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
+  renderer.toneMapping = ACESFilmicToneMapping; // 色调映射
+  // 在普通计算机显示器或者移动设备屏幕等低动态范围介质上，模拟、逼近高动态范围（HDR）效果
+  renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true; // 允许渲染器渲染阴影
   // renderer.shadowMap.type = THREE.VSMShadowMap;
 
   const scene = new Scene();
   const world = new World();
   world.gravity.set(0, -9.8, 0); //单位：m/s²
+  world.broadphase = new SAPBroadphase(world); // 碰撞测试算法 https://blog.csdn.net/weixin_43990650/article/details/121815208
+  // world.allowSleep = true;
   const material = new Material(world);
 
-  const frontWall = new Wall(world, material.physics, scene);
-  frontWall.setPosition(0, 0, -2);
-
-  const leftWall = new Wall(world, material.physics, scene);
-  leftWall.setPosition(-2, 0, 0);
-  leftWall.setRotation(0, Math.PI / 2, 0);
-
-  const rightWall = new Wall(world, material.physics, scene);
-  rightWall.setPosition(2, 0, 0);
-  rightWall.setRotation(0, Math.PI / 2, 0);
-
-  // const backWall = new Wall();
-  // backWall.mesh.translateZ(2);
-  // scene.add(backWall.mesh);
-
   const floor = new Floor(world, material.physics, scene);
-  floor.setPosition(0, -0.5, 0);
+  floor.setPosition(0, -2.5, 0);
   floor.setRotation(-Math.PI / 2, 0, 0);
-
-  const floor2 = new Floor(world, material.physics, scene, 1, 4);
-  floor2.setPosition(-1, 0, 2);
-  floor2.setRotation((-2 * Math.PI) / 3, 0, 0);
 
   const sky = new Sky();
   scene.background = sky.skyBox;
 
   // AxesHelper：辅助观察的坐标系
-  // const axesHelper = new AxesHelper(150);
-  // scene.add(axesHelper);
+  const axesHelper = new AxesHelper(150);
+  scene.add(axesHelper);
 
   initLight(scene);
-  const enemy = new Enemy(scene, enemyArray);
+  // const enemy = new Enemy(scene, enemyArray);
   const controls = new PointerLockControlsCannon(scene, camera.getCamera());
-  const player = new Player(world, material.physics, controls, scene);
 
   initEventHandlers(controls);
   // const stats = new Stats();
@@ -78,7 +72,7 @@ const init = () => {
   document.getElementById("webgl")!.appendChild(renderer.domElement);
 
   // 渲染函数
-  function render() {
+  const render = () => {
     // stats.update();
     if (1) {
       // if (controls.enabled) {
@@ -92,7 +86,12 @@ const init = () => {
     }
 
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
-  }
+  };
+
+  const map = new Map("gltf/collision-world.glb");
+  // const map = new Map("gltf/cs_italy_winter.glb");
+  await map.load(scene, world, material.physics);
+  const player = new Player(world, material.physics, controls, scene);
   render();
 };
 

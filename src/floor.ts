@@ -18,8 +18,8 @@ class Floor {
     world: World,
     cannonMaterial: Material,
     scene: Scene,
-    width = 40,
-    height = 40
+    width = 400,
+    height = 400
   ) {
     const geometry = new PlaneGeometry(width, height);
     const texLoader = new TextureLoader();
