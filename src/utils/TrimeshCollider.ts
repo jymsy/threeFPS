@@ -1,11 +1,10 @@
-import { Object3D } from "three";
-import { Body, Vec3, Material, Quaternion } from "cannon-es";
-import { threeToCannon, ShapeType } from "three-to-cannon";
+import { Object3D, Mesh } from "three";
+import { Body, Vec3, Material, Quaternion, Trimesh } from "cannon-es";
 
 class TrimeshCollider {
   body: Body;
 
-  constructor(mesh: Object3D, material: Material) {
+  constructor(mesh: Mesh, material: Material) {
     this.body = new Body({
       mass: 0,
       position: new Vec3(mesh.position.x, mesh.position.y, mesh.position.z),
@@ -17,14 +16,16 @@ class TrimeshCollider {
       ),
       material,
     });
+    // mesh.material.wireframe = true;
     const position = mesh.geometry.attributes.position;
-    const vertices = new Float32Array(position.count * 3);
-    //https://blog.csdn.net/qq_34568700/article/details/127878838
-    // @ts-ignore
-    const { shape, offset, orientation } = threeToCannon(mesh, {
-      type: ShapeType.MESH,
-    });
-    this.body.addShape(shape, offset, orientation);
+    const vertices = [];
+    for (let i = 0; i < position.count; i++) {
+      vertices[i * 3] = position.getX(i) * mesh.scale.x;
+      vertices[i * 3 + 1] = position.getY(i) * mesh.scale.y;
+      vertices[i * 3 + 2] = position.getZ(i) * mesh.scale.z;
+    }
+    let indices = Array.from(mesh.geometry.index!.array);
+    this.body.addShape(new Trimesh(vertices, indices));
   }
 }
 

@@ -50,7 +50,7 @@ const init = async () => {
   const material = new Material(world);
 
   const floor = new Floor(world, material.physics, scene);
-  floor.setPosition(0, -2.5, 0);
+  floor.setPosition(0, 2, 0);
   floor.setRotation(-Math.PI / 2, 0, 0);
 
   const sky = new Sky();
