@@ -92,7 +92,7 @@ class Player {
     this.weapon = new Weapon(scene);
     const shape = new Sphere(0.15);
     this.body = new Body({
-      mass: 0,
+      mass: 2,
       // 碰撞体的三维空间中位置
       position: new Vec3(0, 20, 0),
       fixedRotation: true,
@@ -324,11 +324,11 @@ class Player {
     this.body.velocity.z = this.moveVelocity.z;
 
     if (this.model) {
-      // this.model.position.set(
-      //   this.body.position.x,
-      //   this.body.position.y - 0.37,
-      //   this.body.position.z
-      // );
+      this.model.position.set(
+        this.body.position.x,
+        this.body.position.y - 0.37,
+        this.body.position.z
+      );
       // this.model.rotation.y = this.pointerControl.euler.y;
 
       this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;

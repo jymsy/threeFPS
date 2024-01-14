@@ -50,10 +50,10 @@ const init = async () => {
   world.broadphase = new SAPBroadphase(world); // 碰撞测试算法 https://blog.csdn.net/weixin_43990650/article/details/121815208
   // world.allowSleep = true;
   const material = new Material(world);
-  const cannonDebugger = new CannonDebugger(scene, world);
-  const floor = new Floor(world, material.physics, scene);
-  floor.setPosition(0, 0, 0);
-  floor.setRotation(-Math.PI / 2, 0, 0);
+  // const cannonDebugger = new CannonDebugger(scene, world);
+  // const floor = new Floor(world, material.physics, scene);
+  // floor.setPosition(0, 0, 0);
+  // floor.setRotation(-Math.PI / 2, 0, 0);
 
   const sky = new Sky();
   scene.background = sky.skyBox;
@@ -79,10 +79,10 @@ const init = async () => {
     if (1) {
       // if (controls.enabled) {
       world.fixedStep(); //更新物理计算
-      cannonDebugger.update();
+      // cannonDebugger.update();
       TWEEN.update();
-      // controls.render(player.body);
-      // player.render(enemyArray);
+      controls.render(player.body);
+      player.render(enemyArray);
       // enemy.render();
 
       renderer.render(scene, camera.getCamera()); //执行渲染操作
@@ -95,7 +95,7 @@ const init = async () => {
   const map = new Map("gltf/de_dust.glb");
   // const map = new Map("gltf/cs_italy_winter.glb");
   await map.load(scene, world, material.physics);
-  // const player = new Player(world, material.physics, controls, scene);
+  const player = new Player(world, material.physics, controls, scene);
   render();
 };
 

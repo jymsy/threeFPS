@@ -9,6 +9,7 @@ import {
   ACESFilmicToneMapping,
   MeshStandardMaterial,
   Vector3,
+  Quaternion,
 } from "three";
 import { Material, World } from "cannon-es";
 import TrimeshCollider from "./utils/TrimeshCollider";
@@ -27,17 +28,22 @@ class Map {
       const loader = new GLTFLoader();
 
       loader.load(this.path, (gltf) => {
-        // gltf.scene.scale.set(2, 2, 2);
+        // gltf.scene.scale.set(3, 3, 3);
         // gltf.scene.position.set(0, 0, 0);
         gltf.scene.traverse((node) => {
           if (node.type === "Mesh") {
             node.castShadow = true;
             node.receiveShadow = true;
-            const phys = new TrimeshCollider(node as Mesh, material);
+            const phys = new TrimeshCollider(
+              node as Mesh,
+              material,
+              node.parent?.parent?.scale!,
+              node.parent?.parent?.quaternion!
+            );
             world.addBody(phys.body);
           }
         });
-
+        console.log(gltf.scene);
         scene.add(gltf.scene);
         resolve(1);
       });
