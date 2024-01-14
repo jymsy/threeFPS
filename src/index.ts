@@ -7,6 +7,7 @@ import {
   ACESFilmicToneMapping,
 } from "three";
 import { Body, Vec3, Sphere, World, Plane, SAPBroadphase } from "cannon-es";
+import CannonDebugger from "cannon-es-debugger";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -44,13 +45,14 @@ const init = async () => {
 
   const scene = new Scene();
   const world = new World();
+
   world.gravity.set(0, -9.8, 0); //单位：m/s²
   world.broadphase = new SAPBroadphase(world); // 碰撞测试算法 https://blog.csdn.net/weixin_43990650/article/details/121815208
   // world.allowSleep = true;
   const material = new Material(world);
-
+  const cannonDebugger = new CannonDebugger(scene, world);
   const floor = new Floor(world, material.physics, scene);
-  floor.setPosition(0, 2, 0);
+  floor.setPosition(0, 0, 0);
   floor.setRotation(-Math.PI / 2, 0, 0);
 
   const sky = new Sky();
@@ -77,9 +79,10 @@ const init = async () => {
     if (1) {
       // if (controls.enabled) {
       world.fixedStep(); //更新物理计算
+      cannonDebugger.update();
       TWEEN.update();
-      controls.render(player.body);
-      player.render(enemyArray);
+      // controls.render(player.body);
+      // player.render(enemyArray);
       // enemy.render();
 
       renderer.render(scene, camera.getCamera()); //执行渲染操作
@@ -88,10 +91,11 @@ const init = async () => {
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };
 
-  const map = new Map("gltf/collision-world.glb");
+  // const map = new Map("gltf/collision-world.glb");
+  const map = new Map("gltf/de_dust.glb");
   // const map = new Map("gltf/cs_italy_winter.glb");
   await map.load(scene, world, material.physics);
-  const player = new Player(world, material.physics, controls, scene);
+  // const player = new Player(world, material.physics, controls, scene);
   render();
 };
 

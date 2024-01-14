@@ -1,10 +1,11 @@
-import { Object3D, Mesh } from "three";
+import { Mesh } from "three";
 import { Body, Vec3, Material, Quaternion, Trimesh } from "cannon-es";
 
 class TrimeshCollider {
   body: Body;
 
   constructor(mesh: Mesh, material: Material) {
+    console.log(mesh);
     this.body = new Body({
       mass: 0,
       position: new Vec3(mesh.position.x, mesh.position.y, mesh.position.z),
@@ -16,6 +17,7 @@ class TrimeshCollider {
       ),
       material,
     });
+    // mesh.material.color = new Color(1, 0, 0);
     // mesh.material.wireframe = true;
     const position = mesh.geometry.attributes.position;
     const vertices = [];

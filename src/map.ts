@@ -27,8 +27,8 @@ class Map {
       const loader = new GLTFLoader();
 
       loader.load(this.path, (gltf) => {
-        // gltf.scene.scale.set(0.2, 0.2, 0.2);
-        gltf.scene.position.set(0, 0, 0);
+        // gltf.scene.scale.set(2, 2, 2);
+        // gltf.scene.position.set(0, 0, 0);
         gltf.scene.traverse((node) => {
           if (node.type === "Mesh") {
             node.castShadow = true;

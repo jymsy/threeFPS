@@ -20,7 +20,6 @@
     "cannon-es": "^0.20.0",
     "cannon-es-debugger": "^1.0.0",
     "lil-gui": "^0.19.1",
-    "three": "^0.158.0",
-    "three-to-cannon": "^5.0.1"
+    "three": "^0.158.0"
   }
 }

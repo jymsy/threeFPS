@@ -92,9 +92,9 @@ class Player {
     this.weapon = new Weapon(scene);
     const shape = new Sphere(0.15);
     this.body = new Body({
-      mass: 3,
+      mass: 0,
       // 碰撞体的三维空间中位置
-      position: new Vec3(0, 15, 0),
+      position: new Vec3(0, 20, 0),
       fixedRotation: true,
       // linearDamping: 0.9,
       material: material,

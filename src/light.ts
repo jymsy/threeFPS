@@ -6,7 +6,7 @@ const initLight = (scene: Scene) => {
   scene.add(ambient);
   // 平行光
   const directionalLight = new DirectionalLight(0xffffff, 1);
-  directionalLight.position.set(8, 10, 5);
+  directionalLight.position.set(800, 1000, 500);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.set(2048, 2048);
   scene.add(directionalLight);
