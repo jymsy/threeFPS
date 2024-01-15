@@ -74,6 +74,7 @@ class Player {
   model?: Group;
   mixer?: AnimationMixer;
   walkingAction?: AnimationAction;
+  idleAction?: AnimationAction;
   leftArm?: Object3D;
   leftForeArm?: Object3D;
   leftShoulder?: Object3D;
@@ -121,7 +122,7 @@ class Player {
     );
     const loader = new GLTFLoader();
     const bones: Bone[] = [];
-    loader.load("gltf/player.glb", (gltf) => {
+    loader.load("gltf/player_pistol.glb", (gltf) => {
       gltf.scene.scale.set(0.7, 0.7, 0.7);
       // gltf.scene.position.set(0, -0.47, 0);
       const keys = Object.keys(boneMap);
@@ -149,12 +150,11 @@ class Player {
       scene.add(skeletonHelper);
 
       this.mixer = new AnimationMixer(gltf.scene);
-      const walking = gltf.animations[3];
-      this.walkingAction = this.mixer.clipAction(walking);
-      // this.walkingAction.play();
+      this.idleAction = this.mixer.clipAction(gltf.animations[3]);
+      this.idleAction.play();
 
       this.updateArmRotations("pistol"); // 暂时默认手枪
-      this.leftShoulder!.position.z =23;
+      this.leftShoulder!.position.z = 23;
       this.initGui(bones);
     });
   }

@@ -44,7 +44,6 @@ class Map {
             world.addBody(phys.body);
           }
         });
-        console.log(gltf.scene);
         scene.add(gltf.scene);
         resolve(1);
       });
