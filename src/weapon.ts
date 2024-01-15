@@ -281,7 +281,7 @@ class Weapon {
         this.isHitEnemy(controls, enemyArray);
       }
 
-      // this.group.rotation.copy(controls.yawObject.rotation);
+      this.group.rotation.copy(controls.yawObject.rotation);
       this.group.position.copy(handPosition); // 枪跟随手(tps)
     }
   }

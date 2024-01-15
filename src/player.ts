@@ -27,9 +27,10 @@ import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import Weapon from "./weapon";
 import { EnemyModel } from "./enemy";
 import State from "./state";
+import CapsuleCollider from "./utils/CapsuleCollider";
 
 const JUMP_VELOCITY = 3;
-const VELOCITY_FACTOR = 0.4;
+const VELOCITY_FACTOR = 1;
 
 const boneMap = {
   mixamorigLeftArm: "leftArm",
@@ -84,26 +85,13 @@ class Player {
 
   constructor(
     world: World,
-    material: Material,
     pointerControl: PointerLockControlsCannon,
     scene: Scene
   ) {
     this.pointerControl = pointerControl;
     this.weapon = new Weapon(scene);
-    const shape = new Sphere(0.15);
-    this.body = new Body({
-      mass: 2,
-      // 碰撞体的三维空间中位置
-      position: new Vec3(0, 20, 0),
-      fixedRotation: true,
-      // linearDamping: 0.9,
-      material: material,
-    });
-    // this.body.updateMassProperties();
-    // 两个圆球，组成胶囊形状
-    this.body.addShape(shape, new Vec3(0, 0, 0));
-    // this.body.addShape(shape, new Vec3(8, 0.25, 3));
-
+    const capsule = new CapsuleCollider();
+    this.body = capsule.body;
     world.addBody(this.body);
 
     document.addEventListener("keydown", this.onKeyDown);
@@ -134,15 +122,15 @@ class Player {
     const loader = new GLTFLoader();
     const bones: Bone[] = [];
     loader.load("gltf/player.glb", (gltf) => {
-      gltf.scene.scale.set(0.3, 0.3, 0.3);
-      gltf.scene.position.set(0, -0.47, 0);
+      gltf.scene.scale.set(0.7, 0.7, 0.7);
+      // gltf.scene.position.set(0, -0.47, 0);
       const keys = Object.keys(boneMap);
       gltf.scene.traverse((node) => {
         if ((node as Mesh).isMesh) {
           node.castShadow = true;
         }
         if ((node as Bone).isBone) {
-          console.log(node.name);
+          // console.log(node.name);
           if (keys.includes(node.name as keyof typeof boneMap)) {
             bones.push(node as Bone);
             // @ts-ignore
@@ -150,21 +138,23 @@ class Player {
           }
         }
       });
-
+      console.log(gltf.animations);
       this.model = gltf.scene;
       scene.add(gltf.scene);
+
+      console.log(this.leftShoulder!.position);
 
       // 骨骼辅助显示
       const skeletonHelper = new SkeletonHelper(gltf.scene);
       scene.add(skeletonHelper);
 
-      console.log(gltf);
       this.mixer = new AnimationMixer(gltf.scene);
       const walking = gltf.animations[3];
       this.walkingAction = this.mixer.clipAction(walking);
       // this.walkingAction.play();
 
       this.updateArmRotations("pistol"); // 暂时默认手枪
+      this.leftShoulder!.position.z =23;
       this.initGui(bones);
     });
   }
@@ -184,14 +174,14 @@ class Player {
       folder.add(
         bone.position,
         "y",
-        -10 + bone.position.y,
-        10 + bone.position.y
+        -100 + bone.position.y,
+        100 + bone.position.y
       );
       folder.add(
         bone.position,
         "z",
-        -10 + bone.position.z,
-        10 + bone.position.z
+        -100 + bone.position.z,
+        100 + bone.position.z
       );
 
       folder.add(bone.rotation, "x", -Math.PI, Math.PI);
@@ -326,13 +316,13 @@ class Player {
     if (this.model) {
       this.model.position.set(
         this.body.position.x,
-        this.body.position.y - 0.37,
+        this.body.position.y - 0.1,
         this.body.position.z
       );
-      // this.model.rotation.y = this.pointerControl.euler.y;
+      this.model.rotation.y = this.pointerControl.euler.y;
+      // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
 
-      this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
-      this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // const { x, y, z } = this.pointerControl.yawObject.position;
       // this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
       // this.leftShoulder?.position.copy(

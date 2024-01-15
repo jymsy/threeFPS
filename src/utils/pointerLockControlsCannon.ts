@@ -25,7 +25,6 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.euler.order = "YXZ";
     this.yawObject = new Group();
     this.yawObject.add(camera);
-
     this.quaternion = new Quaternion();
 
     document.addEventListener("mousemove", this.onMouseMove);
@@ -37,8 +36,8 @@ class PointerLockControlsCannon extends EventDispatcher {
   changeView() {
     State.firstPerson = !State.firstPerson;
     // moving camera
-    this.yawObject.children[0].translateZ(State.firstPerson ? -0.6 : 0.6);
-    this.yawObject.children[0].translateY(State.firstPerson ? -0.15 : 0.15);
+    this.yawObject.children[0].translateZ(State.firstPerson ? -2 : 2);
+    this.yawObject.children[0].translateY(State.firstPerson ? -0.2 : 0.2);
   }
 
   setOffset(offset: Vector3) {
@@ -88,12 +87,10 @@ class PointerLockControlsCannon extends EventDispatcher {
 
   render(cannonBody: Body) {
     this.yawObject.position
-      .copy(
-        new Vector3(
-          cannonBody.position.x - 0.05,
-          cannonBody.position.y,
-          cannonBody.position.z
-        )
+      .set(
+        cannonBody.position.x,
+        cannonBody.position.y + 0.8,
+        cannonBody.position.z
       )
       .add(this.offset);
   }

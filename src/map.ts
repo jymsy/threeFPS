@@ -20,11 +20,12 @@ class Map {
     this.path = path;
   }
 
-  load = (scene: Scene, world: World, material: Material) => {
+  load = (scene: Scene, world: World) => {
     return new Promise((resolve) => {
       if (!this.path) {
         return;
       }
+      const material = new Material({ friction: 0 });
       const loader = new GLTFLoader();
 
       loader.load(this.path, (gltf) => {

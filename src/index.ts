@@ -48,11 +48,11 @@ const init = async () => {
 
   world.gravity.set(0, -9.8, 0); //单位：m/s²
   world.broadphase = new SAPBroadphase(world); // 碰撞测试算法 https://blog.csdn.net/weixin_43990650/article/details/121815208
-  // world.allowSleep = true;
+  world.allowSleep = true;
   const material = new Material(world);
   // const cannonDebugger = new CannonDebugger(scene, world);
   // const floor = new Floor(world, material.physics, scene);
-  // floor.setPosition(0, 0, 0);
+  // floor.setPosition(0, 2, 0);
   // floor.setRotation(-Math.PI / 2, 0, 0);
 
   const sky = new Sky();
@@ -76,8 +76,8 @@ const init = async () => {
   // 渲染函数
   const render = () => {
     // stats.update();
-    if (1) {
-      // if (controls.enabled) {
+    // if (1) {
+    if (controls.enabled) {
       world.fixedStep(); //更新物理计算
       // cannonDebugger.update();
       TWEEN.update();
@@ -94,8 +94,8 @@ const init = async () => {
   // const map = new Map("gltf/collision-world.glb");
   const map = new Map("gltf/de_dust.glb");
   // const map = new Map("gltf/cs_italy_winter.glb");
-  await map.load(scene, world, material.physics);
-  const player = new Player(world, material.physics, controls, scene);
+  await map.load(scene, world);
+  const player = new Player(world, controls, scene);
   render();
 };
 

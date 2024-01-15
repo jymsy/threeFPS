@@ -10,7 +10,6 @@ class TrimeshCollider {
     scale: Vector3,
     quaternion: ThreeQuaternion
   ) {
-    console.log(mesh);
     this.body = new Body({
       mass: 0,
       position: new Vec3(mesh.position.x, mesh.position.y, mesh.position.z),
