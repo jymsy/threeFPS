@@ -154,7 +154,7 @@ class Player {
       this.idleAction.play();
 
       this.updateArmRotations("pistol"); // 暂时默认手枪
-      this.leftShoulder!.position.z = 23;
+      // this.leftShoulder!.position.z =23;
       this.initGui(bones);
     });
   }
@@ -320,8 +320,8 @@ class Player {
         this.body.position.z
       );
       this.model.rotation.y = this.pointerControl.euler.y;
-      // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
-      // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
 
       // const { x, y, z } = this.pointerControl.yawObject.position;
       // this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
