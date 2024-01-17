@@ -27,7 +27,7 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.euler.order = "YXZ";
     this.yawObject = new Group();
     this.yawObject.add(camera);
-    camera.position.set(-0.5, 0, 0);
+    camera.position.set(-0.5, 0.2, -1.5);
     console.log(camera.position);
     this.quaternion = new Quaternion();
 

@@ -33,6 +33,10 @@ import CapsuleCollider from "../utils/CapsuleCollider";
 
 const JUMP_VELOCITY = 3;
 const VELOCITY_FACTOR = 2;
+const MOVING_FORWARD = 1;
+const MOVING_BACKWARD = 2;
+const MOVING_LEFT = 4;
+const MOVING_RIGHT = 8;
 
 const boneMap = {
   mixamorigLeftArm: "leftArm",
@@ -61,14 +65,9 @@ const bodyBaseRotation = {
 
 class Player {
   body;
-  moveForward = false;
-  moveBackward = false;
-  moveLeft = false;
-  moveRight = false;
+  moveBit = 0;
   canJump = false;
-  speed = 10; //控制器移动速度
   clock = new Clock();
-  spaceUp = true;
   pointerControl;
   moveVelocity = new Vector3();
   weapon: Weapon;
@@ -247,20 +246,16 @@ class Player {
     }
     switch (event.key) {
       case "w":
-        this.moveForward = true;
-        this.state?.playAnimation(STATE.RUN);
+        this.moveBit |= MOVING_FORWARD;
         break;
       case "s":
-        this.moveBackward = true;
-        this.state?.playAnimation(STATE.BACK);
+        this.moveBit |= MOVING_BACKWARD;
         break;
       case "a":
-        this.moveLeft = true;
-        this.state?.playAnimation(STATE.LEFT);
+        this.moveBit |= MOVING_LEFT;
         break;
       case "d":
-        this.moveRight = true;
-        this.state?.playAnimation(STATE.RIGHT);
+        this.moveBit |= MOVING_RIGHT;
         break;
       case " ":
         if (this.canJump) {
@@ -285,7 +280,36 @@ class Player {
       default:
         break;
     }
+
+    this.playAnimation();
   };
+
+  playAnimation() {
+    switch (this.moveBit) {
+      case MOVING_FORWARD:
+      case MOVING_FORWARD | MOVING_LEFT:
+      case MOVING_FORWARD | MOVING_RIGHT:
+      case MOVING_FORWARD | MOVING_LEFT | MOVING_RIGHT:
+        this.state?.playAnimation(STATE.RUN);
+        break;
+      case MOVING_BACKWARD:
+      case MOVING_BACKWARD | MOVING_LEFT:
+      case MOVING_BACKWARD | MOVING_RIGHT:
+      case MOVING_BACKWARD | MOVING_LEFT | MOVING_RIGHT:
+        this.state?.playAnimation(STATE.BACK);
+        break;
+      case MOVING_LEFT:
+      case MOVING_LEFT | MOVING_FORWARD | MOVING_BACKWARD:
+        this.state?.playAnimation(STATE.LEFT);
+        break;
+      case MOVING_RIGHT:
+      case MOVING_RIGHT | MOVING_FORWARD | MOVING_BACKWARD:
+        this.state?.playAnimation(STATE.RIGHT);
+        break;
+      default:
+        this.state?.playAnimation(STATE.IDLE);
+    }
+  }
 
   onKeyUp = (event: KeyboardEvent) => {
     if (!this.pointerControl.enabled) {
@@ -293,34 +317,30 @@ class Player {
     }
     switch (event.key) {
       case "w":
-        this.moveForward = false;
-        this.state?.playAnimation(STATE.IDLE);
+        this.moveBit ^= MOVING_FORWARD;
         break;
       case "a":
-        this.moveLeft = false;
-        this.state?.playAnimation(STATE.IDLE);
+        this.moveBit ^= MOVING_LEFT;
         break;
       case "s":
-        this.moveBackward = false;
-        this.state?.playAnimation(STATE.IDLE);
+        this.moveBit ^= MOVING_BACKWARD;
         break;
       case "d":
-        this.moveRight = false;
-        this.state?.playAnimation(STATE.IDLE);
+        this.moveBit ^= MOVING_RIGHT;
         break;
     }
+    this.playAnimation();
   };
-
-  calculateMoveVelocity() {}
 
   render(enemyArray: EnemyModel[]) {
     const delta = this.clock.getDelta();
     this.factor = VELOCITY_FACTOR * delta * 100;
 
     this.moveVelocity.z =
-      (Number(this.moveForward) - Number(this.moveBackward)) * this.factor;
+      ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
+      this.factor;
     this.moveVelocity.x =
-      (Number(this.moveLeft) - Number(this.moveRight)) * this.factor;
+      (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
 
     this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
 

@@ -1,5 +1,5 @@
 const state = {
-  firstPerson: true,
+  firstPerson: false,
 };
 
 export default state;

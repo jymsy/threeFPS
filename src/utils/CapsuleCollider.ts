@@ -6,7 +6,7 @@ class CapsuleCollider {
 
   constructor(radius = 0.2) {
     const shape = new Sphere(radius);
-    shape.collisionFilterMask;
+    // shape.collisionFilterMask = -4;
     this.body = new Body({
       mass: 1,
       allowSleep: false,
@@ -21,6 +21,7 @@ class CapsuleCollider {
     this.body.addShape(shape, new Vec3(0, radius * 2, 0));
     this.body.addShape(shape, new Vec3(0, radius * 4, 0));
     this.body.updateMassProperties();
+    // this.body.collisionFilterGroup = 2;
   }
 }
 

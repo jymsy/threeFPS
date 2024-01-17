@@ -42,22 +42,14 @@ class State {
     if (this.currentState === name) {
       return;
     }
-    let animationName = name;
-    if (this.player.moveVelocity.length() === 0) {
-      // 同时按住前进后退
-      animationName = STATE.IDLE;
-      if (this.currentState === animationName) {
-        return;
-      }
-    }
     if (this.currentAction) {
       this.currentAction.fadeOut(0.1);
     }
-    const clip = AnimationClip.findByName(this.animations, animationName);
+    const clip = AnimationClip.findByName(this.animations, name);
     const action = this.mixer.clipAction(clip);
     if (action) {
       action.reset().fadeIn(0.1).play();
-      this.currentState = animationName;
+      this.currentState = name;
       this.currentAction = action;
     }
   }
