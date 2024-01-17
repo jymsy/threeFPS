@@ -1,9 +1,6 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import {
-  LoadingManager,
-  WebGLRenderer,
-  Scene,
-  AxesHelper,
+  Scene as ThreeScene,
   Mesh,
   Color,
   ACESFilmicToneMapping,
@@ -12,23 +9,29 @@ import {
   Quaternion,
 } from "three";
 import { Material, World } from "cannon-es";
+import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import TrimeshCollider from "./utils/TrimeshCollider";
+import Player from "./player";
 
-class Map {
+class Scene {
   private path;
   constructor(path: string) {
     this.path = path;
   }
 
-  load = (scene: Scene, world: World) => {
-    return new Promise((resolve) => {
+  load = (
+    scene: ThreeScene,
+    world: World,
+    controls: PointerLockControlsCannon
+  ) => {
+    return new Promise<Player>((resolve) => {
       if (!this.path) {
         return;
       }
       const material = new Material({ friction: 0 });
       const loader = new GLTFLoader();
 
-      loader.load(this.path, (gltf) => {
+      loader.load(this.path, async (gltf) => {
         // gltf.scene.scale.set(3, 3, 3);
         // gltf.scene.position.set(0, 0, 0);
         gltf.scene.traverse((node) => {
@@ -45,10 +48,13 @@ class Map {
           }
         });
         scene.add(gltf.scene);
-        resolve(1);
+
+        const player = new Player(world, controls);
+        await player.load(scene);
+        resolve(player);
       });
     });
   };
 }
 
-export default Map;
+export default Scene;

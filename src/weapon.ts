@@ -42,7 +42,7 @@ class Weapon {
   currentIndex = 0;
   loader = new WeaponLoader();
 
-  constructor(scene: Scene) {
+  constructor() {
     this.audio = new Audio("./audio/single-shoot-ak47.wav");
     this.group = new Group();
     this.swayingGroup = new Group();
@@ -59,8 +59,11 @@ class Weapon {
 
     this.flashMesh = new Mesh(geometry, material);
     this.flashMesh.rotateY(Math.PI);
+  }
 
-    this.loader.load().then((weapons) => {
+  load(scene: Scene) {
+    return new Promise(async (resolve) => {
+      const weapons = await this.loader.load();
       this.model = weapons[0].model;
       const flashPosition = weapons[0].config.flashPosition;
       this.flashMesh.position.set(
@@ -78,6 +81,7 @@ class Weapon {
       this.initRecoilAnimation();
       this.initAimingAnimation();
       this.initFlashAnimation();
+      resolve(1);
     });
   }
 
@@ -251,7 +255,6 @@ class Weapon {
       flashPosition[1],
       flashPosition[2]
     );
-    
   }
 
   render(

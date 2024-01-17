@@ -11,7 +11,7 @@ class CapsuleCollider {
       mass: 1,
       allowSleep: false,
       // 碰撞体的三维空间中位置
-      position: new Vec3(0, 3, 1),
+      position: new Vec3(1, 3, 4),
       fixedRotation: true,
       // linearDamping: 0.9,
       material: new Material({ friction: 0 }),

@@ -12,6 +12,7 @@ import {
   Bone,
   Object3D,
   MathUtils,
+  AnimationClip,
 } from "three";
 import GUI from "lil-gui";
 import {
@@ -23,14 +24,15 @@ import {
   ContactEquation,
 } from "cannon-es";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
-import Weapon from "./weapon";
-import { EnemyModel } from "./enemy";
-import State from "./state";
-import CapsuleCollider from "./utils/CapsuleCollider";
+import PointerLockControlsCannon from "../utils/pointerLockControlsCannon";
+import Weapon from "../weapon";
+import { EnemyModel } from "../enemy";
+import State from "../state";
+import PlayerState, { STATE } from "./State";
+import CapsuleCollider from "../utils/CapsuleCollider";
 
 const JUMP_VELOCITY = 3;
-const VELOCITY_FACTOR = 1;
+const VELOCITY_FACTOR = 2;
 
 const boneMap = {
   mixamorigLeftArm: "leftArm",
@@ -69,12 +71,9 @@ class Player {
   spaceUp = true;
   pointerControl;
   moveVelocity = new Vector3();
-  weapon;
+  weapon: Weapon;
   crouch = false; // 下蹲
   model?: Group;
-  mixer?: AnimationMixer;
-  walkingAction?: AnimationAction;
-  idleAction?: AnimationAction;
   leftArm?: Object3D;
   leftForeArm?: Object3D;
   leftShoulder?: Object3D;
@@ -83,17 +82,16 @@ class Player {
   rightForeArm?: Object3D;
   rightHand?: Object3D;
   gui = new GUI();
+  state?: PlayerState;
+  factor = 0;
 
-  constructor(
-    world: World,
-    pointerControl: PointerLockControlsCannon,
-    scene: Scene
-  ) {
+  constructor(world: World, pointerControl: PointerLockControlsCannon) {
     this.pointerControl = pointerControl;
-    this.weapon = new Weapon(scene);
     const capsule = new CapsuleCollider();
     this.body = capsule.body;
     world.addBody(this.body);
+
+    this.weapon = new Weapon();
 
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
@@ -120,42 +118,46 @@ class Player {
         }
       }
     );
-    const loader = new GLTFLoader();
-    const bones: Bone[] = [];
-    loader.load("gltf/player_pistol.glb", (gltf) => {
-      gltf.scene.scale.set(0.7, 0.7, 0.7);
-      // gltf.scene.position.set(0, -0.47, 0);
-      const keys = Object.keys(boneMap);
-      gltf.scene.traverse((node) => {
-        if ((node as Mesh).isMesh) {
-          node.castShadow = true;
-        }
-        if ((node as Bone).isBone) {
-          // console.log(node.name);
-          if (keys.includes(node.name as keyof typeof boneMap)) {
-            bones.push(node as Bone);
-            // @ts-ignore
-            this[boneMap[node.name]] = node;
+  }
+
+  load(scene: Scene) {
+    return new Promise((resolve) => {
+      const loader = new GLTFLoader();
+      const bones: Bone[] = [];
+
+      loader.load("gltf/player_pistol.glb", async (gltf) => {
+        gltf.scene.scale.set(0.7, 0.7, 0.7);
+        // gltf.scene.position.set(0, -0.47, 0);
+        const keys = Object.keys(boneMap);
+        gltf.scene.traverse((node) => {
+          if ((node as Mesh).isMesh) {
+            node.castShadow = true;
           }
-        }
+          if ((node as Bone).isBone) {
+            // console.log(node.name);
+            if (keys.includes(node.name as keyof typeof boneMap)) {
+              bones.push(node as Bone);
+              // @ts-ignore
+              this[boneMap[node.name]] = node;
+            }
+          }
+        });
+        console.log(gltf.animations);
+        this.state = new PlayerState(gltf.animations, gltf.scene, this);
+        this.model = gltf.scene;
+        scene.add(gltf.scene);
+
+        // 骨骼辅助显示
+        // const skeletonHelper = new SkeletonHelper(gltf.scene);
+        // scene.add(skeletonHelper);
+
+        // this.updateArmRotations("pistol"); // 暂时默认手枪
+        // this.leftShoulder!.position.z =23;
+        // this.initGui(bones);
+        await this.weapon.load(scene);
+        this.state.playAnimation(STATE.IDLE);
+        resolve(1);
       });
-      console.log(gltf.animations);
-      this.model = gltf.scene;
-      scene.add(gltf.scene);
-
-      console.log(this.leftShoulder!.position);
-
-      // 骨骼辅助显示
-      const skeletonHelper = new SkeletonHelper(gltf.scene);
-      scene.add(skeletonHelper);
-
-      this.mixer = new AnimationMixer(gltf.scene);
-      this.idleAction = this.mixer.clipAction(gltf.animations[3]);
-      this.idleAction.play();
-
-      this.updateArmRotations("pistol"); // 暂时默认手枪
-      // this.leftShoulder!.position.z =23;
-      this.initGui(bones);
     });
   }
 
@@ -200,12 +202,18 @@ class Player {
   handleMouseDown = (event: MouseEvent) => {
     if (this.pointerControl.enabled) {
       this.weapon.handleMouseDown(event.button);
+      if (event.button === 2) {
+        this.pointerControl.beginAiming();
+      }
     }
   };
 
   handleMouseUp = (event: MouseEvent) => {
     if (this.pointerControl.enabled) {
       this.weapon.handleMouseUp(event.button);
+      if (event.button === 2) {
+        this.pointerControl.endAiming();
+      }
     }
   };
 
@@ -240,35 +248,40 @@ class Player {
     switch (event.key) {
       case "w":
         this.moveForward = true;
+        this.state?.playAnimation(STATE.RUN);
         break;
       case "s":
         this.moveBackward = true;
+        this.state?.playAnimation(STATE.BACK);
         break;
       case "a":
         this.moveLeft = true;
+        this.state?.playAnimation(STATE.LEFT);
         break;
       case "d":
         this.moveRight = true;
+        this.state?.playAnimation(STATE.RIGHT);
         break;
       case " ":
         if (this.canJump) {
           this.body.velocity.y = JUMP_VELOCITY;
           this.canJump = false;
+          this.state?.playAnimation(STATE.JUMP);
         }
         break;
       case "v":
         this.pointerControl.changeView();
         break;
-      case "c":
-        this.crouch = true;
-        this.pointerControl.setOffset(new Vector3(0, -0.2, 0));
-        break;
+      // case "c":
+      //   this.crouch = true;
+      //   this.pointerControl.setOffset(new Vector3(0, -0.2, 0));
+      //   break;
       case "1":
       case "2":
         this.weapon.switchWeapon(Number(event.key));
-        this.updateArmRotations(
-          this.weapon.loader.weapons[this.weapon.currentIndex].config.type
-        );
+      // this.updateArmRotations(
+      //   this.weapon.loader.weapons[this.weapon.currentIndex].config.type
+      // );
       default:
         break;
     }
@@ -281,32 +294,33 @@ class Player {
     switch (event.key) {
       case "w":
         this.moveForward = false;
+        this.state?.playAnimation(STATE.IDLE);
         break;
       case "a":
         this.moveLeft = false;
+        this.state?.playAnimation(STATE.IDLE);
         break;
       case "s":
         this.moveBackward = false;
+        this.state?.playAnimation(STATE.IDLE);
         break;
       case "d":
         this.moveRight = false;
-        break;
-      case "c":
-        this.crouch = false;
-        this.pointerControl.setOffset(new Vector3(0, 0, 0));
+        this.state?.playAnimation(STATE.IDLE);
         break;
     }
   };
 
+  calculateMoveVelocity() {}
+
   render(enemyArray: EnemyModel[]) {
     const delta = this.clock.getDelta();
-    const factor = VELOCITY_FACTOR * delta * 100;
-    this.moveVelocity = new Vector3();
+    this.factor = VELOCITY_FACTOR * delta * 100;
 
     this.moveVelocity.z =
-      (Number(this.moveForward) - Number(this.moveBackward)) * factor;
+      (Number(this.moveForward) - Number(this.moveBackward)) * this.factor;
     this.moveVelocity.x =
-      (Number(this.moveLeft) - Number(this.moveRight)) * factor;
+      (Number(this.moveLeft) - Number(this.moveRight)) * this.factor;
 
     this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
 
@@ -320,8 +334,8 @@ class Player {
         this.body.position.z
       );
       this.model.rotation.y = this.pointerControl.euler.y;
-      this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
-      this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
+      // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
 
       // const { x, y, z } = this.pointerControl.yawObject.position;
       // this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
@@ -330,7 +344,7 @@ class Player {
       // );
     }
 
-    this.mixer?.update(delta);
+    this.state?.mixer.update(delta);
 
     const handPosition = new Vector3();
     this.rightHand?.getWorldPosition(handPosition);

@@ -1,7 +1,7 @@
 import {
   LoadingManager,
   WebGLRenderer,
-  Scene,
+  Scene as ThreeScene,
   AxesHelper,
   Mesh,
   ACESFilmicToneMapping,
@@ -23,7 +23,7 @@ import Enemy, { EnemyModel } from "./enemy";
 import Player from "./player";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import Material from "./material";
-import Map from "./map";
+import Scene from "./Scene";
 
 const init = async () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
@@ -43,7 +43,7 @@ const init = async () => {
   renderer.shadowMap.enabled = true; // 允许渲染器渲染阴影
   // renderer.shadowMap.type = THREE.VSMShadowMap;
 
-  const scene = new Scene();
+  const scene = new ThreeScene();
   const world = new World();
 
   world.gravity.set(0, -9.8, 0); //单位：m/s²
@@ -67,15 +67,15 @@ const init = async () => {
   const controls = new PointerLockControlsCannon(scene, camera.getCamera());
 
   initEventHandlers(controls);
-  // const stats = new Stats();
-  // document.body.appendChild(stats.domElement);
+  const stats = new Stats();
+  document.body.appendChild(stats.domElement);
   // const controls = new OrbitControls(camera, renderer.domElement);
   // controls.update();
   document.getElementById("webgl")!.appendChild(renderer.domElement);
 
   // 渲染函数
   const render = () => {
-    // stats.update();
+    stats.update();
     // if (1) {
     if (controls.enabled) {
       world.fixedStep(); //更新物理计算
@@ -92,10 +92,9 @@ const init = async () => {
   };
 
   // const map = new Map("gltf/collision-world.glb");
-  const map = new Map("gltf/de_dust.glb");
+  const map = new Scene("gltf/de_dust.glb");
   // const map = new Map("gltf/cs_italy_winter.glb");
-  await map.load(scene, world);
-  const player = new Player(world, controls, scene);
+  const player = await map.load(scene, world, controls);
   render();
 };
 

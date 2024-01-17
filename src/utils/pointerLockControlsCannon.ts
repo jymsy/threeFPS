@@ -9,6 +9,7 @@ import {
   Scene,
 } from "three";
 import { Body } from "cannon-es";
+import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
 
 class PointerLockControlsCannon extends EventDispatcher {
@@ -17,26 +18,58 @@ class PointerLockControlsCannon extends EventDispatcher {
   enabled = false;
   clock = new Clock();
   euler = new Euler();
-  // firstPerson = true;
   offset = new Vector3();
+  aimingStartAnimation: Tween<Vector3> | null = null;
+  aimingEndAnimation: Tween<Vector3> | null = null;
 
   constructor(scene: Scene, camera: PerspectiveCamera) {
     super();
     this.euler.order = "YXZ";
     this.yawObject = new Group();
     this.yawObject.add(camera);
+    camera.position.set(-0.5, 0, 0);
+    console.log(camera.position);
     this.quaternion = new Quaternion();
 
     document.addEventListener("mousemove", this.onMouseMove);
     document.addEventListener("pointerlockchange", this.onPointerlockChange);
 
     scene.add(this.yawObject);
+    this.initAimingAnimation();
+  }
+
+  initAimingAnimation() {
+    const currentPosition = this.yawObject.children[0].position;
+    const finalPosition = new Vector3(-0.2, 0.3, -0.8);
+
+    this.aimingStartAnimation = new Tween(currentPosition)
+      .to(finalPosition, 200)
+      .easing(Easing.Quadratic.Out);
+
+    this.aimingEndAnimation = new Tween(finalPosition.clone())
+      .to(new Vector3(-0.5, 0.2, -1.5), 200)
+      .easing(Easing.Quadratic.Out)
+      .onUpdate((position) => {
+        this.yawObject.children[0].position.copy(position);
+      });
+  }
+
+  beginAiming() {
+    if (!State.firstPerson) {
+      this.aimingStartAnimation?.start();
+    }
+  }
+
+  endAiming() {
+    if (!State.firstPerson) {
+      this.aimingEndAnimation?.start();
+    }
   }
 
   changeView() {
     State.firstPerson = !State.firstPerson;
     // moving camera
-    this.yawObject.children[0].translateZ(State.firstPerson ? -2 : 2);
+    this.yawObject.children[0].translateZ(State.firstPerson ? -1.5 : 1.5);
     this.yawObject.children[0].translateY(State.firstPerson ? -0.2 : 0.2);
   }
 
