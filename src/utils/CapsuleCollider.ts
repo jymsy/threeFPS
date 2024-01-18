@@ -1,4 +1,3 @@
-import { Mesh, Vector3, Quaternion as ThreeQuaternion } from "three";
 import { Body, Vec3, Material, Quaternion, Sphere } from "cannon-es";
 
 class CapsuleCollider {
