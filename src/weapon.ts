@@ -8,12 +8,16 @@ import {
   Mesh,
   Raycaster,
   Object3D,
+  MeshLambertMaterial,
+  Color,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
+import { DecalGeometry } from "three/examples/jsm/geometries/DecalGeometry";
 import { EnemyModel } from "./enemy";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import State from "./state";
 import WeaponLoader from "./utils/weaponLoader";
+import BulletHoleMesh from "./utils/BulletHoleMesh";
 
 class Weapon {
   model?: Group;
@@ -41,6 +45,10 @@ class Weapon {
   audio;
   currentIndex = 0;
   loader = new WeaponLoader();
+  // bulletHole = new BulletHoleMesh();
+  bulletHoleMaterial: MeshLambertMaterial;
+  scene?: Scene;
+  bulletDecals: Mesh[] = [];
 
   constructor() {
     this.audio = new Audio("./audio/single-shoot-ak47.wav");
@@ -48,8 +56,17 @@ class Weapon {
     this.swayingGroup = new Group();
     this.recoilGroup = new Group();
 
-    const geometry = new PlaneGeometry(0.2, 0.2);
     const texLoader = new TextureLoader();
+    const bulletHole = texLoader.load("./img/bullet-hole.png");
+    this.bulletHoleMaterial = new MeshLambertMaterial({
+      map: bulletHole,
+      transparent: true, // https://blog.csdn.net/qq_34568700/article/details/130972510
+      depthWrite: false, // 后面的弹孔覆盖前面的
+      polygonOffset: true, // 深度冲突
+      polygonOffsetFactor: -4,
+    });
+
+    const geometry = new PlaneGeometry(0.2, 0.2);
     const texture = texLoader.load("./img/flash_shoot.png");
     const material = new MeshBasicMaterial({
       map: texture,
@@ -62,6 +79,7 @@ class Weapon {
   }
 
   load(scene: Scene) {
+    this.scene = scene;
     return new Promise(async (resolve) => {
       const weapons = await this.loader.load();
       this.model = weapons[0].model;
@@ -95,26 +113,15 @@ class Weapon {
     return 0;
   };
 
-  isHitEnemy(controls: PointerLockControlsCannon, enemyArray: EnemyModel[]) {
-    const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 10);
-    raycaster.set(controls.yawObject.position, controls.getDirection());
-    const intersects = raycaster.intersectObjects(
-      enemyArray.map((item) => item.model.model!)
-    );
-    if (intersects.length > 0) {
-      const id = this.findEnemyId(intersects[0].object);
-      const enemy = enemyArray.find((item) => item.id === id);
-      enemy?.model.getShot();
-    }
-  }
-
   handleMouseDown(button: number) {
     if (button === 0) {
       this.isShooting = true;
     } else if (button === 2) {
-      this.isAiming = true;
-      // this.swayingAnimation!.stop();
-      this.aimingStartAnimation!.start();
+      if (State.firstPerson) {
+        this.isAiming = true;
+        // this.swayingAnimation!.stop();
+        this.aimingStartAnimation!.start();
+      }
     }
   }
 
@@ -122,8 +129,10 @@ class Weapon {
     if (button === 0) {
       this.isShooting = false;
     } else if (button === 2) {
-      this.isAiming = false;
-      this.aimingEndAnimation!.start();
+      if (State.firstPerson) {
+        this.isAiming = false;
+        this.aimingEndAnimation!.start();
+      }
     }
   }
 
@@ -257,6 +266,60 @@ class Weapon {
     );
   }
 
+  bulletCollision(
+    controls: PointerLockControlsCannon,
+    enemyArray: EnemyModel[]
+  ) {
+    const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 100);
+    raycaster.set(
+      controls.yawObject.children[0].getWorldPosition(new Vector3()),
+      controls.getDirection()
+    );
+    const intersectsEnemy = raycaster.intersectObjects(
+      enemyArray.map((item) => item.model.model!)
+    );
+    if (intersectsEnemy.length > 0) {
+      // shoot enemy
+      const id = this.findEnemyId(intersectsEnemy[0].object);
+      const enemy = enemyArray.find((item) => item.id === id);
+      enemy?.model.getShot();
+    } else {
+      const intersectsWorld = raycaster.intersectObjects(
+        State.worldMapMeshes,
+        false
+      );
+      if (intersectsWorld.length > 0) {
+        // 击中场景
+        const position = intersectsWorld[0].point;
+        const normal = intersectsWorld[0]
+          .face!.normal.clone()
+          .applyEuler(State.worldRotation);
+        const dir = new Object3D();
+        dir.lookAt(normal);
+        const m = new Mesh(
+          new DecalGeometry(
+            intersectsWorld[0].object as Mesh,
+            position,
+            dir.rotation,
+            new Vector3(1, 1, 1)
+          ),
+          this.bulletHoleMaterial
+        );
+        // const m = this.bulletHole.create(position, dir.rotation, normal);
+        m.renderOrder = this.bulletDecals.length;
+        this.bulletDecals.push(m);
+        this.scene?.add(m);
+
+        setTimeout(() => {
+          const firstHole = this.bulletDecals.shift();
+          if (firstHole) {
+            this.scene?.remove(firstHole);
+          }
+        }, 3000);
+      }
+    }
+  }
+
   render(
     controls: PointerLockControlsCannon,
     enemyArray: EnemyModel[],
@@ -281,7 +344,7 @@ class Weapon {
         this.audio.play();
         this.recoilAnimation!.start();
         this.flashAnimation!.start();
-        this.isHitEnemy(controls, enemyArray);
+        this.bulletCollision(controls, enemyArray);
       }
 
       this.group.rotation.copy(controls.yawObject.rotation);
