@@ -13,6 +13,7 @@ import {
   Object3D,
   MathUtils,
   AnimationClip,
+  Quaternion,
 } from "three";
 import GUI from "lil-gui";
 import {
@@ -133,7 +134,6 @@ class Player {
             node.castShadow = true;
           }
           if ((node as Bone).isBone) {
-            // console.log(node.name);
             if (keys.includes(node.name as keyof typeof boneMap)) {
               bones.push(node as Bone);
               // @ts-ignore
@@ -364,9 +364,9 @@ class Player {
         this.body.position.z
       );
       this.model.rotation.y = this.pointerControl.euler.y;
+      
       // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
-
       // const { x, y, z } = this.pointerControl.yawObject.position;
       // this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
       // this.leftShoulder?.position.copy(
@@ -375,14 +375,11 @@ class Player {
     }
 
     this.state?.mixer.update(delta);
-
-    const handPosition = new Vector3();
-    this.rightHand?.getWorldPosition(handPosition);
     this.weapon.render(
       this.pointerControl,
       enemyArray,
       this.moveVelocity,
-      handPosition
+      this.rightHand!
     );
   }
 }

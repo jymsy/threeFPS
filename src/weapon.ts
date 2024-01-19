@@ -10,9 +10,10 @@ import {
   Object3D,
   MeshLambertMaterial,
   Color,
+  Quaternion,
+  AxesHelper,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
-import { DecalGeometry } from "three/examples/jsm/geometries/DecalGeometry";
 import { EnemyModel } from "./enemy";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import State from "./state";
@@ -45,8 +46,7 @@ class Weapon {
   audio;
   currentIndex = 0;
   loader = new WeaponLoader();
-  // bulletHole = new BulletHoleMesh();
-  bulletHoleMaterial: MeshLambertMaterial;
+  bulletHole = new BulletHoleMesh("texture");
   scene?: Scene;
   bulletDecals: Mesh[] = [];
 
@@ -57,15 +57,6 @@ class Weapon {
     this.recoilGroup = new Group();
 
     const texLoader = new TextureLoader();
-    const bulletHole = texLoader.load("./img/bullet-hole.png");
-    this.bulletHoleMaterial = new MeshLambertMaterial({
-      map: bulletHole,
-      transparent: true, // https://blog.csdn.net/qq_34568700/article/details/130972510
-      depthWrite: false, // 后面的弹孔覆盖前面的
-      polygonOffset: true, // 深度冲突
-      polygonOffsetFactor: -4,
-    });
-
     const geometry = new PlaneGeometry(0.2, 0.2);
     const texture = texLoader.load("./img/flash_shoot.png");
     const material = new MeshBasicMaterial({
@@ -289,23 +280,8 @@ class Weapon {
         false
       );
       if (intersectsWorld.length > 0) {
-        // 击中场景
-        const position = intersectsWorld[0].point;
-        const normal = intersectsWorld[0]
-          .face!.normal.clone()
-          .applyEuler(State.worldRotation);
-        const dir = new Object3D();
-        dir.lookAt(normal);
-        const m = new Mesh(
-          new DecalGeometry(
-            intersectsWorld[0].object as Mesh,
-            position,
-            dir.rotation,
-            new Vector3(1, 1, 1)
-          ),
-          this.bulletHoleMaterial
-        );
-        // const m = this.bulletHole.create(position, dir.rotation, normal);
+        // 击中world
+        const m = this.bulletHole.create(intersectsWorld[0]);
         m.renderOrder = this.bulletDecals.length;
         this.bulletDecals.push(m);
         this.scene?.add(m);
@@ -324,7 +300,7 @@ class Weapon {
     controls: PointerLockControlsCannon,
     enemyArray: EnemyModel[],
     moveVelocity: Vector3,
-    handPosition: Vector3
+    rightHand: Object3D
   ) {
     if (this.model) {
       // if (!this.isMoving && moveVelocity.length() > 0) {
@@ -347,8 +323,14 @@ class Weapon {
         this.bulletCollision(controls, enemyArray);
       }
 
-      this.group.rotation.copy(controls.yawObject.rotation);
+      const handPosition = new Vector3();
+      const handQuaternion = new Quaternion();
+      rightHand.getWorldPosition(handPosition);
+      rightHand.getWorldQuaternion(handQuaternion);
+      // this.group.rotation.copy(controls.yawObject.rotation);
       this.group.position.copy(handPosition); // 枪跟随手(tps)
+      this.group.quaternion.copy(handQuaternion);
+      this.group.rotateX(-Math.PI / 2).rotateZ(-Math.PI / 2);
     }
   }
 }

@@ -11,15 +11,18 @@ import {
   MeshLambertMaterial,
   Euler,
   DoubleSide,
-  Color,
+  Intersection,
 } from "three";
+import { DecalGeometry } from "three/examples/jsm/geometries/DecalGeometry";
 import State from "../state";
 
 class BulletHoleMesh {
+  type: "texture" | "decal";
   geometry: PlaneGeometry;
   material: MeshBasicMaterial;
 
-  constructor() {
+  constructor(type: "texture" | "decal" = "decal") {
+    this.type = type;
     const texLoader = new TextureLoader();
     const bulletHole = texLoader.load("./img/bullet-hole.png");
     this.material = new MeshLambertMaterial({
@@ -33,12 +36,29 @@ class BulletHoleMesh {
     this.geometry = new PlaneGeometry(1, 1);
   }
 
-  create(position: Vector3, normal: Vector3) {
-    const mesh = new Mesh(this.geometry, this.material);
-    normal.applyEuler(State.worldRotation);
-    mesh.lookAt(normal);
-    mesh.position.copy(position);
-    return mesh;
+  create(hitObject: Intersection<Object3D>) {
+    const position = hitObject.point;
+    const normal = hitObject
+      .face!.normal.clone()
+      .applyEuler(State.worldRotation);
+    if (this.type === "decal") {
+      const dir = new Object3D();
+      dir.lookAt(normal);
+      return new Mesh(
+        new DecalGeometry(
+          hitObject.object as Mesh,
+          position,
+          dir.rotation,
+          new Vector3(1, 1, 1)
+        ),
+        this.material
+      );
+    } else {
+      const mesh = new Mesh(this.geometry, this.material);
+      mesh.lookAt(normal);
+      mesh.position.copy(position);
+      return mesh;
+    }
   }
 }
 
