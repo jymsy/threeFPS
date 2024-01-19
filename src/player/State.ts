@@ -17,12 +17,20 @@ import {
 import Player from ".";
 
 export enum STATE {
-  RUN = "pistolRun",
-  BACK = "pistolBack",
-  LEFT = "pistolLeft",
-  RIGHT = "pistolRight",
-  JUMP = "pistolJump",
-  IDLE = "pistolIdle",
+  FORWARD = "forward",
+  FORWARD_SHOOT = "forwardShoot",
+  FORWARD_LEFT = "forwardLeft",
+  FORWARD_RIGHT = "forwardRight",
+  BACKWARD = "backward",
+  BACKWARD_AIM = "backwardAim",
+  BACKWARD_LEFT = "backwardLeft",
+  BACKWARD_RIGHT = "backwardRight",
+  AIM = "aim",
+  LEFT = "left",
+  RIGHT = "right",
+  JUMP = "jump",
+  IDLE = "idle",
+  SHOOT = "shoot",
 }
 
 class State {

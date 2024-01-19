@@ -82,8 +82,8 @@ class Weapon {
     this.scene = scene;
     return new Promise(async (resolve) => {
       const weapons = await this.loader.load();
-      this.model = weapons[0].model;
-      const flashPosition = weapons[0].config.flashPosition;
+      this.model = weapons[1].model;
+      const flashPosition = weapons[1].config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
         flashPosition[1],

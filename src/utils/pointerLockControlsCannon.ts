@@ -28,7 +28,6 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.yawObject = new Group();
     this.yawObject.add(camera);
     camera.position.set(-0.5, 0.2, -1.5);
-    console.log(camera.position);
     this.quaternion = new Quaternion();
 
     document.addEventListener("mousemove", this.onMouseMove);

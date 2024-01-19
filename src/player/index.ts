@@ -124,7 +124,7 @@ class Player {
       const loader = new GLTFLoader();
       const bones: Bone[] = [];
 
-      loader.load("gltf/player_pistol.glb", async (gltf) => {
+      loader.load("gltf/riflePlayer.glb", async (gltf) => {
         gltf.scene.scale.set(0.7, 0.7, 0.7);
         // gltf.scene.position.set(0, -0.47, 0);
         const keys = Object.keys(boneMap);
@@ -202,6 +202,7 @@ class Player {
     if (this.pointerControl.enabled) {
       this.weapon.handleMouseDown(event.button);
       if (event.button === 2) {
+        this.state?.playAnimation(STATE.AIM);
         this.pointerControl.beginAiming();
       }
     }
@@ -211,6 +212,7 @@ class Player {
     if (this.pointerControl.enabled) {
       this.weapon.handleMouseUp(event.button);
       if (event.button === 2) {
+        this.state?.playAnimation(STATE.IDLE);
         this.pointerControl.endAiming();
       }
     }
@@ -286,17 +288,25 @@ class Player {
 
   playAnimation() {
     switch (this.moveBit) {
-      case MOVING_FORWARD:
       case MOVING_FORWARD | MOVING_LEFT:
+        this.state?.playAnimation(STATE.FORWARD_LEFT);
+        break;
       case MOVING_FORWARD | MOVING_RIGHT:
+        this.state?.playAnimation(STATE.FORWARD_RIGHT);
+        break;
+      case MOVING_FORWARD:
       case MOVING_FORWARD | MOVING_LEFT | MOVING_RIGHT:
-        this.state?.playAnimation(STATE.RUN);
+        this.state?.playAnimation(STATE.FORWARD);
         break;
       case MOVING_BACKWARD:
-      case MOVING_BACKWARD | MOVING_LEFT:
-      case MOVING_BACKWARD | MOVING_RIGHT:
       case MOVING_BACKWARD | MOVING_LEFT | MOVING_RIGHT:
-        this.state?.playAnimation(STATE.BACK);
+        this.state?.playAnimation(STATE.BACKWARD);
+        break;
+      case MOVING_BACKWARD | MOVING_LEFT:
+        this.state?.playAnimation(STATE.BACKWARD_LEFT);
+        break;
+      case MOVING_BACKWARD | MOVING_RIGHT:
+        this.state?.playAnimation(STATE.BACKWARD_RIGHT);
         break;
       case MOVING_LEFT:
       case MOVING_LEFT | MOVING_FORWARD | MOVING_BACKWARD:
