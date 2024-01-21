@@ -155,7 +155,34 @@ class Player {
         // this.initGui(bones);
         await this.weapon.load(scene);
         this.state.playAnimation(STATE.IDLE);
+
         resolve(1);
+      });
+
+      loader.load("gltf/animated_assault_rifle.glb", (glb) => {
+        const mesh = glb.scene.children[0];
+        // console.log(mesh);
+        mesh.scale.set(0.05, 0.05, 0.05);
+        console.log(mesh);
+        // glb.scene.scale.set(0.1, 0.1, 0.1);
+        mesh.traverse((node) => {
+          if (
+            [
+              "BARREL",
+              "crosshair",
+              "sleeve",
+              "hardknuckle",
+              "shape_pose",
+            ].includes(node.name)
+          ) {
+            node.visible = false;
+          }
+          if ((node as Mesh).isMesh) {
+            node.castShadow = true;
+          }
+        });
+        console.log(glb.animations);
+        scene.add(mesh);
       });
     });
   }

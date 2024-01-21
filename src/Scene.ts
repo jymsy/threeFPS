@@ -35,6 +35,7 @@ class Scene {
           if (node.type === "Mesh") {
             node.castShadow = true;
             node.receiveShadow = true;
+            node.material.wireframe = true;
             State.worldMapMeshes.push(node);
             const phys = new TrimeshCollider(
               node as Mesh,

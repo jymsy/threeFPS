@@ -44,7 +44,7 @@ class Weapon {
   flashAnimation: Tween<{ opacity: number }> | null = null;
   flashMesh;
   audio;
-  currentIndex = 0;
+  currentIndex = 1;
   loader = new WeaponLoader();
   bulletHole = new BulletHoleMesh("texture");
   scene?: Scene;
@@ -73,8 +73,8 @@ class Weapon {
     this.scene = scene;
     return new Promise(async (resolve) => {
       const weapons = await this.loader.load();
-      this.model = weapons[1].model;
-      const flashPosition = weapons[1].config.flashPosition;
+      this.model = weapons[this.currentIndex].model;
+      const flashPosition = weapons[this.currentIndex].config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
         flashPosition[1],
