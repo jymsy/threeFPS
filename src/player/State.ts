@@ -33,10 +33,15 @@ export enum STATE {
   SHOOT = "shoot",
 }
 
+type ActionState = {
+  name: string;
+  action: AnimationAction | null;
+};
+
 class State {
   animations: AnimationClip[];
-  currentState: string = "";
-  currentAction?: AnimationAction;
+  currentState: ActionState;
+  preState: ActionState;
   mixer: AnimationMixer;
   player: Player;
 
@@ -44,21 +49,26 @@ class State {
     this.animations = animations;
     this.mixer = new AnimationMixer(scene);
     this.player = player;
+    this.currentState = { name: "", action: null };
+    this.preState = { name: "", action: null };
   }
 
   playAnimation(name: string) {
-    if (this.currentState === name) {
+    if (this.currentState.name === name) {
       return;
     }
-    if (this.currentAction) {
-      this.currentAction.fadeOut(0.1);
+    if (this.currentState.action) {
+      this.currentState.action.fadeOut(0.1);
     }
     const clip = AnimationClip.findByName(this.animations, name);
     const action = this.mixer.clipAction(clip);
     if (action) {
       action.reset().fadeIn(0.1).play();
-      this.currentState = name;
-      this.currentAction = action;
+      this.preState = {
+        name: this.currentState.name,
+        action: this.currentState.action,
+      };
+      this.currentState = { name, action };
     }
   }
 }
