@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { CubeTextureLoader } from "three";
 
 class Sky {
   images = [
@@ -9,10 +9,10 @@ class Sky {
     "./img/skybox/back.jpg",
     "./img/skybox/front.jpg",
   ];
-  skyBox
+  skyBox;
 
   constructor() {
-    const loader = new THREE.CubeTextureLoader();
+    const loader = new CubeTextureLoader();
     this.skyBox = loader.load(this.images);
   }
 }

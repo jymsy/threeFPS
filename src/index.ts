@@ -15,7 +15,7 @@ import TWEEN from "@tweenjs/tween.js";
 import Stats from "three/examples/jsm/libs/stats.module";
 import Wall from "./wall";
 import Floor from "./floor";
-import Sky from "./sky";
+import Sky from "./Sky";
 import initEventHandlers from "./event";
 import Camera from "./camera";
 import initLight from "./light";
