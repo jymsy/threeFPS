@@ -84,14 +84,20 @@ class Player {
   gui = new GUI();
   state?: PlayerState;
   factor = 0;
+  scene;
 
-  constructor(world: World, pointerControl: PointerLockControlsCannon) {
+  constructor(
+    world: World,
+    pointerControl: PointerLockControlsCannon,
+    scene: Scene
+  ) {
+    this.scene = scene;
     this.pointerControl = pointerControl;
     const capsule = new CapsuleCollider();
     this.body = capsule.body;
     world.addBody(this.body);
 
-    this.weapon = new Weapon();
+    this.weapon = new Weapon(scene);
 
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
@@ -120,7 +126,7 @@ class Player {
     );
   }
 
-  load(scene: Scene) {
+  load() {
     return new Promise((resolve) => {
       const loader = new GLTFLoader();
       const bones: Bone[] = [];
@@ -144,7 +150,7 @@ class Player {
         console.log(gltf.animations);
         this.state = new PlayerState(gltf.animations, gltf.scene, this);
         this.model = gltf.scene;
-        scene.add(gltf.scene);
+        this.scene.add(gltf.scene);
 
         // 骨骼辅助显示
         // const skeletonHelper = new SkeletonHelper(gltf.scene);
@@ -153,7 +159,7 @@ class Player {
         // this.updateArmRotations("pistol"); // 暂时默认手枪
         // this.leftShoulder!.position.z =23;
         // this.initGui(bones);
-        await this.weapon.load(scene);
+        await this.weapon.load();
         this.state.playAnimation(STATE.IDLE);
 
         resolve(1);
@@ -231,6 +237,8 @@ class Player {
       if (event.button === 2) {
         this.state?.playAnimation(STATE.AIM);
         this.pointerControl.beginAiming();
+      } else if (event.button === 0) {
+        this.state?.playAnimation(STATE.SHOOT);
       }
     }
   };
@@ -391,7 +399,7 @@ class Player {
         this.body.position.z
       );
       this.model.rotation.y = this.pointerControl.euler.y;
-      
+
       // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // const { x, y, z } = this.pointerControl.yawObject.position;

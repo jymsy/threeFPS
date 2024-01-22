@@ -46,15 +46,15 @@ class Weapon {
   audio;
   currentIndex = 1;
   loader = new WeaponLoader();
-  bulletHole = new BulletHoleMesh("texture");
-  scene?: Scene;
-  bulletDecals: Mesh[] = [];
+  bulletHole = new BulletHoleMesh("decal");
+  scene: Scene;
 
-  constructor() {
+  constructor(scene: Scene) {
     this.audio = new Audio("./audio/single-shoot-ak47.wav");
     this.group = new Group();
     this.swayingGroup = new Group();
     this.recoilGroup = new Group();
+    this.scene = scene;
 
     const texLoader = new TextureLoader();
     const geometry = new PlaneGeometry(0.2, 0.2);
@@ -69,8 +69,7 @@ class Weapon {
     this.flashMesh.rotateY(Math.PI);
   }
 
-  load(scene: Scene) {
-    this.scene = scene;
+  load() {
     return new Promise(async (resolve) => {
       const weapons = await this.loader.load();
       this.model = weapons[this.currentIndex].model;
@@ -84,7 +83,7 @@ class Weapon {
       this.recoilGroup.add(this.model);
       this.swayingGroup.add(this.recoilGroup);
       this.group.add(this.swayingGroup);
-      scene.add(this.group);
+      this.scene.add(this.group);
 
       // this.initSwayingAnimation();
       this.initRecoilAnimation();
@@ -281,17 +280,7 @@ class Weapon {
       );
       if (intersectsWorld.length > 0) {
         // 击中world
-        const m = this.bulletHole.create(intersectsWorld[0]);
-        m.renderOrder = this.bulletDecals.length;
-        this.bulletDecals.push(m);
-        this.scene?.add(m);
-
-        setTimeout(() => {
-          const firstHole = this.bulletDecals.shift();
-          if (firstHole) {
-            this.scene?.remove(firstHole);
-          }
-        }, 3000);
+        this.bulletHole.create(intersectsWorld[0], this.scene!);
       }
     }
   }

@@ -20,6 +20,7 @@ class BulletHoleMesh {
   type: "texture" | "decal";
   geometry: PlaneGeometry;
   material: MeshBasicMaterial;
+  bulletDecals: Mesh[] = [];
 
   constructor(type: "texture" | "decal" = "decal") {
     this.type = type;
@@ -36,7 +37,8 @@ class BulletHoleMesh {
     this.geometry = new PlaneGeometry(1, 1);
   }
 
-  create(hitObject: Intersection<Object3D>) {
+  create(hitObject: Intersection<Object3D>, scene: Scene) {
+    let mesh;
     const position = hitObject.point;
     const normal = hitObject
       .face!.normal.clone()
@@ -44,7 +46,7 @@ class BulletHoleMesh {
     if (this.type === "decal") {
       const dir = new Object3D();
       dir.lookAt(normal);
-      return new Mesh(
+      mesh = new Mesh(
         new DecalGeometry(
           hitObject.object as Mesh,
           position,
@@ -54,11 +56,21 @@ class BulletHoleMesh {
         this.material
       );
     } else {
-      const mesh = new Mesh(this.geometry, this.material);
+      mesh = new Mesh(this.geometry, this.material);
       mesh.lookAt(normal);
       mesh.position.copy(position);
-      return mesh;
     }
+
+    mesh.renderOrder = this.bulletDecals.length;
+    this.bulletDecals.push(mesh);
+    scene.add(mesh);
+
+    setTimeout(() => {
+      const firstHole = this.bulletDecals.shift();
+      if (firstHole) {
+        scene.remove(firstHole);
+      }
+    }, 3000);
   }
 }
 

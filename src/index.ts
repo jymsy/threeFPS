@@ -76,7 +76,6 @@ const init = async () => {
   // 渲染函数
   const render = () => {
     stats.update();
-    // if (1) {
     if (controls.enabled) {
       world.fixedStep(); //更新物理计算
       // cannonDebugger.update();
@@ -91,10 +90,12 @@ const init = async () => {
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };
 
-  // const map = new Map("gltf/collision-world.glb");
   const map = new Scene("gltf/de_dust.glb");
-  // const map = new Map("gltf/cs_italy_winter.glb");
   const player = await map.load(scene, world, controls);
+  const loading = document.getElementById("loading")!;
+  loading.style.display = "none";
+  const instructions = document.getElementById("instructions")!;
+  instructions.style.display = "flex";
   render();
 };
 

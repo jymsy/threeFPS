@@ -15,7 +15,7 @@ const initEventHandlers = (pointerControl: PointerLockControlsCannon) => {
 
   pointerControl.addEventListener("unlock", () => {
     blocker.style.display = "block";
-    instructions.style.display = "";
+    instructions.style.display = "flex";
   });
 };
 
