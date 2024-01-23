@@ -1,7 +1,7 @@
-import { CubeTextureLoader } from "three";
+import { CubeTextureLoader, Scene } from "three";
 
-class Sky {
-  images = [
+const initSky = (scene: Scene) => {
+  const images = [
     "./img/skybox/right.jpg",
     "./img/skybox/left.jpg",
     "./img/skybox/up.jpg",
@@ -9,12 +9,8 @@ class Sky {
     "./img/skybox/back.jpg",
     "./img/skybox/front.jpg",
   ];
-  skyBox;
+  const loader = new CubeTextureLoader();
+  scene.background = loader.load(images);
+};
 
-  constructor() {
-    const loader = new CubeTextureLoader();
-    this.skyBox = loader.load(this.images);
-  }
-}
-
-export default Sky;
+export default initSky;

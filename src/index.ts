@@ -24,6 +24,7 @@ import Player from "./player";
 import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import Material from "./material";
 import Scene from "./Scene";
+import initSky from "./Sky";
 
 const init = async () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
@@ -55,14 +56,12 @@ const init = async () => {
   // floor.setPosition(0, 2, 0);
   // floor.setRotation(-Math.PI / 2, 0, 0);
 
-  const sky = new Sky();
-  scene.background = sky.skyBox;
-
+  initSky(scene);
+  initLight(scene);
   // AxesHelper：辅助观察的坐标系
   const axesHelper = new AxesHelper(150);
   scene.add(axesHelper);
 
-  initLight(scene);
   // const enemy = new Enemy(scene, enemyArray);
   const controls = new PointerLockControlsCannon(scene, camera.getCamera());
 

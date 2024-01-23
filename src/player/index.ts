@@ -23,6 +23,7 @@ import {
   World,
   Material,
   ContactEquation,
+  RaycastResult,
 } from "cannon-es";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import PointerLockControlsCannon from "../utils/pointerLockControlsCannon";
@@ -85,6 +86,8 @@ class Player {
   state?: PlayerState;
   factor = 0;
   scene;
+  rayResult: RaycastResult = new RaycastResult();
+  rayHit = false;
 
   constructor(
     world: World,
@@ -104,26 +107,56 @@ class Player {
     document.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("mouseup", this.handleMouseUp);
 
-    const contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
-    const upAxis = new Vec3(0, 1, 0);
+    world.addEventListener("preStep", () => {
+      const start = new Vec3(
+        this.body.position.x,
+        this.body.position.y,
+        this.body.position.z
+      );
+      const end = new Vec3(
+        this.body.position.x,
+        this.body.position.y - 0.2,
+        this.body.position.z
+      );
 
-    this.body.addEventListener(
-      "collide",
-      (event: { contact: ContactEquation }) => {
-        const { contact } = event;
-        if (contact.bi.id === this.body.id) {
-          // bi is the player body, flip the contact normal
-          contact.ni.negate(contactNormal);
-        } else {
-          contactNormal.copy(contact.ni);
-        }
+      const rayCastOptions = {
+        collisionFilterMask: 1,
+        skipBackfaces: true /* ignore back faces */,
+      };
 
-        if (contactNormal.dot(upAxis) > 0.5) {
-          // Use a "good" threshold value between 0 and 1 here!
-          this.canJump = true;
-        }
+      this.rayHit = world.raycastClosest(
+        start,
+        end,
+        rayCastOptions,
+        this.rayResult
+      );
+    });
+    world.addEventListener("postStep", () => {
+      if (this.rayHit) {
+        this.body.velocity.y = 0;
       }
-    );
+    });
+
+    // const contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
+    // const upAxis = new Vec3(0, 1, 0);
+
+    // this.body.addEventListener(
+    //   "collide",
+    //   (event: { contact: ContactEquation }) => {
+    //     const { contact } = event;
+    //     if (contact.bi.id === this.body.id) {
+    //       // bi is the player body, flip the contact normal
+    //       contact.ni.negate(contactNormal);
+    //     } else {
+    //       contactNormal.copy(contact.ni);
+    //     }
+
+    //     if (contactNormal.dot(upAxis) > 0.5) {
+    //       // Use a "good" threshold value between 0 and 1 here!
+    //       this.canJump = true;
+    //     }
+    //   }
+    // );
   }
 
   load() {
@@ -165,31 +198,31 @@ class Player {
         resolve(1);
       });
 
-      loader.load("gltf/animated_assault_rifle.glb", (glb) => {
-        const mesh = glb.scene.children[0];
-        // console.log(mesh);
-        mesh.scale.set(0.05, 0.05, 0.05);
-        console.log(mesh);
-        // glb.scene.scale.set(0.1, 0.1, 0.1);
-        mesh.traverse((node) => {
-          if (
-            [
-              "BARREL",
-              "crosshair",
-              "sleeve",
-              "hardknuckle",
-              "shape_pose",
-            ].includes(node.name)
-          ) {
-            node.visible = false;
-          }
-          if ((node as Mesh).isMesh) {
-            node.castShadow = true;
-          }
-        });
-        console.log(glb.animations);
-        scene.add(mesh);
-      });
+      // loader.load("gltf/animated_assault_rifle.glb", (glb) => {
+      //   const mesh = glb.scene.children[0];
+      //   // console.log(mesh);
+      //   mesh.scale.set(0.05, 0.05, 0.05);
+      //   console.log(mesh);
+      //   // glb.scene.scale.set(0.1, 0.1, 0.1);
+      //   mesh.traverse((node) => {
+      //     if (
+      //       [
+      //         "BARREL",
+      //         "crosshair",
+      //         "sleeve",
+      //         "hardknuckle",
+      //         "shape_pose",
+      //       ].includes(node.name)
+      //     ) {
+      //       node.visible = false;
+      //     }
+      //     if ((node as Mesh).isMesh) {
+      //       node.castShadow = true;
+      //     }
+      //   });
+      //   console.log(glb.animations);
+      //   this.scene.add(mesh);
+      // });
     });
   }
 
