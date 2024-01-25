@@ -5,6 +5,7 @@ import {
   AxesHelper,
   Mesh,
   ACESFilmicToneMapping,
+  PCFSoftShadowMap,
 } from "three";
 import { Body, Vec3, Sphere, World, Plane, SAPBroadphase } from "cannon-es";
 import CannonDebugger from "cannon-es-debugger";
@@ -42,7 +43,7 @@ const init = async () => {
   // 在普通计算机显示器或者移动设备屏幕等低动态范围介质上，模拟、逼近高动态范围（HDR）效果
   renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true; // 允许渲染器渲染阴影
-  // renderer.shadowMap.type = THREE.VSMShadowMap;
+  renderer.shadowMap.type = PCFSoftShadowMap;
 
   const scene = new ThreeScene();
   const world = new World();

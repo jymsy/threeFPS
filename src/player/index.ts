@@ -413,6 +413,7 @@ class Player {
   render(enemyArray: EnemyModel[]) {
     const delta = this.clock.getDelta();
     this.factor = VELOCITY_FACTOR * delta * 100;
+    console.log(this.body.velocity.y);
 
     this.moveVelocity.z =
       ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
@@ -432,7 +433,6 @@ class Player {
         this.body.position.z
       );
       this.model.rotation.y = this.pointerControl.euler.y;
-
       // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // const { x, y, z } = this.pointerControl.yawObject.position;
