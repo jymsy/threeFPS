@@ -21,7 +21,7 @@ class CapsuleCollider {
     this.body.addShape(shape, new Vec3(0, radius * 4, 0));
     this.body.updateMassProperties();
     // this.body.collisionFilterGroup = 2;
-    this.body.collisionFilterMask = -4;
+    // this.body.collisionFilterMask = -4;
   }
 }
 
