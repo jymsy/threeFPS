@@ -95,6 +95,10 @@ class Weapon {
     });
   }
 
+  reload() {
+    BulletStore.reload();
+  }
+
   findEnemyId = (model: Object3D): number => {
     if (model.name === "enemy") {
       return model.id;
@@ -306,9 +310,13 @@ class Weapon {
       //   this.swayingAnimation.start();
       // }
       if (this.isShooting && this.recoilAnimationFinished) {
+        if (BulletStore.count === 0) {
+          return;
+        }
         this.recoilAnimationFinished = false;
         this.audio.currentTime = 0;
         this.audio.play();
+        BulletStore.decrease();
         this.recoilAnimation!.start();
         this.flashAnimation!.start();
         this.bulletCollision(controls, enemyArray);

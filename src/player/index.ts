@@ -337,6 +337,9 @@ class Player {
       case "v":
         this.pointerControl.changeView();
         break;
+      case "r":
+        this.weapon.reload();
+        break;
       // case "c":
       //   this.crouch = true;
       //   this.pointerControl.setOffset(new Vector3(0, -0.2, 0));
