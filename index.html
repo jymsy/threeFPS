@@ -12,7 +12,7 @@
       margin: 0px;
     }
 
-    .aim {
+    #aim {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -57,12 +57,16 @@
       color: #ffffff;
     }
 
-    .bullet-count {
+    #bullet-count {
       position: absolute;
       right: 10px;
       bottom: 10px;
       z-index: 2;
       color: #ffffff;
+    }
+
+    #bullet-num {
+      font-size: 24px;
     }
   </style>
 </head>
@@ -80,8 +84,8 @@
       </p>
     </div>
   </div>
-  <div class="aim"></div>
-  <div class="bullet-count"><span id="bullet-num"></span> | 30</div>
+  <div id="aim"></div>
+  <div id="bullet-count"><span id="bullet-num"></span> | 30</div>
   <div id="webgl"></div>
   <script type="module" src="/src/index.ts"></script>
 </body>

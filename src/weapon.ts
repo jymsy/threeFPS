@@ -19,6 +19,7 @@ import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
 import State from "./state";
 import WeaponLoader from "./utils/weaponLoader";
 import BulletHoleMesh from "./utils/BulletHoleMesh";
+import BulletStore from "./utils/BulletStore";
 
 class Weapon {
   model?: Group;
@@ -55,6 +56,7 @@ class Weapon {
     this.swayingGroup = new Group();
     this.recoilGroup = new Group();
     this.scene = scene;
+    BulletStore.init();
 
     const texLoader = new TextureLoader();
     const geometry = new PlaneGeometry(0.2, 0.2);

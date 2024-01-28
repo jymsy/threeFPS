@@ -37,9 +37,8 @@ const config: Config[] = [
     name: "m16",
     path: "gltf/m16.glb",
     scale: 0.0008,
-    // rotation: [Math.PI / 2, 0, -Math.PI / 2],
     rotation: [0, Math.PI, 0],
-    position: [0.02, 0.04, 0.05],
+    position: [0.02, 0.04, 0.1],
     flashPosition: [0.03, 0.03, 0.45],
   },
 ];

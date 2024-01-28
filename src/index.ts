@@ -30,8 +30,6 @@ import initSky from "./Sky";
 const init = async () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
   const height = window.innerHeight; //窗口文档显示区的高度作为画布高度
-  // 实例化一个gui对象
-  // const gui = new GUI();
   // 创建渲染器对象
   const renderer = new WebGLRenderer({ antialias: true }); // 抗锯齿
   const camera = new Camera(width / height);
@@ -69,8 +67,6 @@ const init = async () => {
   initEventHandlers(controls);
   const stats = new Stats();
   document.body.appendChild(stats.domElement);
-  // const controls = new OrbitControls(camera, renderer.domElement);
-  // controls.update();
   document.getElementById("webgl")!.appendChild(renderer.domElement);
 
   // 渲染函数
