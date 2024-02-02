@@ -88,6 +88,7 @@ class Player {
   scene;
   rayResult: RaycastResult = new RaycastResult();
   rayHit = false;
+  delta = 0;
 
   constructor(
     world: World,
@@ -115,7 +116,7 @@ class Player {
       );
       const end = new Vec3(
         this.body.position.x,
-        this.body.position.y - 0.2,
+        this.body.position.y - 0.3,
         this.body.position.z
       );
 
@@ -130,11 +131,52 @@ class Player {
         rayCastOptions,
         this.rayResult
       );
+
+      // if (this.rayHit) {
+      //   this.body.velocity.y = 0;
+
+      //   this.factor = VELOCITY_FACTOR * this.delta * 100;
+
+      //   this.moveVelocity.z =
+      //     ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
+      //     this.factor;
+      //   this.moveVelocity.x =
+      //     (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
+
+      //   this.moveVelocity.applyEuler(
+      //     new Euler(0, this.pointerControl.euler.y, 0)
+      //   );
+
+      //   this.body.velocity.x = this.moveVelocity.x;
+      //   this.body.velocity.z = this.moveVelocity.z;
+
+      //   console.log(this.rayResult.hitPointWorld.y);
+      //   this.body.position.y = this.rayResult.hitPointWorld.y + 0.2;
+      // }
     });
     world.addEventListener("postStep", () => {
-      if (this.rayHit) {
-        this.body.velocity.y = 0;
-      }
+      console.log(this.rayHit);
+      // if (this.rayHit) {
+      //   this.body.velocity.y = 0;
+
+      //   this.factor = VELOCITY_FACTOR * this.delta * 100;
+
+      //   this.moveVelocity.z =
+      //     ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
+      //     this.factor;
+      //   this.moveVelocity.x =
+      //     (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
+
+      //   this.moveVelocity.applyEuler(
+      //     new Euler(0, this.pointerControl.euler.y, 0)
+      //   );
+
+      //   this.body.velocity.x = this.moveVelocity.x;
+      //   this.body.velocity.z = this.moveVelocity.z;
+
+      //   console.log(this.rayResult.hitPointWorld.y);
+      //   this.body.position.y = this.rayResult.hitPointWorld.y + 0.2;
+      // }
     });
 
     // const contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
@@ -328,10 +370,10 @@ class Player {
         this.moveBit |= MOVING_RIGHT;
         break;
       case " ":
-        if (this.canJump) {
+        if (this.rayHit) {
           this.body.velocity.y = JUMP_VELOCITY;
-          this.canJump = false;
-          this.state?.playAnimation(STATE.JUMP);
+
+          // this.state?.playAnimation(STATE.JUMP);
         }
         break;
       case "v":
@@ -414,20 +456,7 @@ class Player {
   };
 
   render(enemyArray: EnemyModel[]) {
-    const delta = this.clock.getDelta();
-    this.factor = VELOCITY_FACTOR * delta * 100;
-    console.log(this.body.velocity.y);
-
-    this.moveVelocity.z =
-      ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
-      this.factor;
-    this.moveVelocity.x =
-      (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
-
-    this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
-
-    this.body.velocity.x = this.moveVelocity.x;
-    this.body.velocity.z = this.moveVelocity.z;
+    this.delta = this.clock.getDelta();
 
     if (this.model) {
       this.model.position.set(
@@ -435,7 +464,7 @@ class Player {
         this.body.position.y - 0.1,
         this.body.position.z
       );
-      this.model.rotation.y = this.pointerControl.euler.y;
+      // this.model.rotation.y = this.pointerControl.euler.y;
       // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // const { x, y, z } = this.pointerControl.yawObject.position;
@@ -445,7 +474,7 @@ class Player {
       // );
     }
 
-    this.state?.mixer.update(delta);
+    this.state?.mixer.update(this.delta);
     this.weapon.render(
       this.pointerControl,
       enemyArray,

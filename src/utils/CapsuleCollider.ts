@@ -5,7 +5,6 @@ class CapsuleCollider {
 
   constructor(radius = 0.2) {
     const shape = new Sphere(radius);
-    // shape.collisionFilterMask = -4;
     this.body = new Body({
       mass: 1,
       allowSleep: false,
@@ -17,11 +16,14 @@ class CapsuleCollider {
     });
     // 两个圆球，组成胶囊形状
     this.body.addShape(shape, new Vec3(0, 0, 0));
-    this.body.addShape(shape, new Vec3(0, radius * 2, 0));
-    this.body.addShape(shape, new Vec3(0, radius * 4, 0));
+    this.body.addShape(shape, new Vec3(0, radius, 0));
+    this.body.addShape(shape, new Vec3(0, -radius, 0));
+    this.body.shapes.forEach((shape) => {
+      shape.collisionFilterMask = -5;
+    });
+    this.body.collisionFilterGroup = 2;
+
     this.body.updateMassProperties();
-    // this.body.collisionFilterGroup = 2;
-    // this.body.collisionFilterMask = -4;
   }
 }
 

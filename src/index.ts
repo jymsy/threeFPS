@@ -50,7 +50,7 @@ const init = async () => {
   world.broadphase = new SAPBroadphase(world); // 碰撞测试算法 https://blog.csdn.net/weixin_43990650/article/details/121815208
   world.allowSleep = true;
   const material = new Material(world);
-  // const cannonDebugger = new CannonDebugger(scene, world);
+  const cannonDebugger = new CannonDebugger(scene, world);
   // const floor = new Floor(world, material.physics, scene);
   // floor.setPosition(0, 2, 0);
   // floor.setRotation(-Math.PI / 2, 0, 0);
@@ -74,7 +74,7 @@ const init = async () => {
     stats.update();
     if (controls.enabled) {
       world.fixedStep(); //更新物理计算
-      // cannonDebugger.update();
+      cannonDebugger.update();
       TWEEN.update();
       controls.render(player.body);
       player.render(enemyArray);
@@ -86,6 +86,7 @@ const init = async () => {
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };
 
+  // const map = new Scene("gltf/cs_italy_winter.glb");
   const map = new Scene("gltf/de_dust.glb");
   const player = await map.load(scene, world, controls);
   const loading = document.getElementById("loading")!;
