@@ -8,7 +8,6 @@ import {
   Euler,
   Scene,
 } from "three";
-import { Body } from "cannon-es";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
 
@@ -119,13 +118,13 @@ class PointerLockControlsCannon extends EventDispatcher {
   }
 
   render(cannonBody: Body) {
-    this.yawObject.position
-      .set(
-        cannonBody.position.x,
-        cannonBody.position.y + 0.8,
-        cannonBody.position.z
-      )
-      .add(this.offset);
+    // this.yawObject.position
+    //   .set(
+    //     cannonBody.position.x,
+    //     cannonBody.position.y + 0.8,
+    //     cannonBody.position.z
+    //   )
+    //   .add(this.offset);
   }
 }
 

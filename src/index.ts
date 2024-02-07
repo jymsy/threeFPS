@@ -4,11 +4,14 @@ import {
   Scene as ThreeScene,
   AxesHelper,
   Mesh,
+  LineBasicMaterial,
   ACESFilmicToneMapping,
   PCFSoftShadowMap,
+  BufferGeometry,
+  LineSegments,
+  BufferAttribute,
 } from "three";
-import { Body, Vec3, Sphere, World, Plane, SAPBroadphase } from "cannon-es";
-import CannonDebugger from "cannon-es-debugger";
+import { World, init as initRapier } from "@dimforge/rapier3d-compat";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -27,6 +30,26 @@ import Material from "./material";
 import Scene from "./Scene";
 import initSky from "./Sky";
 
+const debugRapier = (
+  lines: LineSegments | null,
+  scene: ThreeScene,
+  world: World
+) => {
+  if (!lines) {
+    let material = new LineBasicMaterial({
+      color: 0xffffff,
+      vertexColors: true,
+    });
+    let geometry = new BufferGeometry();
+    lines = new LineSegments(geometry, material);
+    scene.add(lines);
+  }
+
+  const { vertices, colors } = world.debugRender();
+  lines.geometry.setAttribute("position", new BufferAttribute(vertices, 3));
+  lines.geometry.setAttribute("color", new BufferAttribute(colors, 4));
+};
+
 const init = async () => {
   const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
   const height = window.innerHeight; //窗口文档显示区的高度作为画布高度
@@ -44,16 +67,12 @@ const init = async () => {
   renderer.shadowMap.type = PCFSoftShadowMap;
 
   const scene = new ThreeScene();
-  const world = new World();
-
-  world.gravity.set(0, -9.8, 0); //单位：m/s²
-  world.broadphase = new SAPBroadphase(world); // 碰撞测试算法 https://blog.csdn.net/weixin_43990650/article/details/121815208
-  world.allowSleep = true;
-  const material = new Material(world);
-  const cannonDebugger = new CannonDebugger(scene, world);
-  // const floor = new Floor(world, material.physics, scene);
-  // floor.setPosition(0, 2, 0);
-  // floor.setRotation(-Math.PI / 2, 0, 0);
+  await initRapier();
+  const world = new World({ x: 0.0, y: -9.81, z: 0.0 });
+  // const material = new Material(world);
+  const floor = new Floor(world, scene);
+  floor.setPosition(0, -2, 0);
+  floor.setRotation(-Math.PI / 2, 0, 0);
 
   initSky(scene);
   initLight(scene);
@@ -69,26 +88,28 @@ const init = async () => {
   document.body.appendChild(stats.domElement);
   document.getElementById("webgl")!.appendChild(renderer.domElement);
 
+  // for debug
+  let debugLines: LineSegments | null = null;
+
   // 渲染函数
   const render = () => {
     stats.update();
-    if (controls.enabled) {
-      world.fixedStep(); //更新物理计算
-      cannonDebugger.update();
-      TWEEN.update();
-      controls.render(player.body);
-      player.render(enemyArray);
-      // enemy.render();
+    // if (controls.enabled) {
+    world.step(); //更新物理计算
+    TWEEN.update();
+    debugRapier(debugLines, scene, world);
+    // controls.render(player.body);
+    // player.render(enemyArray);
+    // enemy.render();
 
-      renderer.render(scene, camera.getCamera()); //执行渲染操作
-    }
+    renderer.render(scene, camera.getCamera()); //执行渲染操作
+    // }
 
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };
 
-  // const map = new Scene("gltf/cs_italy_winter.glb");
-  const map = new Scene("gltf/de_dust.glb");
-  const player = await map.load(scene, world, controls);
+  // const map = new Scene("gltf/de_dust.glb");
+  // const player = await map.load(scene, world, controls);
   const loading = document.getElementById("loading")!;
   loading.style.display = "none";
   const instructions = document.getElementById("instructions")!;
