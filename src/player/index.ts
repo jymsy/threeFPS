@@ -414,6 +414,13 @@ class Player {
       this.moveVelocity
     );
 
+    let movement = characterController.computedMovement();
+    let newPos = character.translation();
+    newPos.x += movement.x;
+    newPos.y += movement.y;
+    newPos.z += movement.z;
+    character.setNextKinematicTranslation(newPos);
+
     if (this.model) {
       this.model.position.set(
         this.body.position.x,
