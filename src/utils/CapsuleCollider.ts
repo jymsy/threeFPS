@@ -2,6 +2,7 @@ import { World, RigidBodyDesc, ColliderDesc } from "@dimforge/rapier3d-compat";
 
 class CapsuleCollider {
   body;
+  collider;
   controller;
 
   constructor(world: World) {
@@ -13,10 +14,7 @@ class CapsuleCollider {
     );
     this.body = world.createRigidBody(characterDesc);
     let characterColliderDesc = ColliderDesc.capsule(0.4, 0.2);
-    let characterCollider = world.createCollider(
-      characterColliderDesc,
-      this.body
-    );
+    this.collider = world.createCollider(characterColliderDesc, this.body);
 
     this.controller = world.createCharacterController(0.03);
     this.controller.enableAutostep(0.3, 0.1, true);

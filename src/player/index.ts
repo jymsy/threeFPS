@@ -410,9 +410,9 @@ class Player {
     // this.body.velocity.z = this.moveVelocity.z;
 
     this.collider.controller.computeColliderMovement(
-      this.collider.body,
-      movementDirection,
-  );
+      this.collider.collider,
+      this.moveVelocity
+    );
 
     if (this.model) {
       this.model.position.set(
