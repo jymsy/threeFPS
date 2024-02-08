@@ -1,29 +1,26 @@
-import { Body, Vec3, Material, Quaternion, Sphere } from "cannon-es";
+import { World, RigidBodyDesc, ColliderDesc } from "@dimforge/rapier3d-compat";
 
 class CapsuleCollider {
-  body: Body;
+  body;
+  controller;
 
-  constructor(radius = 0.2) {
-    const shape = new Sphere(radius);
-    this.body = new Body({
-      mass: 1,
-      allowSleep: false,
-      // 碰撞体的三维空间中位置
-      position: new Vec3(1, 3, 4),
-      fixedRotation: true,
-      // linearDamping: 0.9,
-      material: new Material({ friction: 0 }),
-    });
-    // 两个圆球，组成胶囊形状
-    this.body.addShape(shape, new Vec3(0, 0, 0));
-    this.body.addShape(shape, new Vec3(0, radius, 0));
-    this.body.addShape(shape, new Vec3(0, -radius, 0));
-    this.body.shapes.forEach((shape) => {
-      shape.collisionFilterMask = -5;
-    });
-    this.body.collisionFilterGroup = 2;
+  constructor(world: World) {
+    // Character.
+    let characterDesc = RigidBodyDesc.kinematicPositionBased().setTranslation(
+      1,
+      3,
+      4
+    );
+    this.body = world.createRigidBody(characterDesc);
+    let characterColliderDesc = ColliderDesc.capsule(0.4, 0.2);
+    let characterCollider = world.createCollider(
+      characterColliderDesc,
+      this.body
+    );
 
-    this.body.updateMassProperties();
+    this.controller = world.createCharacterController(0.03);
+    this.controller.enableAutostep(0.3, 0.1, true);
+    this.controller.enableSnapToGround(0.3);
   }
 }
 

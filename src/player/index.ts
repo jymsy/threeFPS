@@ -16,15 +16,7 @@ import {
   Quaternion,
 } from "three";
 import GUI from "lil-gui";
-import {
-  Body,
-  Vec3,
-  Sphere,
-  World,
-  Material,
-  ContactEquation,
-  RaycastResult,
-} from "cannon-es";
+import { World, RigidBodyDesc, ColliderDesc } from "@dimforge/rapier3d-compat";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import PointerLockControlsCannon from "../utils/pointerLockControlsCannon";
 import Weapon from "../weapon";
@@ -66,7 +58,7 @@ const bodyBaseRotation = {
 };
 
 class Player {
-  body;
+  collider;
   moveBit = 0;
   canJump = false;
   clock = new Clock();
@@ -86,7 +78,6 @@ class Player {
   state?: PlayerState;
   factor = 0;
   scene;
-  rayResult: RaycastResult = new RaycastResult();
   rayHit = false;
   delta = 0;
 
@@ -97,9 +88,7 @@ class Player {
   ) {
     this.scene = scene;
     this.pointerControl = pointerControl;
-    const capsule = new CapsuleCollider();
-    this.body = capsule.body;
-    world.addBody(this.body);
+    this.collider = new CapsuleCollider(world);
 
     this.weapon = new Weapon(scene);
 
@@ -108,76 +97,27 @@ class Player {
     document.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("mouseup", this.handleMouseUp);
 
-    world.addEventListener("preStep", () => {
-      const start = new Vec3(
-        this.body.position.x,
-        this.body.position.y,
-        this.body.position.z
-      );
-      const end = new Vec3(
-        this.body.position.x,
-        this.body.position.y - 0.3,
-        this.body.position.z
-      );
+    // if (this.rayHit) {
+    //   this.body.velocity.y = 0;
 
-      const rayCastOptions = {
-        collisionFilterMask: 1,
-        skipBackfaces: true /* ignore back faces */,
-      };
+    //   this.factor = VELOCITY_FACTOR * this.delta * 100;
 
-      this.rayHit = world.raycastClosest(
-        start,
-        end,
-        rayCastOptions,
-        this.rayResult
-      );
+    //   this.moveVelocity.z =
+    //     ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
+    //     this.factor;
+    //   this.moveVelocity.x =
+    //     (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
 
-      // if (this.rayHit) {
-      //   this.body.velocity.y = 0;
+    //   this.moveVelocity.applyEuler(
+    //     new Euler(0, this.pointerControl.euler.y, 0)
+    //   );
 
-      //   this.factor = VELOCITY_FACTOR * this.delta * 100;
+    //   this.body.velocity.x = this.moveVelocity.x;
+    //   this.body.velocity.z = this.moveVelocity.z;
 
-      //   this.moveVelocity.z =
-      //     ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
-      //     this.factor;
-      //   this.moveVelocity.x =
-      //     (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
-
-      //   this.moveVelocity.applyEuler(
-      //     new Euler(0, this.pointerControl.euler.y, 0)
-      //   );
-
-      //   this.body.velocity.x = this.moveVelocity.x;
-      //   this.body.velocity.z = this.moveVelocity.z;
-
-      //   console.log(this.rayResult.hitPointWorld.y);
-      //   this.body.position.y = this.rayResult.hitPointWorld.y + 0.2;
-      // }
-    });
-    world.addEventListener("postStep", () => {
-      console.log(this.rayHit);
-      // if (this.rayHit) {
-      //   this.body.velocity.y = 0;
-
-      //   this.factor = VELOCITY_FACTOR * this.delta * 100;
-
-      //   this.moveVelocity.z =
-      //     ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
-      //     this.factor;
-      //   this.moveVelocity.x =
-      //     (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
-
-      //   this.moveVelocity.applyEuler(
-      //     new Euler(0, this.pointerControl.euler.y, 0)
-      //   );
-
-      //   this.body.velocity.x = this.moveVelocity.x;
-      //   this.body.velocity.z = this.moveVelocity.z;
-
-      //   console.log(this.rayResult.hitPointWorld.y);
-      //   this.body.position.y = this.rayResult.hitPointWorld.y + 0.2;
-      // }
-    });
+    //   console.log(this.rayResult.hitPointWorld.y);
+    //   this.body.position.y = this.rayResult.hitPointWorld.y + 0.2;
+    // }
 
     // const contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
     // const upAxis = new Vec3(0, 1, 0);
@@ -370,11 +310,9 @@ class Player {
         this.moveBit |= MOVING_RIGHT;
         break;
       case " ":
-        if (this.rayHit) {
-          this.body.velocity.y = JUMP_VELOCITY;
+        // this.body.velocity.y = JUMP_VELOCITY;
 
-          // this.state?.playAnimation(STATE.JUMP);
-        }
+        // this.state?.playAnimation(STATE.JUMP);
         break;
       case "v":
         this.pointerControl.changeView();
@@ -457,6 +395,24 @@ class Player {
 
   render(enemyArray: EnemyModel[]) {
     this.delta = this.clock.getDelta();
+
+    this.factor = VELOCITY_FACTOR * this.delta * 100;
+
+    this.moveVelocity.z =
+      ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
+      this.factor;
+    this.moveVelocity.x =
+      (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
+
+    this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
+
+    // this.body.velocity.x = this.moveVelocity.x;
+    // this.body.velocity.z = this.moveVelocity.z;
+
+    this.collider.controller.computeColliderMovement(
+      this.collider.body,
+      movementDirection,
+  );
 
     if (this.model) {
       this.model.position.set(

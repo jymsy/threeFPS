@@ -70,9 +70,9 @@ const init = async () => {
   await initRapier();
   const world = new World({ x: 0.0, y: -9.81, z: 0.0 });
   // const material = new Material(world);
-  const floor = new Floor(world, scene);
-  floor.setPosition(0, -2, 0);
-  floor.setRotation(-Math.PI / 2, 0, 0);
+  // const floor = new Floor(world, scene);
+  // floor.setPosition(0, -2, 0);
+  // floor.setRotation(-Math.PI / 2, 0, 0);
 
   initSky(scene);
   initLight(scene);
@@ -97,7 +97,7 @@ const init = async () => {
     // if (controls.enabled) {
     world.step(); //更新物理计算
     TWEEN.update();
-    debugRapier(debugLines, scene, world);
+    // debugRapier(debugLines, scene, world);
     // controls.render(player.body);
     // player.render(enemyArray);
     // enemy.render();
@@ -108,8 +108,8 @@ const init = async () => {
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };
 
-  // const map = new Scene("gltf/de_dust.glb");
-  // const player = await map.load(scene, world, controls);
+  const map = new Scene("gltf/de_dust.glb");
+  const player = await map.load(scene, world, controls);
   const loading = document.getElementById("loading")!;
   loading.style.display = "none";
   const instructions = document.getElementById("instructions")!;
