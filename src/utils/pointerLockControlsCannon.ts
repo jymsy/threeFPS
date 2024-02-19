@@ -117,14 +117,12 @@ class PointerLockControlsCannon extends EventDispatcher {
     return new Vector3(0, 0, 1).applyQuaternion(this.quaternion);
   }
 
-  render(cannonBody: Body) {
-    // this.yawObject.position
-    //   .set(
-    //     cannonBody.position.x,
-    //     cannonBody.position.y + 0.8,
-    //     cannonBody.position.z
-    //   )
-    //   .add(this.offset);
+  render(position?: Vector3) {
+    if (position) {
+      this.yawObject.position
+        .set(position.x, position.y + 0.8, position.z)
+        .add(this.offset);
+    }
   }
 }
 

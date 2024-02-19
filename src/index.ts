@@ -94,16 +94,16 @@ const init = async () => {
   // 渲染函数
   const render = () => {
     stats.update();
-    // if (controls.enabled) {
-    world.step(); //更新物理计算
-    TWEEN.update();
-    // debugRapier(debugLines, scene, world);
-    // controls.render(player.body);
-    // player.render(enemyArray);
-    // enemy.render();
+    if (controls.enabled) {
+      world.step(); //更新物理计算
+      TWEEN.update();
+      // debugRapier(debugLines, scene, world);
+      controls.render(player.model?.position);
+      player.render(enemyArray);
+      // enemy.render();
 
-    renderer.render(scene, camera.getCamera()); //执行渲染操作
-    // }
+      renderer.render(scene, camera.getCamera()); //执行渲染操作
+    }
 
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };

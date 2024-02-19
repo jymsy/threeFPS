@@ -48,10 +48,9 @@ class Scene {
         });
         scene.add(map);
 
-        // const player = new Player(world, controls, scene);
-        // await player.load();
-        // resolve(player);
-        resolve(1);
+        const player = new Player(world, controls, scene);
+        await player.load();
+        resolve(player);
       });
     });
   };

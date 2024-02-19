@@ -11,12 +11,12 @@ import {
   SkeletonHelper,
   Bone,
   Object3D,
-  MathUtils,
+  Raycaster,
   AnimationClip,
   Quaternion,
 } from "three";
 import GUI from "lil-gui";
-import { World, RigidBodyDesc, ColliderDesc } from "@dimforge/rapier3d-compat";
+import { World, RigidBodyDesc, Ray } from "@dimforge/rapier3d-compat";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import PointerLockControlsCannon from "../utils/pointerLockControlsCannon";
 import Weapon from "../weapon";
@@ -25,8 +25,8 @@ import State from "../state";
 import PlayerState, { STATE } from "./State";
 import CapsuleCollider from "../utils/CapsuleCollider";
 
-const JUMP_VELOCITY = 3;
-const VELOCITY_FACTOR = 2;
+const JUMP_VELOCITY = 0.14;
+const VELOCITY_FACTOR = 4;
 const MOVING_FORWARD = 1;
 const MOVING_BACKWARD = 2;
 const MOVING_LEFT = 4;
@@ -63,7 +63,7 @@ class Player {
   canJump = false;
   clock = new Clock();
   pointerControl;
-  moveVelocity = new Vector3();
+  moveVelocity = new Vector3(0, -0.1, 0);
   weapon: Weapon;
   crouch = false; // 下蹲
   model?: Group;
@@ -79,6 +79,7 @@ class Player {
   factor = 0;
   scene;
   rayHit = false;
+  rayCaster;
   delta = 0;
 
   constructor(
@@ -97,48 +98,12 @@ class Player {
     document.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("mouseup", this.handleMouseUp);
 
-    // if (this.rayHit) {
-    //   this.body.velocity.y = 0;
-
-    //   this.factor = VELOCITY_FACTOR * this.delta * 100;
-
-    //   this.moveVelocity.z =
-    //     ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
-    //     this.factor;
-    //   this.moveVelocity.x =
-    //     (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
-
-    //   this.moveVelocity.applyEuler(
-    //     new Euler(0, this.pointerControl.euler.y, 0)
-    //   );
-
-    //   this.body.velocity.x = this.moveVelocity.x;
-    //   this.body.velocity.z = this.moveVelocity.z;
-
-    //   console.log(this.rayResult.hitPointWorld.y);
-    //   this.body.position.y = this.rayResult.hitPointWorld.y + 0.2;
-    // }
-
-    // const contactNormal = new Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
-    // const upAxis = new Vec3(0, 1, 0);
-
-    // this.body.addEventListener(
-    //   "collide",
-    //   (event: { contact: ContactEquation }) => {
-    //     const { contact } = event;
-    //     if (contact.bi.id === this.body.id) {
-    //       // bi is the player body, flip the contact normal
-    //       contact.ni.negate(contactNormal);
-    //     } else {
-    //       contactNormal.copy(contact.ni);
-    //     }
-
-    //     if (contactNormal.dot(upAxis) > 0.5) {
-    //       // Use a "good" threshold value between 0 and 1 here!
-    //       this.canJump = true;
-    //     }
-    //   }
-    // );
+    this.rayCaster = new Raycaster(
+      new Vector3(),
+      new Vector3(0, -1, 0),
+      0,
+      0.64
+    );
   }
 
   load() {
@@ -310,8 +275,9 @@ class Player {
         this.moveBit |= MOVING_RIGHT;
         break;
       case " ":
-        // this.body.velocity.y = JUMP_VELOCITY;
-
+        if (this.rayHit) {
+          this.moveVelocity.y = JUMP_VELOCITY;
+        }
         // this.state?.playAnimation(STATE.JUMP);
         break;
       case "v":
@@ -395,39 +361,42 @@ class Player {
 
   render(enemyArray: EnemyModel[]) {
     this.delta = this.clock.getDelta();
-
-    this.factor = VELOCITY_FACTOR * this.delta * 100;
+    this.factor = VELOCITY_FACTOR * this.delta;
 
     this.moveVelocity.z =
       ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
       this.factor;
     this.moveVelocity.x =
       (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
-
+    this.moveVelocity.y -= 9.8 * this.factor * 0.01;
     this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
-
-    // this.body.velocity.x = this.moveVelocity.x;
-    // this.body.velocity.z = this.moveVelocity.z;
 
     this.collider.controller.computeColliderMovement(
       this.collider.collider,
       this.moveVelocity
     );
 
-    let movement = characterController.computedMovement();
-    let newPos = character.translation();
+    let movement = this.collider.controller.computedMovement();
+    let newPos = this.collider.body.translation();
     newPos.x += movement.x;
     newPos.y += movement.y;
     newPos.z += movement.z;
-    character.setNextKinematicTranslation(newPos);
+    this.collider.body.setNextKinematicTranslation(newPos);
+
+    this.rayCaster.ray.origin = new Vector3(newPos.x, newPos.y, newPos.z);
+    const intersections = this.rayCaster.intersectObjects(
+      State.worldMapMeshes,
+      false
+    );
+    this.rayHit = intersections.length > 0;
+
+    if (this.rayHit) {
+      this.moveVelocity.y = Math.max(0, this.moveVelocity.y);
+    }
 
     if (this.model) {
-      this.model.position.set(
-        this.body.position.x,
-        this.body.position.y - 0.1,
-        this.body.position.z
-      );
-      // this.model.rotation.y = this.pointerControl.euler.y;
+      this.model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
+      this.model.rotation.y = this.pointerControl.euler.y;
       // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
       // const { x, y, z } = this.pointerControl.yawObject.position;
