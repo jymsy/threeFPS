@@ -99,7 +99,6 @@ const init = async () => {
       TWEEN.update();
       // debugRapier(debugLines, scene, world);
       player.render(enemyArray);
-      controls.render(player.model?.position);
       // enemy.render();
 
       renderer.render(scene, camera.getCamera()); //执行渲染操作

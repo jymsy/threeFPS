@@ -1,17 +1,7 @@
 import {
-  Scene,
-  Vector3,
-  Clock,
-  Euler,
-  Mesh,
   AnimationMixer,
-  Group,
   AnimationAction,
-  LoopOnce,
-  SkeletonHelper,
-  Bone,
   Object3D,
-  MathUtils,
   AnimationClip,
 } from "three";
 import Player from ".";
@@ -45,7 +35,7 @@ class State {
   mixer: AnimationMixer;
   player: Player;
 
-  constructor(animations: AnimationClip[], scene: Group, player: Player) {
+  constructor(animations: AnimationClip[], scene: Object3D, player: Player) {
     this.animations = animations;
     this.mixer = new AnimationMixer(scene);
     this.player = player;
@@ -54,6 +44,7 @@ class State {
   }
 
   playAnimation(name: string) {
+    console.log(name);
     if (this.currentState.name === name) {
       return;
     }

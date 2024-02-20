@@ -71,14 +71,13 @@ class PointerLockControls extends EventDispatcher {
   }
 
   changeView() {
-    State.firstPerson = !State.firstPerson;
     // moving camera
-    this.yawObject.children[0].translateZ(
-      State.firstPerson ? CAMERA_INIT_POSITION.z : -CAMERA_INIT_POSITION.z
-    );
-    this.yawObject.children[0].translateY(
-      State.firstPerson ? -CAMERA_INIT_POSITION.y : CAMERA_INIT_POSITION.y
-    );
+    // this.yawObject.children[0].translateZ(
+    //   State.firstPerson ? CAMERA_INIT_POSITION.z : -CAMERA_INIT_POSITION.z
+    // );
+    // this.yawObject.children[0].translateY(
+    //   State.firstPerson ? -CAMERA_INIT_POSITION.y : CAMERA_INIT_POSITION.y
+    // );
   }
 
   setOffset(offset: Vector3) {

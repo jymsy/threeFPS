@@ -4,26 +4,20 @@ import {
   Clock,
   Euler,
   Mesh,
-  AnimationMixer,
   Group,
-  AnimationAction,
-  LoopOnce,
-  SkeletonHelper,
   Bone,
   Object3D,
   Raycaster,
-  AnimationClip,
-  Quaternion,
 } from "three";
 import GUI from "lil-gui";
 import { World } from "@dimforge/rapier3d-compat";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import PointerLockControls from "../utils/PointerLockControls";
 import Weapon from "../weapon";
 import { EnemyModel } from "../enemy";
 import State from "../state";
 import PlayerState, { STATE } from "./State";
 import CapsuleCollider from "../utils/CapsuleCollider";
+import ModelLoader from "./ModelLoader";
 
 const JUMP_VELOCITY = 0.11;
 const VELOCITY_FACTOR = 4;
@@ -31,31 +25,6 @@ const MOVING_FORWARD = 1;
 const MOVING_BACKWARD = 2;
 const MOVING_LEFT = 4;
 const MOVING_RIGHT = 8;
-
-const boneMap = {
-  mixamorigLeftArm: "leftArm",
-  mixamorigLeftForeArm: "leftForeArm",
-  mixamorigLeftShoulder: "leftShoulder",
-  mixamorigRightArm: "rightArm",
-  mixamorigRightForeArm: "rightForeArm",
-  mixamorigRightShoulder: "rightShoulder",
-  mixamorigRightHand: "rightHand",
-};
-
-const bodyBaseRotation = {
-  pistol: {
-    leftArm: [1.841, 0.163, 1.439],
-    leftForeArm: [0.411, -0.05, -0.166],
-    rightArm: [1.131, 0.207, -1.106],
-    rightForeArm: [0.905, 0.283, -0.722],
-  },
-  rifle: {
-    leftArm: [1.841, 0.163, 1.439],
-    leftForeArm: [0.411, -0.05, -0.166],
-    rightArm: [0.961, 0.006, -0.471],
-    rightForeArm: [0.905, -0.232, -1.589],
-  },
-};
 
 class Player {
   collider;
@@ -66,7 +35,6 @@ class Player {
   moveVelocity = new Vector3(0, -0.1, 0);
   weapon: Weapon;
   crouch = false; // 下蹲
-  model?: Group;
   leftArm?: Object3D;
   leftForeArm?: Object3D;
   leftShoulder?: Object3D;
@@ -81,6 +49,7 @@ class Player {
   rayHit = false;
   rayCaster;
   delta = 0;
+  modelLoader;
 
   constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
     this.scene = scene;
@@ -88,6 +57,7 @@ class Player {
     this.collider = new CapsuleCollider(world);
 
     this.weapon = new Weapon(scene, pointerControl);
+    this.modelLoader = new ModelLoader(scene);
 
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
@@ -103,51 +73,51 @@ class Player {
   }
 
   load() {
-    return new Promise((resolve) => {
-      const loader = new GLTFLoader();
-      const bones: Bone[] = [];
-
-      loader.load("gltf/riflePlayer.glb", async (gltf) => {
-        gltf.scene.scale.set(0.7, 0.7, 0.7);
-        // gltf.scene.position.set(0, -0.47, 0);
-        const keys = Object.keys(boneMap);
-        gltf.scene.traverse((node) => {
-          if ((node as Mesh).isMesh) {
-            node.castShadow = true;
+    return new Promise(async (resolve) => {
+      const { model, animations } = await this.modelLoader.load(
+        "third-view",
+        "gltf/riflePlayer.glb",
+        0.7,
+        (node) => {
+          if ((node as Bone).isBone && node.name === "mixamorigRightHand") {
+            this.rightHand = node;
           }
-          if ((node as Bone).isBone) {
-            if (keys.includes(node.name as keyof typeof boneMap)) {
-              bones.push(node as Bone);
-              // @ts-ignore
-              this[boneMap[node.name]] = node;
-            }
-          }
-        });
-        console.log(gltf.animations);
-        this.state = new PlayerState(gltf.animations, gltf.scene, this);
-        this.model = gltf.scene;
-        this.scene.add(gltf.scene);
+        }
+      );
+      this.modelLoader.use("third-view");
+      console.log(animations)
+      this.state = new PlayerState(animations, model, this);
+      await this.weapon.load();
+      this.state.playAnimation(STATE.IDLE);
 
-        // 骨骼辅助显示
-        // const skeletonHelper = new SkeletonHelper(gltf.scene);
-        // scene.add(skeletonHelper);
+      resolve(1);
 
-        // this.updateArmRotations("pistol"); // 暂时默认手枪
-        // this.leftShoulder!.position.z =23;
-        // this.initGui(bones);
-        await this.weapon.load();
-        this.state.playAnimation(STATE.IDLE);
+      // const loader = new GLTFLoader();
+      // loader.load("gltf/riflePlayer.glb", async (gltf) => {
+      //   gltf.scene.scale.set(0.7, 0.7, 0.7);
+      //   gltf.scene.traverse((node) => {
+      //     if ((node as Mesh).isMesh) {
+      //       node.castShadow = true;
+      //     }
+      //   });
+      //   // console.log(gltf.animations);
+      //   this.state = new PlayerState(gltf.animations, gltf.scene, this);
+      //   this.model = gltf.scene;
+      //   this.scene.add(gltf.scene);
 
-        resolve(1);
-      });
+      //   await this.weapon.load();
+      //   this.state.playAnimation(STATE.IDLE);
+
+      //   resolve(1);
+      // });
 
       // loader.load("gltf/animated_assault_rifle.glb", (glb) => {
-      //   const mesh = glb.scene.children[0];
+      //   this.firstViewModel = glb.scene.children[0];
       //   // console.log(mesh);
-      //   mesh.scale.set(0.05, 0.05, 0.05);
-      //   console.log(mesh);
+      //   this.firstViewModel.scale.set(0.05, 0.05, 0.05);
+      //   console.log(this.firstViewModel);
       //   // glb.scene.scale.set(0.1, 0.1, 0.1);
-      //   mesh.traverse((node) => {
+      //   this.firstViewModel.traverse((node) => {
       //     if (
       //       [
       //         "BARREL",
@@ -164,7 +134,6 @@ class Player {
       //     }
       //   });
       //   console.log(glb.animations);
-      //   this.scene.add(mesh);
       // });
     });
   }
@@ -236,30 +205,6 @@ class Player {
     }
   };
 
-  updateArmRotations = (type: "pistol" | "rifle") => {
-    const rotation = bodyBaseRotation[type];
-    this.leftArm?.rotation.set(
-      rotation.leftArm[0],
-      rotation.leftArm[1],
-      rotation.leftArm[2]
-    );
-    this.leftForeArm?.rotation.set(
-      rotation.leftForeArm[0],
-      rotation.leftForeArm[1],
-      rotation.leftForeArm[2]
-    );
-    this.rightArm?.rotation.set(
-      rotation.rightArm[0],
-      rotation.rightArm[1],
-      rotation.rightArm[2]
-    );
-    this.rightForeArm?.rotation.set(
-      rotation.rightForeArm[0],
-      rotation.rightForeArm[1],
-      rotation.rightForeArm[2]
-    );
-  };
-
   onKeyDown = (event: KeyboardEvent) => {
     if (!this.pointerControl.enabled) {
       return;
@@ -284,7 +229,7 @@ class Player {
         }
         return;
       case "v":
-        this.pointerControl.changeView();
+        this.changeView();
         break;
       case "r":
         this.weapon.reload();
@@ -304,6 +249,16 @@ class Player {
     }
 
     this.playAnimation();
+  };
+
+  changeView = () => {
+    State.firstPerson = !State.firstPerson;
+    if (State.firstPerson) {
+      this.modelLoader.use("first-view");
+    } else {
+      this.modelLoader.use("third-view");
+    }
+    this.pointerControl.changeView();
   };
 
   playAnimation() {
@@ -401,12 +356,14 @@ class Player {
 
     if (this.isHitTheGround(newPos.x, newPos.y, newPos.z)) {
       this.moveVelocity.y = Math.max(0, this.moveVelocity.y);
-      this.playAnimation();
+      // this.playAnimation();
     }
 
-    if (this.model) {
-      this.model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
-      this.model.rotation.y = this.pointerControl.euler.y;
+    const model = this.modelLoader.getCurrentModel();
+
+    if (model) {
+      model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
+      model.rotation.y = this.pointerControl.euler.y;
     }
 
     this.state?.mixer.update(this.delta);
@@ -416,6 +373,8 @@ class Player {
       this.moveVelocity,
       this.rightHand!
     );
+
+    this.pointerControl.render(model.position);
   }
 }
 
