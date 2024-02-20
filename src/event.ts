@@ -1,4 +1,4 @@
-import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
+import PointerLockControlsCannon from "./utils/PointerLockControls";
 
 const initEventHandlers = (pointerControl: PointerLockControlsCannon) => {
   const instructions = document.getElementById("instructions")!;

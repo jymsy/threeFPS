@@ -8,18 +8,18 @@ import {
   Mesh,
   Raycaster,
   Object3D,
-  MeshLambertMaterial,
-  Color,
+  Audio,
   Quaternion,
   AxesHelper,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import { EnemyModel } from "./enemy";
-import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
+import PointerLockControls from "./utils/PointerLockControls";
 import State from "./state";
 import WeaponLoader from "./utils/weaponLoader";
 import BulletHoleMesh from "./utils/BulletHoleMesh";
 import BulletStore from "./utils/BulletStore";
+import AudioLoader from "./utils/AudioLoader";
 
 class Weapon {
   model?: Group;
@@ -44,14 +44,14 @@ class Weapon {
   aimingEndAnimation: Tween<Vector3> | null = null;
   flashAnimation: Tween<{ opacity: number }> | null = null;
   flashMesh;
-  audio;
   currentIndex = 1;
   loader = new WeaponLoader();
   bulletHole = new BulletHoleMesh("decal");
   scene: Scene;
+  audioLoader;
 
-  constructor(scene: Scene) {
-    this.audio = new Audio("./audio/single-shoot-ak47.wav");
+  constructor(scene: Scene, controls: PointerLockControls) {
+    this.audioLoader = new AudioLoader(controls);
     this.group = new Group();
     this.swayingGroup = new Group();
     this.recoilGroup = new Group();
@@ -88,6 +88,9 @@ class Weapon {
       this.swayingGroup.add(this.recoilGroup);
       this.group.add(this.swayingGroup);
       this.scene.add(this.group);
+
+      await this.audioLoader.load("shooting", "./audio/single-shoot-ak47.wav");
+      await this.audioLoader.load("empty", "./audio/shoot-without-bullet.wav");
 
       // this.initSwayingAnimation();
       this.initRecoilAnimation();
@@ -193,9 +196,9 @@ class Weapon {
       //     new Vector3(currentPosition.x, currentPosition.y, currentPosition.z)
       //   );
       // })
-      // .onStart(() => {
-      //   this.recoilAnimationFinished = false;
-      // })
+      .onStart(() => {
+        this.recoilAnimationFinished = false;
+      })
       .onComplete(() => {
         this.recoilAnimationFinished = true;
       });
@@ -264,10 +267,7 @@ class Weapon {
     );
   }
 
-  bulletCollision(
-    controls: PointerLockControlsCannon,
-    enemyArray: EnemyModel[]
-  ) {
+  bulletCollision(controls: PointerLockControls, enemyArray: EnemyModel[]) {
     const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 100);
     raycaster.set(
       controls.yawObject.children[0].getWorldPosition(new Vector3()),
@@ -294,7 +294,7 @@ class Weapon {
   }
 
   render(
-    controls: PointerLockControlsCannon,
+    controls: PointerLockControls,
     enemyArray: EnemyModel[],
     moveVelocity: Vector3,
     rightHand: Object3D
@@ -313,11 +313,10 @@ class Weapon {
       // }
       if (this.isShooting && this.recoilAnimationFinished) {
         if (BulletStore.count === 0) {
+          this.audioLoader.play("empty");
           return;
         }
-        this.recoilAnimationFinished = false;
-        this.audio.currentTime = 0;
-        this.audio.play();
+        this.audioLoader.play("shooting");
         BulletStore.decrease();
         this.recoilAnimation!.start();
         this.flashAnimation!.start();

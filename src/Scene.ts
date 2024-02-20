@@ -1,7 +1,7 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { World, RigidBodyDesc } from "@dimforge/rapier3d-compat";
 import { Scene as ThreeScene, Mesh, Quaternion } from "three";
-import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
+import PointerLockControlsCannon from "./utils/PointerLockControls";
 import TrimeshCollider from "./utils/TrimeshCollider";
 import Player from "./player";
 import State from "./state";

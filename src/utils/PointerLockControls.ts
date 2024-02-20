@@ -13,7 +13,7 @@ import State from "../state";
 
 const CAMERA_INIT_POSITION = new Vector3(-0.5, 0.2, -1.5);
 
-class PointerLockControlsCannon extends EventDispatcher {
+class PointerLockControls extends EventDispatcher {
   yawObject;
   quaternion;
   enabled = false;
@@ -135,4 +135,4 @@ class PointerLockControlsCannon extends EventDispatcher {
   }
 }
 
-export default PointerLockControlsCannon;
+export default PointerLockControls;

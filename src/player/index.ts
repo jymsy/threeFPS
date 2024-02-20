@@ -16,9 +16,9 @@ import {
   Quaternion,
 } from "three";
 import GUI from "lil-gui";
-import { World, RigidBodyDesc, Ray } from "@dimforge/rapier3d-compat";
+import { World } from "@dimforge/rapier3d-compat";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import PointerLockControlsCannon from "../utils/pointerLockControlsCannon";
+import PointerLockControls from "../utils/PointerLockControls";
 import Weapon from "../weapon";
 import { EnemyModel } from "../enemy";
 import State from "../state";
@@ -82,16 +82,12 @@ class Player {
   rayCaster;
   delta = 0;
 
-  constructor(
-    world: World,
-    pointerControl: PointerLockControlsCannon,
-    scene: Scene
-  ) {
+  constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
     this.scene = scene;
     this.pointerControl = pointerControl;
     this.collider = new CapsuleCollider(world);
 
-    this.weapon = new Weapon(scene);
+    this.weapon = new Weapon(scene, pointerControl);
 
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);

@@ -25,7 +25,7 @@ import Camera from "./camera";
 import initLight from "./light";
 import Enemy, { EnemyModel } from "./enemy";
 import Player from "./player";
-import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
+import PointerLockControlsCannon from "./utils/PointerLockControls";
 import Material from "./material";
 import Scene from "./Scene";
 import initSky from "./Sky";
