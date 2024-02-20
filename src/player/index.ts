@@ -213,11 +213,12 @@ class Player {
 
   handleMouseDown = (event: MouseEvent) => {
     if (this.pointerControl.enabled) {
-      this.weapon.handleMouseDown(event.button);
       if (event.button === 2) {
+        this.weapon.beginAiming();
         this.state?.playAnimation(STATE.AIM);
         this.pointerControl.beginAiming();
-      } else if (event.button === 0) {
+      } else if (event.button === 0 && this.weapon.isAiming) {
+        this.weapon.beginShooting();
         this.state?.playAnimation(STATE.SHOOT);
       }
     }
@@ -225,10 +226,16 @@ class Player {
 
   handleMouseUp = (event: MouseEvent) => {
     if (this.pointerControl.enabled) {
-      this.weapon.handleMouseUp(event.button);
       if (event.button === 2) {
+        this.weapon.endAiming();
         this.state?.playAnimation(STATE.IDLE);
         this.pointerControl.endAiming();
+        if (this.weapon.isShooting) {
+          this.weapon.endShooting();
+        }
+      } else if (event.button === 0 && this.weapon.isAiming) {
+        this.weapon.endShooting();
+        this.state?.playAnimation(STATE.AIM);
       }
     }
   };
@@ -359,6 +366,17 @@ class Player {
     this.playAnimation();
   };
 
+  isHitTheGround = (x: number, y: number, z: number) => {
+    this.rayCaster.ray.origin = new Vector3(x, y, z);
+    const intersections = this.rayCaster.intersectObjects(
+      State.worldMapMeshes,
+      false
+    );
+    this.rayHit = intersections.length > 0;
+
+    return this.rayHit;
+  };
+
   render(enemyArray: EnemyModel[]) {
     this.delta = this.clock.getDelta();
     this.factor = VELOCITY_FACTOR * this.delta;
@@ -383,27 +401,13 @@ class Player {
     newPos.z += movement.z;
     this.collider.body.setNextKinematicTranslation(newPos);
 
-    this.rayCaster.ray.origin = new Vector3(newPos.x, newPos.y, newPos.z);
-    const intersections = this.rayCaster.intersectObjects(
-      State.worldMapMeshes,
-      false
-    );
-    this.rayHit = intersections.length > 0;
-
-    if (this.rayHit) {
+    if (this.isHitTheGround(newPos.x, newPos.y, newPos.z)) {
       this.moveVelocity.y = Math.max(0, this.moveVelocity.y);
     }
 
     if (this.model) {
       this.model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       this.model.rotation.y = this.pointerControl.euler.y;
-      // this.leftShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
-      // this.rightShoulder!.rotation.x = this.pointerControl.euler.x + 1.5;
-      // const { x, y, z } = this.pointerControl.yawObject.position;
-      // this.leftShoulder?.position.copy(this.pointerControl.yawObject.position);
-      // this.leftShoulder?.position.copy(
-      //   new Vector3(x, y, z)
-      // );
     }
 
     this.state?.mixer.update(this.delta);

@@ -75,6 +75,8 @@ class Weapon {
     return new Promise(async (resolve) => {
       const weapons = await this.loader.load();
       this.model = weapons[this.currentIndex].model;
+      const axesHelper = new AxesHelper(150);
+      this.model.add(axesHelper);
       const flashPosition = weapons[this.currentIndex].config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
@@ -109,28 +111,28 @@ class Weapon {
     return 0;
   };
 
-  handleMouseDown(button: number) {
-    if (button === 0) {
-      this.isShooting = true;
-    } else if (button === 2) {
-      if (State.firstPerson) {
-        this.isAiming = true;
-        // this.swayingAnimation!.stop();
-        this.aimingStartAnimation!.start();
-      }
+  beginAiming = () => {
+    this.isAiming = true;
+    if (State.firstPerson) {
+      // this.swayingAnimation!.stop();
+      this.aimingStartAnimation!.start();
     }
-  }
+  };
 
-  handleMouseUp(button: number) {
-    if (button === 0) {
-      this.isShooting = false;
-    } else if (button === 2) {
-      if (State.firstPerson) {
-        this.isAiming = false;
-        this.aimingEndAnimation!.start();
-      }
+  endAiming = () => {
+    this.isAiming = false;
+    if (State.firstPerson) {
+      this.aimingEndAnimation!.start();
     }
-  }
+  };
+
+  beginShooting = () => {
+    this.isShooting = true;
+  };
+
+  endShooting = () => {
+    this.isShooting = false;
+  };
 
   generateRecoilPosition() {
     const amount = 0.01;
@@ -184,13 +186,13 @@ class Weapon {
       .easing(Easing.Quadratic.Out)
       .repeat(1)
       .yoyo(true)
-      .onUpdate(() => {
-        this.recoilGroup.rotation.x =
-          -(currentPosition.rotation * Math.PI) / 180;
-        this.recoilGroup.position.copy(
-          new Vector3(currentPosition.x, currentPosition.y, currentPosition.z)
-        );
-      })
+      // .onUpdate(() => {
+      //   this.recoilGroup.rotation.x =
+      //     -(currentPosition.rotation * Math.PI) / 180;
+      //   this.recoilGroup.position.copy(
+      //     new Vector3(currentPosition.x, currentPosition.y, currentPosition.z)
+      //   );
+      // })
       // .onStart(() => {
       //   this.recoilAnimationFinished = false;
       // })

@@ -11,6 +11,8 @@ import {
 import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
 
+const CAMERA_INIT_POSITION = new Vector3(-0.5, 0.2, -1.5);
+
 class PointerLockControlsCannon extends EventDispatcher {
   yawObject;
   quaternion;
@@ -26,8 +28,7 @@ class PointerLockControlsCannon extends EventDispatcher {
     this.euler.order = "YXZ";
     this.yawObject = new Group();
     this.yawObject.add(camera);
-    camera.position.set(-0.5, 0.2, -2.5);
-    // camera.position.set(-0.5, 0.2, -1.5);
+    camera.position.copy(CAMERA_INIT_POSITION);
     this.quaternion = new Quaternion();
 
     document.addEventListener("mousemove", this.onMouseMove);
@@ -39,14 +40,18 @@ class PointerLockControlsCannon extends EventDispatcher {
 
   initAimingAnimation() {
     const currentPosition = this.yawObject.children[0].position;
-    const finalPosition = new Vector3(-0.2, 0.3, -0.8);
+    const finalPosition = new Vector3(
+      CAMERA_INIT_POSITION.x,
+      CAMERA_INIT_POSITION.y + 0.1,
+      CAMERA_INIT_POSITION.z + 0.7
+    );
 
     this.aimingStartAnimation = new Tween(currentPosition)
       .to(finalPosition, 200)
       .easing(Easing.Quadratic.Out);
 
     this.aimingEndAnimation = new Tween(finalPosition.clone())
-      .to(new Vector3(-0.5, 0.2, -1.5), 200)
+      .to(CAMERA_INIT_POSITION, 200)
       .easing(Easing.Quadratic.Out)
       .onUpdate((position) => {
         this.yawObject.children[0].position.copy(position);
@@ -68,8 +73,12 @@ class PointerLockControlsCannon extends EventDispatcher {
   changeView() {
     State.firstPerson = !State.firstPerson;
     // moving camera
-    this.yawObject.children[0].translateZ(State.firstPerson ? -1.5 : 1.5);
-    this.yawObject.children[0].translateY(State.firstPerson ? -0.2 : 0.2);
+    this.yawObject.children[0].translateZ(
+      State.firstPerson ? CAMERA_INIT_POSITION.z : -CAMERA_INIT_POSITION.z
+    );
+    this.yawObject.children[0].translateY(
+      State.firstPerson ? -CAMERA_INIT_POSITION.y : CAMERA_INIT_POSITION.y
+    );
   }
 
   setOffset(offset: Vector3) {
