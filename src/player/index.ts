@@ -25,7 +25,7 @@ import State from "../state";
 import PlayerState, { STATE } from "./State";
 import CapsuleCollider from "../utils/CapsuleCollider";
 
-const JUMP_VELOCITY = 0.14;
+const JUMP_VELOCITY = 0.11;
 const VELOCITY_FACTOR = 4;
 const MOVING_FORWARD = 1;
 const MOVING_BACKWARD = 2;
@@ -280,15 +280,15 @@ class Player {
       case " ":
         if (this.rayHit) {
           this.moveVelocity.y = JUMP_VELOCITY;
+          this.state?.playAnimation(STATE.JUMP);
         }
-        // this.state?.playAnimation(STATE.JUMP);
-        break;
+        return;
       case "v":
         this.pointerControl.changeView();
         break;
       case "r":
         this.weapon.reload();
-        break;
+        return;
       // case "c":
       //   this.crouch = true;
       //   this.pointerControl.setOffset(new Vector3(0, -0.2, 0));
@@ -358,6 +358,8 @@ class Player {
       case "d":
         this.moveBit ^= MOVING_RIGHT;
         break;
+      default:
+        return;
     }
     this.playAnimation();
   };
@@ -399,6 +401,7 @@ class Player {
 
     if (this.isHitTheGround(newPos.x, newPos.y, newPos.z)) {
       this.moveVelocity.y = Math.max(0, this.moveVelocity.y);
+      this.playAnimation();
     }
 
     if (this.model) {

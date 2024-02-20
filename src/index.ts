@@ -98,8 +98,8 @@ const init = async () => {
       world.step(); //更新物理计算
       TWEEN.update();
       // debugRapier(debugLines, scene, world);
-      controls.render(player.model?.position);
       player.render(enemyArray);
+      controls.render(player.model?.position);
       // enemy.render();
 
       renderer.render(scene, camera.getCamera()); //执行渲染操作

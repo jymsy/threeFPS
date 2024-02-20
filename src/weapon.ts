@@ -75,8 +75,8 @@ class Weapon {
     return new Promise(async (resolve) => {
       const weapons = await this.loader.load();
       this.model = weapons[this.currentIndex].model;
-      const axesHelper = new AxesHelper(150);
-      this.model.add(axesHelper);
+      // const axesHelper = new AxesHelper(150);
+      // this.model.add(axesHelper);
       const flashPosition = weapons[this.currentIndex].config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
