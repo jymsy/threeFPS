@@ -3,8 +3,8 @@ import {
   AnimationAction,
   Object3D,
   AnimationClip,
+  LoopOnce,
 } from "three";
-import Player from ".";
 
 export enum STATE {
   FORWARD = "forward",
@@ -29,30 +29,49 @@ type ActionState = {
 };
 
 class State {
-  animations: AnimationClip[];
+  animations: Record<string, AnimationAction> = {};
   currentState: ActionState;
   preState: ActionState;
   mixer: AnimationMixer;
-  player: Player;
 
-  constructor(animations: AnimationClip[], scene: Object3D, player: Player) {
-    this.animations = animations;
+  constructor(
+    animations: AnimationClip[],
+    scene: Object3D,
+    loopOnces: string[] = [],
+    finishCallback?: (name: string) => void
+  ) {
     this.mixer = new AnimationMixer(scene);
-    this.player = player;
     this.currentState = { name: "", action: null };
     this.preState = { name: "", action: null };
+
+    animations.forEach((animation) => {
+      const name = animation.name;
+      const clipAction = this.mixer.clipAction(animation);
+      if (loopOnces.includes(name)) {
+        clipAction.loop = LoopOnce;
+        clipAction.clampWhenFinished = true;
+      }
+      this.animations[name] = clipAction;
+    });
+
+    this.mixer.addEventListener("finished", (event) => {
+      const clip = (event.action as AnimationAction).getClip();
+      if (finishCallback) {
+        finishCallback(clip.name);
+      }
+    });
   }
 
   playAnimation(name: string) {
-    console.log(name);
     if (this.currentState.name === name) {
       return;
     }
     if (this.currentState.action) {
       this.currentState.action.fadeOut(0.1);
     }
-    const clip = AnimationClip.findByName(this.animations, name);
-    const action = this.mixer.clipAction(clip);
+    // const clip = AnimationClip.findByName(this.animations, name);
+    // const action = this.mixer.clipAction(clip);
+    const action = this.animations[name];
     if (action) {
       action.reset().fadeIn(0.1).play();
       this.preState = {

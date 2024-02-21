@@ -50,6 +50,7 @@ class Player {
   rayCaster;
   delta = 0;
   modelLoader;
+  neck?: Object3D;
 
   constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
     this.scene = scene;
@@ -79,37 +80,32 @@ class Player {
         "gltf/riflePlayer.glb",
         0.7,
         (node) => {
-          if ((node as Bone).isBone && node.name === "mixamorigRightHand") {
-            this.rightHand = node;
+          if ((node as Bone).isBone) {
+            console.log(node);
+            if (node.name === "mixamorigRightHand") {
+              this.rightHand = node;
+            } else if (node.name === "mixamorigNeck") {
+              this.neck = node;
+            }
           }
         }
       );
+      console.log(animations);
       this.modelLoader.use("third-view");
-      console.log(animations)
-      this.state = new PlayerState(animations, model, this);
+      this.state = new PlayerState(
+        animations,
+        model,
+        ["jump"],
+        (name: string) => {
+          if (name === "jump") {
+            this.playAnimation();
+          }
+        }
+      );
       await this.weapon.load();
       this.state.playAnimation(STATE.IDLE);
 
       resolve(1);
-
-      // const loader = new GLTFLoader();
-      // loader.load("gltf/riflePlayer.glb", async (gltf) => {
-      //   gltf.scene.scale.set(0.7, 0.7, 0.7);
-      //   gltf.scene.traverse((node) => {
-      //     if ((node as Mesh).isMesh) {
-      //       node.castShadow = true;
-      //     }
-      //   });
-      //   // console.log(gltf.animations);
-      //   this.state = new PlayerState(gltf.animations, gltf.scene, this);
-      //   this.model = gltf.scene;
-      //   this.scene.add(gltf.scene);
-
-      //   await this.weapon.load();
-      //   this.state.playAnimation(STATE.IDLE);
-
-      //   resolve(1);
-      // });
 
       // loader.load("gltf/animated_assault_rifle.glb", (glb) => {
       //   this.firstViewModel = glb.scene.children[0];
@@ -334,6 +330,8 @@ class Player {
     this.delta = this.clock.getDelta();
     this.factor = VELOCITY_FACTOR * this.delta;
 
+    this.state?.mixer.update(this.delta);
+
     this.moveVelocity.z =
       ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
       this.factor;
@@ -356,7 +354,6 @@ class Player {
 
     if (this.isHitTheGround(newPos.x, newPos.y, newPos.z)) {
       this.moveVelocity.y = Math.max(0, this.moveVelocity.y);
-      // this.playAnimation();
     }
 
     const model = this.modelLoader.getCurrentModel();
@@ -364,9 +361,9 @@ class Player {
     if (model) {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
+      this.neck!.rotation.x = this.pointerControl.euler.x;
     }
 
-    this.state?.mixer.update(this.delta);
     this.weapon.render(
       this.pointerControl,
       enemyArray,

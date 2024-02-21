@@ -26,9 +26,6 @@ class Scene {
       loader.load(this.path, async (gltf) => {
         // gltf.scene.scale.set(3, 3, 3);
         // gltf.scene.position.set(0, 0, 0);
-
-        console.log(gltf.scene);
-
         const map = gltf.scene;
         State.worldScale.copy(map.children[0].scale);
         State.worldRotation.copy(map.children[0].rotation);
