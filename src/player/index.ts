@@ -84,7 +84,7 @@ class Player {
             console.log(node);
             if (node.name === "mixamorigRightHand") {
               this.rightHand = node;
-            } else if (node.name === "mixamorigSpine") {
+            } else if (node.name === "mixamorigSpine2") {
               this.spine = node;
               const axesHelper = new AxesHelper(150);
               this.spine.add(axesHelper);
@@ -335,10 +335,10 @@ class Player {
     if (model) {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
-      this.spine!.rotation.x = this.pointerControl.euler.x;
-      if (this.weapon.isAiming) {
-        this.spine!.rotation.y = 0.6;
-      }
+      // this.spine!.rotation.x = this.pointerControl.euler.x;
+      // if (this.weapon.isAiming) {
+      //   this.spine!.rotation.y = 0.6;
+      // }
     }
 
     this.weapon.render(
