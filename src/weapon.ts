@@ -49,6 +49,7 @@ class Weapon {
   bulletHole = new BulletHoleMesh("decal");
   scene: Scene;
   audioLoader;
+  aimElement;
 
   constructor(scene: Scene, controls: PointerLockControls) {
     this.audioLoader = new AudioLoader(controls);
@@ -69,6 +70,8 @@ class Weapon {
 
     this.flashMesh = new Mesh(geometry, material);
     this.flashMesh.rotateY(Math.PI);
+
+    this.aimElement = document.getElementById("aim");
   }
 
   load() {
@@ -76,8 +79,8 @@ class Weapon {
       const weapons = await this.loader.load();
       const defaultWeapon = weapons[weaponConfig[this.currentIndex].name];
       this.model = defaultWeapon.model;
-      // const axesHelper = new AxesHelper(150);
-      // this.model.add(axesHelper);
+      const axesHelper = new AxesHelper(150);
+      this.model.add(axesHelper);
       const flashPosition = defaultWeapon.config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
@@ -117,17 +120,19 @@ class Weapon {
 
   beginAiming = () => {
     this.isAiming = true;
-    if (State.firstPerson) {
-      // this.swayingAnimation!.stop();
-      this.aimingStartAnimation!.start();
-    }
+    this.aimElement?.classList.add("aiming");
+    // if (State.firstPerson) {
+    //   // this.swayingAnimation!.stop();
+    //   // this.aimingStartAnimation!.start();
+    // }
   };
 
   endAiming = () => {
     this.isAiming = false;
-    if (State.firstPerson) {
-      this.aimingEndAnimation!.start();
-    }
+    this.aimElement?.classList.remove("aiming");
+    // if (State.firstPerson) {
+    //   this.aimingEndAnimation!.start();
+    // }
   };
 
   beginShooting = () => {

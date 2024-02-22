@@ -15,6 +15,11 @@ import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
 
 const CAMERA_INIT_POSITION = new Vector3(-0.5, 0.2, -1.5);
+const AIMING_FINAL_POSITION = new Vector3(
+  CAMERA_INIT_POSITION.x,
+  CAMERA_INIT_POSITION.y + 0.1,
+  CAMERA_INIT_POSITION.z + 0.7
+);
 
 class PointerLockControls extends EventDispatcher {
   cameraGroup;
@@ -51,17 +56,12 @@ class PointerLockControls extends EventDispatcher {
 
   initAimingAnimation() {
     const currentPosition = this.cameraGroup.children[0].position;
-    const finalPosition = new Vector3(
-      CAMERA_INIT_POSITION.x,
-      CAMERA_INIT_POSITION.y + 0.1,
-      CAMERA_INIT_POSITION.z + 0.7
-    );
 
     this.aimingStartAnimation = new Tween(currentPosition)
-      .to(finalPosition, 200)
+      .to(AIMING_FINAL_POSITION, 200)
       .easing(Easing.Quadratic.Out);
 
-    this.aimingEndAnimation = new Tween(finalPosition.clone())
+    this.aimingEndAnimation = new Tween(AIMING_FINAL_POSITION.clone())
       .to(CAMERA_INIT_POSITION, 200)
       .easing(Easing.Quadratic.Out)
       .onUpdate((position) => {
@@ -71,26 +71,30 @@ class PointerLockControls extends EventDispatcher {
 
   beginAiming() {
     if (!State.firstPerson) {
-      this.aimingStartAnimation?.start();
+      // this.aimingStartAnimation?.start();
     }
   }
 
   endAiming() {
     if (!State.firstPerson) {
-      this.aimingEndAnimation?.start();
+      // this.aimingEndAnimation?.start();
     }
   }
 
-  changeView() {
+  changeView(isAiming: boolean) {
     // moving camera
     if (State.firstPerson) {
       this.cameraGroup.children[0].position.set(0, 0.33, 0.05);
     } else {
-      this.cameraGroup.children[0].position.set(
-        CAMERA_INIT_POSITION.x,
-        CAMERA_INIT_POSITION.y,
-        CAMERA_INIT_POSITION.z
-      );
+      if (isAiming) {
+        this.cameraGroup.children[0].position.copy(AIMING_FINAL_POSITION);
+      } else {
+        this.cameraGroup.children[0].position.set(
+          CAMERA_INIT_POSITION.x,
+          CAMERA_INIT_POSITION.y,
+          CAMERA_INIT_POSITION.z
+        );
+      }
     }
   }
 

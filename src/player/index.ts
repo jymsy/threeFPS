@@ -4,7 +4,7 @@ import {
   Clock,
   Euler,
   Mesh,
-  Group,
+  AxesHelper,
   Bone,
   Object3D,
   Raycaster,
@@ -81,10 +81,13 @@ class Player {
         0.7,
         (node) => {
           if ((node as Bone).isBone) {
+            console.log(node);
             if (node.name === "mixamorigRightHand") {
               this.rightHand = node;
             } else if (node.name === "mixamorigSpine") {
               this.spine = node;
+              const axesHelper = new AxesHelper(150);
+              this.spine.add(axesHelper);
             }
           }
         }
@@ -105,31 +108,6 @@ class Player {
       this.state.playAnimation(STATE.IDLE);
 
       resolve(1);
-
-      // loader.load("gltf/animated_assault_rifle.glb", (glb) => {
-      //   this.firstViewModel = glb.scene.children[0];
-      //   // console.log(mesh);
-      //   this.firstViewModel.scale.set(0.05, 0.05, 0.05);
-      //   console.log(this.firstViewModel);
-      //   // glb.scene.scale.set(0.1, 0.1, 0.1);
-      //   this.firstViewModel.traverse((node) => {
-      //     if (
-      //       [
-      //         "BARREL",
-      //         "crosshair",
-      //         "sleeve",
-      //         "hardknuckle",
-      //         "shape_pose",
-      //       ].includes(node.name)
-      //     ) {
-      //       node.visible = false;
-      //     }
-      //     if ((node as Mesh).isMesh) {
-      //       node.castShadow = true;
-      //     }
-      //   });
-      //   console.log(glb.animations);
-      // });
     });
   }
 
@@ -249,7 +227,7 @@ class Player {
 
   changeView = () => {
     State.firstPerson = !State.firstPerson;
-    this.pointerControl.changeView();
+    this.pointerControl.changeView(this.weapon.isAiming);
   };
 
   playAnimation() {
@@ -358,6 +336,9 @@ class Player {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
       this.spine!.rotation.x = this.pointerControl.euler.x;
+      if (this.weapon.isAiming) {
+        this.spine!.rotation.y = 0.6;
+      }
     }
 
     this.weapon.render(
