@@ -84,7 +84,7 @@ class PointerLockControls extends EventDispatcher {
   changeView() {
     // moving camera
     if (State.firstPerson) {
-      this.cameraGroup.children[0].position.set(0, 0.4, 0.05);
+      this.cameraGroup.children[0].position.set(0, 0.33, 0.05);
     } else {
       this.cameraGroup.children[0].position.set(
         CAMERA_INIT_POSITION.x,
@@ -92,12 +92,6 @@ class PointerLockControls extends EventDispatcher {
         CAMERA_INIT_POSITION.z
       );
     }
-    // this.cameraGroup.children[0].translateZ(
-    //   State.firstPerson ? CAMERA_INIT_POSITION.z : -CAMERA_INIT_POSITION.z
-    // );
-    // this.cameraGroup.children[0].translateY(
-    //   State.firstPerson ? -CAMERA_INIT_POSITION.y : CAMERA_INIT_POSITION.y
-    // );
   }
 
   setOffset(offset: Vector3) {

@@ -1,16 +1,5 @@
-import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
-import {
-  Scene,
-  Vector3,
-  Group,
-  PlaneGeometry,
-  TextureLoader,
-  MeshBasicMaterial,
-  Mesh,
-  Raycaster,
-  Object3D,
-  MeshPhongMaterial,
-} from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { Group, Mesh } from "three";
 
 type Config = {
   type: "pistol" | "rifle";
@@ -22,7 +11,7 @@ type Config = {
   flashPosition: number[];
 };
 
-const config: Config[] = [
+export const weaponConfig: Config[] = [
   {
     type: "pistol",
     name: "kimber",
@@ -50,16 +39,16 @@ type WeaponItem = {
 
 class WeaponLoader {
   loader = new GLTFLoader();
-  weapons: WeaponItem[] = [];
+  weapons: Record<string, WeaponItem> = {};
   loaded = false;
   loadedCount = 0;
 
   load = () => {
-    return new Promise<WeaponItem[]>((resolve) => {
+    return new Promise<Record<string, WeaponItem>>((resolve) => {
       if (this.loaded) {
         return;
       }
-      config.forEach((item) => {
+      weaponConfig.forEach((item) => {
         this.loader.load(item.path, (gltf) => {
           gltf.scene.scale.set(item.scale, item.scale, item.scale);
           gltf.scene.traverse((node) => {
@@ -75,13 +64,13 @@ class WeaponLoader {
             const rotation = item.rotation;
             gltf.scene.rotation.set(rotation[0], rotation[1], rotation[2]);
           }
-          this.weapons.push({
+          this.weapons[item.name] = {
             model: gltf.scene,
             config: item,
-          });
+          };
           this.loadedCount++;
 
-          if (this.loadedCount === config.length) {
+          if (this.loadedCount === weaponConfig.length) {
             this.loaded = true;
             resolve(this.weapons);
           }

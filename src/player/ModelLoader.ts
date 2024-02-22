@@ -1,5 +1,12 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { Mesh, Scene, Object3D, AnimationClip, SkeletonHelper } from "three";
+import {
+  SkinnedMesh,
+  Scene,
+  Object3D,
+  AnimationClip,
+  MeshPhysicalMaterial,
+  FrontSide,
+} from "three";
 
 export type LoadResult = {
   model: Object3D;
@@ -25,12 +32,14 @@ class ModelLoader {
   ) => {
     return new Promise<LoadResult>(async (resolve) => {
       this.loader.load(path, async (gltf) => {
-        const helper = new SkeletonHelper(gltf.scene);
-        this.scene.add(helper);
+        // const helper = new SkeletonHelper(gltf.scene);
+        // this.scene.add(helper);
         gltf.scene.scale.set(scale, scale, scale);
         gltf.scene.traverse((node) => {
-          if ((node as Mesh).isMesh) {
+          if ((node as SkinnedMesh).isMesh) {
             node.castShadow = true;
+            ((node as SkinnedMesh).material as MeshPhysicalMaterial).side =
+              FrontSide;
           }
 
           if (traverse) {

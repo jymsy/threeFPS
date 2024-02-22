@@ -81,7 +81,6 @@ class Player {
         0.7,
         (node) => {
           if ((node as Bone).isBone) {
-            console.log(node);
             if (node.name === "mixamorigRightHand") {
               this.rightHand = node;
             } else if (node.name === "mixamorigSpine") {
@@ -226,7 +225,7 @@ class Player {
         return;
       case "v":
         this.changeView();
-        break;
+        return;
       case "r":
         this.weapon.reload();
         return;
@@ -237,6 +236,7 @@ class Player {
       case "1":
       case "2":
         this.weapon.switchWeapon(Number(event.key));
+        return;
       // this.updateArmRotations(
       //   this.weapon.loader.weapons[this.weapon.currentIndex].config.type
       // );

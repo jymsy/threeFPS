@@ -16,7 +16,7 @@ import { Tween, Easing } from "@tweenjs/tween.js";
 import { EnemyModel } from "./enemy";
 import PointerLockControls from "./utils/PointerLockControls";
 import State from "./state";
-import WeaponLoader from "./utils/weaponLoader";
+import WeaponLoader, { weaponConfig } from "./utils/weaponLoader";
 import BulletHoleMesh from "./utils/BulletHoleMesh";
 import BulletStore from "./utils/BulletStore";
 import AudioLoader from "./utils/AudioLoader";
@@ -74,10 +74,11 @@ class Weapon {
   load() {
     return new Promise(async (resolve) => {
       const weapons = await this.loader.load();
-      this.model = weapons[this.currentIndex].model;
+      const defaultWeapon = weapons[weaponConfig[this.currentIndex].name];
+      this.model = defaultWeapon.model;
       // const axesHelper = new AxesHelper(150);
       // this.model.add(axesHelper);
-      const flashPosition = weapons[this.currentIndex].config.flashPosition;
+      const flashPosition = defaultWeapon.config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
         flashPosition[1],
@@ -255,11 +256,11 @@ class Weapon {
     }
     this.currentIndex = index - 1;
     this.recoilGroup.remove(this.model!);
-    this.model = this.loader.weapons[this.currentIndex].model;
+    const weapon = this.loader.weapons[weaponConfig[this.currentIndex].name];
+    this.model = weapon.model;
     this.recoilGroup.add(this.model);
 
-    const flashPosition =
-      this.loader.weapons[this.currentIndex].config.flashPosition;
+    const flashPosition = weapon.config.flashPosition;
     this.flashMesh.position.set(
       flashPosition[0],
       flashPosition[1],
