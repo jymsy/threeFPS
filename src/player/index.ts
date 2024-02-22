@@ -50,7 +50,7 @@ class Player {
   rayCaster;
   delta = 0;
   modelLoader;
-  neck?: Object3D;
+  spine?: Object3D;
 
   constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
     this.scene = scene;
@@ -84,8 +84,8 @@ class Player {
             console.log(node);
             if (node.name === "mixamorigRightHand") {
               this.rightHand = node;
-            } else if (node.name === "mixamorigNeck") {
-              this.neck = node;
+            } else if (node.name === "mixamorigSpine") {
+              this.spine = node;
             }
           }
         }
@@ -249,11 +249,6 @@ class Player {
 
   changeView = () => {
     State.firstPerson = !State.firstPerson;
-    if (State.firstPerson) {
-      this.modelLoader.use("first-view");
-    } else {
-      this.modelLoader.use("third-view");
-    }
     this.pointerControl.changeView();
   };
 
@@ -331,7 +326,7 @@ class Player {
     this.factor = VELOCITY_FACTOR * this.delta;
 
     this.state?.mixer.update(this.delta);
-
+    // update move velocity vector
     this.moveVelocity.z =
       ((this.moveBit & MOVING_FORWARD) - ((this.moveBit >> 1) & 1)) *
       this.factor;
@@ -340,6 +335,7 @@ class Player {
     this.moveVelocity.y -= 9.8 * this.factor * 0.01;
     this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
 
+    // update body position
     this.collider.controller.computeColliderMovement(
       this.collider.collider,
       this.moveVelocity
@@ -356,12 +352,12 @@ class Player {
       this.moveVelocity.y = Math.max(0, this.moveVelocity.y);
     }
 
+    // update model position
     const model = this.modelLoader.getCurrentModel();
-
     if (model) {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
-      this.neck!.rotation.x = this.pointerControl.euler.x;
+      this.spine!.rotation.x = this.pointerControl.euler.x;
     }
 
     this.weapon.render(

@@ -270,7 +270,7 @@ class Weapon {
   bulletCollision(controls: PointerLockControls, enemyArray: EnemyModel[]) {
     const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 100);
     raycaster.set(
-      controls.yawObject.children[0].getWorldPosition(new Vector3()),
+      controls.cameraGroup.children[0].getWorldPosition(new Vector3()),
       controls.getDirection()
     );
     const intersectsEnemy = raycaster.intersectObjects(
@@ -327,7 +327,7 @@ class Weapon {
       const handQuaternion = new Quaternion();
       rightHand.getWorldPosition(handPosition);
       rightHand.getWorldQuaternion(handQuaternion);
-      // this.group.rotation.copy(controls.yawObject.rotation);
+      // this.group.rotation.copy(controls.cameraGroup.rotation);
       this.group.position.copy(handPosition); // 枪跟随手(tps)
       this.group.quaternion.copy(handQuaternion);
       this.group.rotateX(-Math.PI / 2).rotateZ(-Math.PI / 2);

@@ -7,7 +7,7 @@ class AudioLoader {
 
   constructor(pointerControl: PointerLockControls) {
     this.listener = new AudioListener();
-    pointerControl.yawObject.add(this.listener);
+    pointerControl.cameraGroup.add(this.listener);
   }
 
   load = (name: string, path: string) => {

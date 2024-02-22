@@ -7,6 +7,9 @@ import {
   Vector3,
   Euler,
   Scene,
+  BoxGeometry,
+  MeshLambertMaterial,
+  Mesh,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
@@ -14,7 +17,7 @@ import State from "../state";
 const CAMERA_INIT_POSITION = new Vector3(-0.5, 0.2, -1.5);
 
 class PointerLockControls extends EventDispatcher {
-  yawObject;
+  cameraGroup;
   quaternion;
   enabled = false;
   clock = new Clock();
@@ -25,21 +28,29 @@ class PointerLockControls extends EventDispatcher {
 
   constructor(scene: Scene, camera: PerspectiveCamera) {
     super();
+
+    // const geometry = new BoxGeometry(1, 0.1, 1);
+    // const material = new MeshLambertMaterial({
+    //   color: 0xff0000,
+    // });
+    // const box = new Mesh(geometry, material);
+
     this.euler.order = "YXZ";
-    this.yawObject = new Group();
-    this.yawObject.add(camera);
+    this.cameraGroup = new Group();
+    this.cameraGroup.add(camera);
+    // this.cameraGroup.add(box);
     camera.position.copy(CAMERA_INIT_POSITION);
     this.quaternion = new Quaternion();
 
     document.addEventListener("mousemove", this.onMouseMove);
     document.addEventListener("pointerlockchange", this.onPointerlockChange);
 
-    scene.add(this.yawObject);
+    scene.add(this.cameraGroup);
     this.initAimingAnimation();
   }
 
   initAimingAnimation() {
-    const currentPosition = this.yawObject.children[0].position;
+    const currentPosition = this.cameraGroup.children[0].position;
     const finalPosition = new Vector3(
       CAMERA_INIT_POSITION.x,
       CAMERA_INIT_POSITION.y + 0.1,
@@ -54,7 +65,7 @@ class PointerLockControls extends EventDispatcher {
       .to(CAMERA_INIT_POSITION, 200)
       .easing(Easing.Quadratic.Out)
       .onUpdate((position) => {
-        this.yawObject.children[0].position.copy(position);
+        this.cameraGroup.children[0].position.copy(position);
       });
   }
 
@@ -72,10 +83,19 @@ class PointerLockControls extends EventDispatcher {
 
   changeView() {
     // moving camera
-    // this.yawObject.children[0].translateZ(
+    if (State.firstPerson) {
+      this.cameraGroup.children[0].position.set(0, 0.4, 0.05);
+    } else {
+      this.cameraGroup.children[0].position.set(
+        CAMERA_INIT_POSITION.x,
+        CAMERA_INIT_POSITION.y,
+        CAMERA_INIT_POSITION.z
+      );
+    }
+    // this.cameraGroup.children[0].translateZ(
     //   State.firstPerson ? CAMERA_INIT_POSITION.z : -CAMERA_INIT_POSITION.z
     // );
-    // this.yawObject.children[0].translateY(
+    // this.cameraGroup.children[0].translateY(
     //   State.firstPerson ? -CAMERA_INIT_POSITION.y : CAMERA_INIT_POSITION.y
     // );
   }
@@ -103,7 +123,7 @@ class PointerLockControls extends EventDispatcher {
     this.euler.x += movementY * 0.002;
     this.euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.euler.x));
 
-    this.yawObject.setRotationFromEuler(this.euler);
+    this.cameraGroup.setRotationFromEuler(this.euler);
     this.quaternion.setFromEuler(this.euler);
   };
 
@@ -118,7 +138,7 @@ class PointerLockControls extends EventDispatcher {
   };
 
   getObject() {
-    return this.yawObject;
+    return this.cameraGroup;
   }
 
   getDirection() {
@@ -127,7 +147,7 @@ class PointerLockControls extends EventDispatcher {
 
   render(position?: Vector3) {
     if (position) {
-      this.yawObject.position
+      this.cameraGroup.position
         .set(position.x, position.y + 0.8, position.z)
         .add(this.offset);
     }
