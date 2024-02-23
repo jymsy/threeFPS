@@ -27,6 +27,8 @@ const MOVING_BACKWARD = 2;
 const MOVING_LEFT = 4;
 const MOVING_RIGHT = 8;
 
+let position;
+
 class Player {
   collider;
   moveBit = 0;
@@ -52,6 +54,8 @@ class Player {
   delta = 0;
   modelLoader;
   spine?: Object3D;
+  parent?: Object3D;
+  initScale = new Vector3();
 
   constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
     this.scene = scene;
@@ -72,6 +76,7 @@ class Player {
       0,
       0.64
     );
+    this.initScale = new Vector3(0.07, 0.07, 0.07);
   }
 
   load() {
@@ -90,6 +95,7 @@ class Player {
               console.log(node);
               const axesHelper = new AxesHelper(150);
               this.spine.add(axesHelper);
+              this.parent = this.spine.parent!;
             }
           }
         }
@@ -109,6 +115,7 @@ class Player {
       );
       await this.weapon.load();
       this.state.playAnimation(STATE.AIM);
+      // this.initGui([this.spine as Bone]);
 
       resolve(1);
     });
@@ -336,19 +343,32 @@ class Player {
     if (model) {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
-      const q = new Quaternion();
+      position = this.spine!.getWorldPosition(new Vector3());
+      // const scale = this.spine!.getWorldScale(new Vector3());
+      // console.log(scale, this.spine);
+      // this.spine?.scale.copy(this.initScale);
+      this.parent?.remove(this.spine);
+      this.scene.add(this.spine);
+      this.spine!.rotation.x = this.pointerControl.euler.x;
+      // //
+      
+      this.spine?.scale.copy(this.initScale);
+      this.spine?.position.copy(position);
+      this.parent?.attach(this.spine!);
+      // const q = new Quaternion();
       // this.spine!.getWorldQuaternion(q);
+      // const qq = q.clone().invert();
+      // const eu = new Euler(this.pointerControl.euler.x, 0, 0);
+      // const q1 = new Quaternion().setFromEuler(eu);
+      // this.spine!.applyQuaternion(qq);
       // const x = new Vector3(1, 0, 0).applyQuaternion(q).normalize();
       // console.log(x);
 
       // const quaternionTarget = new Quaternion();
       // quaternionTarget.setFromUnitVectors(x, new Vector3(1, 0, 0));
       // const euler = new Euler().setFromQuaternion(quaternionTarget);
-
+      // this.spine!.rotation.x = this.pointerControl.euler.x;
       // this.spine!.setRotationFromEuler(euler);
-      // if (this.weapon.isAiming) {
-      //   this.spine!.rotation.y = 0.6;
-      // }
     }
 
     this.weapon.render(

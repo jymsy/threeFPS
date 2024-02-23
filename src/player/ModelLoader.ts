@@ -33,8 +33,8 @@ class ModelLoader {
   ) => {
     return new Promise<LoadResult>(async (resolve) => {
       this.loader.load(path, async (gltf) => {
-        const helper = new SkeletonHelper(gltf.scene);
-        this.scene.add(helper);
+        // const helper = new SkeletonHelper(gltf.scene);
+        // this.scene.add(helper);
         gltf.scene.scale.set(scale, scale, scale);
         gltf.scene.traverse((node) => {
           if ((node as SkinnedMesh).isMesh) {
