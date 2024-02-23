@@ -3,11 +3,12 @@ import {
   Vector3,
   Clock,
   Euler,
-  Mesh,
+  Group,
   AxesHelper,
   Bone,
   Object3D,
   Raycaster,
+  Quaternion,
 } from "three";
 import GUI from "lil-gui";
 import { World } from "@dimforge/rapier3d-compat";
@@ -81,17 +82,19 @@ class Player {
         0.7,
         (node) => {
           if ((node as Bone).isBone) {
-            console.log(node);
+            // console.log(node);
             if (node.name === "mixamorigRightHand") {
               this.rightHand = node;
-            } else if (node.name === "mixamorigSpine2") {
+            } else if (node.name === "mixamorigSpine") {
               this.spine = node;
+              console.log(node);
               const axesHelper = new AxesHelper(150);
               this.spine.add(axesHelper);
             }
           }
         }
       );
+
       console.log(animations);
       this.modelLoader.use("third-view");
       this.state = new PlayerState(
@@ -105,7 +108,7 @@ class Player {
         }
       );
       await this.weapon.load();
-      this.state.playAnimation(STATE.IDLE);
+      this.state.playAnimation(STATE.AIM);
 
       resolve(1);
     });
@@ -153,9 +156,8 @@ class Player {
     if (this.pointerControl.enabled) {
       if (event.button === 2) {
         this.weapon.beginAiming();
-        this.state?.playAnimation(STATE.AIM);
         this.pointerControl.beginAiming();
-      } else if (event.button === 0 && this.weapon.isAiming) {
+      } else if (event.button === 0) {
         this.weapon.beginShooting();
         this.state?.playAnimation(STATE.SHOOT);
       }
@@ -166,12 +168,11 @@ class Player {
     if (this.pointerControl.enabled) {
       if (event.button === 2) {
         this.weapon.endAiming();
-        this.state?.playAnimation(STATE.IDLE);
         this.pointerControl.endAiming();
         if (this.weapon.isShooting) {
           this.weapon.endShooting();
         }
-      } else if (event.button === 0 && this.weapon.isAiming) {
+      } else if (event.button === 0) {
         this.weapon.endShooting();
         this.state?.playAnimation(STATE.AIM);
       }
@@ -261,7 +262,7 @@ class Player {
         this.state?.playAnimation(STATE.RIGHT);
         break;
       default:
-        this.state?.playAnimation(STATE.IDLE);
+        this.state?.playAnimation(STATE.AIM);
     }
   }
 
@@ -335,7 +336,16 @@ class Player {
     if (model) {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
-      // this.spine!.rotation.x = this.pointerControl.euler.x;
+      const q = new Quaternion();
+      // this.spine!.getWorldQuaternion(q);
+      // const x = new Vector3(1, 0, 0).applyQuaternion(q).normalize();
+      // console.log(x);
+
+      // const quaternionTarget = new Quaternion();
+      // quaternionTarget.setFromUnitVectors(x, new Vector3(1, 0, 0));
+      // const euler = new Euler().setFromQuaternion(quaternionTarget);
+
+      // this.spine!.setRotationFromEuler(euler);
       // if (this.weapon.isAiming) {
       //   this.spine!.rotation.y = 0.6;
       // }

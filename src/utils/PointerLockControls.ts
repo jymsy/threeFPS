@@ -14,15 +14,15 @@ import {
 import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
 
-const CAMERA_INIT_POSITION = new Vector3(-0.5, 0.2, -1.5);
+const CAMERA_INIT_POSITION = new Vector3(-0.15, 0.5, -1.5);
 const AIMING_FINAL_POSITION = new Vector3(
-  CAMERA_INIT_POSITION.x,
-  CAMERA_INIT_POSITION.y + 0.1,
+  CAMERA_INIT_POSITION.x - 0.3,
+  CAMERA_INIT_POSITION.y - 0.1,
   CAMERA_INIT_POSITION.z + 0.7
 );
 
 class PointerLockControls extends EventDispatcher {
-  cameraGroup;
+  cameraGroup = new Group();
   quaternion;
   enabled = false;
   clock = new Clock();
@@ -41,7 +41,6 @@ class PointerLockControls extends EventDispatcher {
     // const box = new Mesh(geometry, material);
 
     this.euler.order = "YXZ";
-    this.cameraGroup = new Group();
     this.cameraGroup.add(camera);
     // this.cameraGroup.add(box);
     camera.position.copy(CAMERA_INIT_POSITION);
@@ -71,13 +70,13 @@ class PointerLockControls extends EventDispatcher {
 
   beginAiming() {
     if (!State.firstPerson) {
-      // this.aimingStartAnimation?.start();
+      this.aimingStartAnimation?.start();
     }
   }
 
   endAiming() {
     if (!State.firstPerson) {
-      // this.aimingEndAnimation?.start();
+      this.aimingEndAnimation?.start();
     }
   }
 

@@ -123,7 +123,7 @@ class Weapon {
     this.aimElement?.classList.add("aiming");
     // if (State.firstPerson) {
     //   // this.swayingAnimation!.stop();
-    //   // this.aimingStartAnimation!.start();
+    //   this.aimingStartAnimation!.start();
     // }
   };
 

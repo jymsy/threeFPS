@@ -20,8 +20,8 @@ const initLight = (scene: Scene) => {
   directionalLight.shadow.camera.far = 1000;
 
   // 可视化平行光阴影对应的正投影相机对象
-  const cameraHelper = new CameraHelper(directionalLight.shadow.camera);
-  scene.add(cameraHelper);
+  // const cameraHelper = new CameraHelper(directionalLight.shadow.camera);
+  // scene.add(cameraHelper);
 };
 
 export default initLight;
