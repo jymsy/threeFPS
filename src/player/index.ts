@@ -56,6 +56,7 @@ class Player {
   spine?: Object3D;
   parent?: Object3D;
   initScale = new Vector3();
+  container = new Group();
 
   constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
     this.scene = scene;
@@ -77,13 +78,14 @@ class Player {
       0.64
     );
     this.initScale = new Vector3(0.07, 0.07, 0.07);
+    this.scene.add(this.container);
   }
 
   load() {
     return new Promise(async (resolve) => {
       const { model, animations } = await this.modelLoader.load(
         "third-view",
-        "gltf/riflePlayer.glb",
+        "gltf/rifle.glb",
         0.7,
         (node) => {
           if ((node as Bone).isBone) {
@@ -343,20 +345,18 @@ class Player {
     if (model) {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
-      position = this.spine!.getWorldPosition(new Vector3());
-      // const scale = this.spine!.getWorldScale(new Vector3());
-      // console.log(scale, this.spine);
-      // this.spine?.scale.copy(this.initScale);
-      this.parent?.remove(this.spine);
-      this.scene.add(this.spine);
-      this.spine!.rotation.x = this.pointerControl.euler.x;
-      // //
-      
-      this.spine?.scale.copy(this.initScale);
-      this.spine?.position.copy(position);
-      this.parent?.attach(this.spine!);
-      // const q = new Quaternion();
-      // this.spine!.getWorldQuaternion(q);
+
+      const q = new Quaternion();
+      const axis = new Vector3(1, 0, 0);
+      // this.spine!.updateWorldMatrix(true, false);
+      const invWorldQuaternion = this.spine!.getWorldQuaternion(q).invert();
+      axis.applyQuaternion(invWorldQuaternion);
+
+      let deltaLocalRot = new Quaternion();
+      deltaLocalRot.setFromAxisAngle(axis, this.pointerControl.euler.x);
+      this.spine!.quaternion.multiply(deltaLocalRot);
+      // this.spine!.updateWorldMatrix(true, false);
+
       // const qq = q.clone().invert();
       // const eu = new Euler(this.pointerControl.euler.x, 0, 0);
       // const q1 = new Quaternion().setFromEuler(eu);
