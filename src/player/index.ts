@@ -27,8 +27,6 @@ const MOVING_BACKWARD = 2;
 const MOVING_LEFT = 4;
 const MOVING_RIGHT = 8;
 
-let position;
-
 class Player {
   collider;
   moveBit = 0;
@@ -54,9 +52,6 @@ class Player {
   delta = 0;
   modelLoader;
   spine?: Object3D;
-  parent?: Object3D;
-  initScale = new Vector3();
-  container = new Group();
 
   constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
     this.scene = scene;
@@ -77,8 +72,6 @@ class Player {
       0,
       0.64
     );
-    this.initScale = new Vector3(0.07, 0.07, 0.07);
-    this.scene.add(this.container);
   }
 
   load() {
@@ -94,10 +87,8 @@ class Player {
               this.rightHand = node;
             } else if (node.name === "mixamorigSpine") {
               this.spine = node;
-              console.log(node);
-              const axesHelper = new AxesHelper(150);
-              this.spine.add(axesHelper);
-              this.parent = this.spine.parent!;
+              // const axesHelper = new AxesHelper(150);
+              // this.spine.add(axesHelper);
             }
           }
         }
@@ -254,7 +245,7 @@ class Player {
         break;
       case MOVING_BACKWARD:
       case MOVING_BACKWARD | MOVING_LEFT | MOVING_RIGHT:
-        this.state?.playAnimation(STATE.BACKWARD);
+        this.state?.playAnimation(STATE.BACKWARD_AIM);
         break;
       case MOVING_BACKWARD | MOVING_LEFT:
         this.state?.playAnimation(STATE.BACKWARD_LEFT);
@@ -346,29 +337,18 @@ class Player {
       model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       model.rotation.y = this.pointerControl.euler.y;
 
-      const q = new Quaternion();
-      const axis = new Vector3(1, 0, 0);
-      // this.spine!.updateWorldMatrix(true, false);
-      const invWorldQuaternion = this.spine!.getWorldQuaternion(q).invert();
+      const axis = new Vector3(1, 0, 0).applyEuler(
+        new Euler(0, this.pointerControl.euler.y, 0)
+      );
+      // this.spine!.updateWorldMatrix(true, true);
+      const invWorldQuaternion = this.spine!.getWorldQuaternion(
+        new Quaternion()
+      ).invert();
       axis.applyQuaternion(invWorldQuaternion);
 
-      let deltaLocalRot = new Quaternion();
-      deltaLocalRot.setFromAxisAngle(axis, this.pointerControl.euler.x);
-      this.spine!.quaternion.multiply(deltaLocalRot);
-      // this.spine!.updateWorldMatrix(true, false);
-
-      // const qq = q.clone().invert();
-      // const eu = new Euler(this.pointerControl.euler.x, 0, 0);
-      // const q1 = new Quaternion().setFromEuler(eu);
-      // this.spine!.applyQuaternion(qq);
-      // const x = new Vector3(1, 0, 0).applyQuaternion(q).normalize();
-      // console.log(x);
-
-      // const quaternionTarget = new Quaternion();
-      // quaternionTarget.setFromUnitVectors(x, new Vector3(1, 0, 0));
-      // const euler = new Euler().setFromQuaternion(quaternionTarget);
-      // this.spine!.rotation.x = this.pointerControl.euler.x;
-      // this.spine!.setRotationFromEuler(euler);
+      let deltaLocalQuaternion = new Quaternion();
+      deltaLocalQuaternion.setFromAxisAngle(axis, this.pointerControl.euler.x);
+      this.spine!.quaternion.multiply(deltaLocalQuaternion);
     }
 
     this.weapon.render(
