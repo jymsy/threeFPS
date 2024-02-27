@@ -25,6 +25,7 @@ const AIMING_FINAL_POSITION = new Vector3(
 
 class PointerLockControls extends EventDispatcher {
   cameraGroup = new Group();
+  camera;
   quaternion;
   enabled = false;
   clock = new Clock();
@@ -39,6 +40,7 @@ class PointerLockControls extends EventDispatcher {
   constructor(scene: Scene, camera: PerspectiveCamera, world: World) {
     super();
 
+    this.camera = camera;
     this.world = world;
     // const geometry = new BoxGeometry(1, 0.1, 1);
     // const material = new MeshLambertMaterial({
@@ -61,17 +63,23 @@ class PointerLockControls extends EventDispatcher {
   }
 
   initAimingAnimation() {
-    const currentPosition = this.cameraGroup.children[0].position;
+    const currentPosition = this.camera.position;
 
     this.aimingStartAnimation = new Tween(currentPosition)
       .to(AIMING_FINAL_POSITION, 200)
-      .easing(Easing.Quadratic.Out);
+      .easing(Easing.Quadratic.Out)
+      .onComplete(() => {
+        this.cameraOrigin.position.copy(AIMING_FINAL_POSITION);
+      });
 
     this.aimingEndAnimation = new Tween(AIMING_FINAL_POSITION.clone())
       .to(CAMERA_INIT_POSITION, 200)
       .easing(Easing.Quadratic.Out)
       .onUpdate((position) => {
-        this.cameraGroup.children[0].position.copy(position);
+        this.camera.position.copy(position);
+      })
+      .onComplete(() => {
+        this.cameraOrigin.position.copy(CAMERA_INIT_POSITION);
       });
   }
 
@@ -90,12 +98,12 @@ class PointerLockControls extends EventDispatcher {
   changeView(isAiming: boolean) {
     // moving camera
     if (State.firstPerson) {
-      this.cameraGroup.children[0].position.set(0, 0.33, 0.05);
+      this.camera.position.set(0, 0.33, 0.05);
     } else {
       if (isAiming) {
-        this.cameraGroup.children[0].position.copy(AIMING_FINAL_POSITION);
+        this.camera.position.copy(AIMING_FINAL_POSITION);
       } else {
-        this.cameraGroup.children[0].position.set(
+        this.camera.position.set(
           CAMERA_INIT_POSITION.x,
           CAMERA_INIT_POSITION.y,
           CAMERA_INIT_POSITION.z
@@ -169,21 +177,12 @@ class PointerLockControls extends EventDispatcher {
         const newPostion = this.cameraGroup.worldToLocal(
           new Vector3(hitPoint.x, hitPoint.y, hitPoint.z)
         );
-        this.cameraGroup.children[0].position.lerp(
+        this.camera.position.lerp(
           new Vector3(newPostion.x, newPostion.y, newPostion.z),
           0.1
         );
-      } else if (
-        !this.cameraGroup.children[0].position.equals(CAMERA_INIT_POSITION)
-      ) {
-        this.cameraGroup.children[0].position.lerp(
-          new Vector3(
-            CAMERA_INIT_POSITION.x,
-            CAMERA_INIT_POSITION.y,
-            CAMERA_INIT_POSITION.z
-          ),
-          0.1
-        );
+      } else if (!this.camera.position.equals(this.cameraOrigin.position)) {
+        this.camera.position.lerp(this.cameraOrigin.position, 0.1);
       }
     }
   };
