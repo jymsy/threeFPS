@@ -25,7 +25,7 @@ import Camera from "./camera";
 import initLight from "./light";
 import Enemy, { EnemyModel } from "./enemy";
 import Player from "./player";
-import PointerLockControlsCannon from "./utils/PointerLockControls";
+import PointerLockControls from "./utils/PointerLockControls";
 import Material from "./material";
 import Scene from "./Scene";
 import initSky from "./Sky";
@@ -81,7 +81,7 @@ const init = async () => {
   scene.add(axesHelper);
 
   // const enemy = new Enemy(scene, enemyArray);
-  const controls = new PointerLockControlsCannon(scene, camera.getCamera());
+  const controls = new PointerLockControls(scene, camera.getCamera(), world);
 
   initEventHandlers(controls);
   const stats = new Stats();

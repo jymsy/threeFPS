@@ -10,7 +10,9 @@ import {
   BoxGeometry,
   MeshLambertMaterial,
   Mesh,
+  Object3D,
 } from "three";
+import { Ray, World, Collider } from "@dimforge/rapier3d-compat";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
 
@@ -30,10 +32,14 @@ class PointerLockControls extends EventDispatcher {
   offset = new Vector3();
   aimingStartAnimation: Tween<Vector3> | null = null;
   aimingEndAnimation: Tween<Vector3> | null = null;
+  eyeRay = new Ray({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 1 });
+  world;
+  cameraOrigin = new Object3D(); // for camera raycast
 
-  constructor(scene: Scene, camera: PerspectiveCamera) {
+  constructor(scene: Scene, camera: PerspectiveCamera, world: World) {
     super();
 
+    this.world = world;
     // const geometry = new BoxGeometry(1, 0.1, 1);
     // const material = new MeshLambertMaterial({
     //   color: 0xff0000,
@@ -42,8 +48,9 @@ class PointerLockControls extends EventDispatcher {
 
     this.euler.order = "YXZ";
     this.cameraGroup.add(camera);
-    // this.cameraGroup.add(box);
+    this.cameraGroup.add(this.cameraOrigin);
     camera.position.copy(CAMERA_INIT_POSITION);
+    this.cameraOrigin.position.copy(CAMERA_INIT_POSITION);
     this.quaternion = new Quaternion();
 
     document.addEventListener("mousemove", this.onMouseMove);
@@ -139,14 +146,54 @@ class PointerLockControls extends EventDispatcher {
   }
 
   getDirection() {
-    return new Vector3(0, 0, 1).applyQuaternion(this.quaternion);
+    return new Vector3(0, 0, 1).applyQuaternion(this.quaternion).normalize();
   }
 
-  render(position?: Vector3) {
+  calculateSight = (position: Vector3, playerCollider: Collider) => {
+    if (!State.firstPerson) {
+      const dest = this.cameraOrigin.getWorldPosition(new Vector3());
+      const origin = new Vector3(position.x, position.y + 1.2, position.z);
+      this.eyeRay.origin = origin;
+      this.eyeRay.dir = dest.sub(origin).normalize();
+
+      const hit = this.world.castRay(
+        this.eyeRay,
+        1.7,
+        false,
+        undefined,
+        undefined,
+        playerCollider // ignore player collider
+      );
+      if (hit !== null) {
+        let hitPoint = this.eyeRay.pointAt(hit.toi);
+        const newPostion = this.cameraGroup.worldToLocal(
+          new Vector3(hitPoint.x, hitPoint.y, hitPoint.z)
+        );
+        this.cameraGroup.children[0].position.lerp(
+          new Vector3(newPostion.x, newPostion.y, newPostion.z),
+          0.1
+        );
+      } else if (
+        !this.cameraGroup.children[0].position.equals(CAMERA_INIT_POSITION)
+      ) {
+        this.cameraGroup.children[0].position.lerp(
+          new Vector3(
+            CAMERA_INIT_POSITION.x,
+            CAMERA_INIT_POSITION.y,
+            CAMERA_INIT_POSITION.z
+          ),
+          0.1
+        );
+      }
+    }
+  };
+
+  render(position: Vector3, playerCollider: Collider) {
     if (position) {
       this.cameraGroup.position
         .set(position.x, position.y + 0.8, position.z)
         .add(this.offset);
+      this.calculateSight(position, playerCollider);
     }
   }
 }

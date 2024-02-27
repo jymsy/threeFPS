@@ -358,7 +358,7 @@ class Player {
       this.rightHand!
     );
 
-    this.pointerControl.render(model.position);
+    this.pointerControl.render(model.position, this.collider.collider);
   }
 }
 
