@@ -30,7 +30,6 @@ const MOVING_RIGHT = 8;
 class Player {
   collider;
   moveBit = 0;
-  canJump = false;
   clock = new Clock();
   pointerControl;
   moveVelocity = new Vector3(0, -0.1, 0);

@@ -218,9 +218,7 @@ class Weapon {
   initSwayingAnimation() {
     const currentPosition = new Vector3(0, 0, 0);
     const initialPosition = new Vector3(0, 0, 0);
-    // const newPosition = new Vector3(-0.015, 0, 0);
     const newPosition = this.swayingNewPosition;
-    // const duration = 300;
     const duration = this.swayingDuration;
 
     this.swayingAnimation = new Tween(currentPosition)
