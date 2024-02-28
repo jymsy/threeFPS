@@ -79,8 +79,8 @@ class Weapon {
       const weapons = await this.loader.load();
       const defaultWeapon = weapons[weaponConfig[this.currentIndex].name];
       this.model = defaultWeapon.model;
-      const axesHelper = new AxesHelper(150);
-      this.model.add(axesHelper);
+      // const axesHelper = new AxesHelper(150);
+      // this.model.add(axesHelper);
       const flashPosition = defaultWeapon.config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
@@ -320,13 +320,13 @@ class Weapon {
       if (this.isShooting && this.recoilAnimationFinished) {
         if (BulletStore.count === 0) {
           this.audioLoader.play("empty");
-          return;
+        } else {
+          this.audioLoader.play("shooting");
+          BulletStore.decrease();
+          this.recoilAnimation!.start();
+          this.flashAnimation!.start();
+          // this.bulletCollision(controls, enemyArray);
         }
-        this.audioLoader.play("shooting");
-        BulletStore.decrease();
-        this.recoilAnimation!.start();
-        this.flashAnimation!.start();
-        this.bulletCollision(controls, enemyArray);
       }
 
       const handPosition = new Vector3();

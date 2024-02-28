@@ -159,7 +159,11 @@ class Player {
         this.pointerControl.beginAiming();
       } else if (event.button === 0) {
         this.weapon.beginShooting();
-        this.state?.playAnimation(STATE.SHOOT);
+        this.state?.playAnimation(
+          this.state?.currentState.name === STATE.FORWARD
+            ? STATE.FORWARD_SHOOT
+            : STATE.SHOOT
+        );
       }
     }
   };
@@ -174,7 +178,8 @@ class Player {
         }
       } else if (event.button === 0) {
         this.weapon.endShooting();
-        this.state?.playAnimation(STATE.AIM);
+        // this.state?.playAnimation(STATE.AIM);
+        this.playAnimation();
       }
     }
   };

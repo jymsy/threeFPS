@@ -21,7 +21,7 @@ import Wall from "./wall";
 import Floor from "./floor";
 import Sky from "./Sky";
 import initEventHandlers from "./event";
-import Camera from "./camera";
+import Camera from "./Camera";
 import initLight from "./light";
 import Enemy, { EnemyModel } from "./enemy";
 import Player from "./player";
