@@ -297,7 +297,6 @@ class Weapon {
         false
       );
       if (intersectsWorld.length > 0) {
-        console.log("hit");
         // 击中world
         this.bulletHole.create(intersectsWorld[0], this.scene!);
       }

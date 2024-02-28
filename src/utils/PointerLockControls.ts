@@ -86,20 +86,30 @@ class PointerLockControls extends EventDispatcher {
   beginAiming() {
     if (!State.firstPerson) {
       this.aimingStartAnimation?.start();
+    } else {
+      this.camera.position.set(-0.087, 0.275, 0.1);
     }
   }
 
   endAiming() {
     if (!State.firstPerson) {
       this.aimingEndAnimation?.start();
+    } else {
+      this.camera.position.set(0, 0.33, 0.05);
     }
   }
 
   changeView(isAiming: boolean) {
     // moving camera
     if (State.firstPerson) {
-      this.camera.position.set(0, 0.33, 0.05);
+      if (isAiming) {
+        this.camera.position.set(-0.087, 0.275, 0.1);
+      } else {
+        this.camera.position.set(0, 0.33, 0.05);
+      }
     } else {
+      // reset camera raycast destination
+      this.cameraOrigin.position.copy(CAMERA_INIT_POSITION);
       if (isAiming) {
         this.camera.position.copy(AIMING_FINAL_POSITION);
       } else {
