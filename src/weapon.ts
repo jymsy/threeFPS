@@ -50,6 +50,8 @@ class Weapon {
   scene: Scene;
   audioLoader;
   aimElement;
+  bulletRay;
+  tipsElement;
 
   constructor(scene: Scene, controls: PointerLockControls) {
     this.audioLoader = new AudioLoader(controls);
@@ -72,6 +74,8 @@ class Weapon {
     this.flashMesh.rotateY(Math.PI);
 
     this.aimElement = document.getElementById("aim");
+    this.bulletRay = new Raycaster(new Vector3(), new Vector3(), 0, 100);
+    this.tipsElement = document.getElementById("tips");
   }
 
   load() {
@@ -106,6 +110,7 @@ class Weapon {
 
   reload() {
     BulletStore.reload();
+    this.tipsElement!.innerHTML = "";
   }
 
   findEnemyId = (model: Object3D): number => {
@@ -274,12 +279,11 @@ class Weapon {
   }
 
   bulletCollision(controls: PointerLockControls, enemyArray: EnemyModel[]) {
-    const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 100);
-    raycaster.set(
-      controls.cameraGroup.children[0].getWorldPosition(new Vector3()),
+    this.bulletRay.set(
+      controls.camera.getWorldPosition(new Vector3()),
       controls.getDirection()
     );
-    const intersectsEnemy = raycaster.intersectObjects(
+    const intersectsEnemy = this.bulletRay.intersectObjects(
       enemyArray.map((item) => item.model.model!)
     );
     if (intersectsEnemy.length > 0) {
@@ -288,11 +292,12 @@ class Weapon {
       const enemy = enemyArray.find((item) => item.id === id);
       enemy?.model.getShot();
     } else {
-      const intersectsWorld = raycaster.intersectObjects(
+      const intersectsWorld = this.bulletRay.intersectObjects(
         State.worldMapMeshes,
         false
       );
       if (intersectsWorld.length > 0) {
+        console.log("hit");
         // 击中world
         this.bulletHole.create(intersectsWorld[0], this.scene!);
       }
@@ -320,12 +325,13 @@ class Weapon {
       if (this.isShooting && this.recoilAnimationFinished) {
         if (BulletStore.count === 0) {
           this.audioLoader.play("empty");
+          this.tipsElement!.innerText = "按 R 键更换弹夹";
         } else {
           this.audioLoader.play("shooting");
           BulletStore.decrease();
           this.recoilAnimation!.start();
           this.flashAnimation!.start();
-          // this.bulletCollision(controls, enemyArray);
+          this.bulletCollision(controls, enemyArray);
         }
       }
 

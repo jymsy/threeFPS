@@ -12,21 +12,16 @@ import {
   BufferAttribute,
 } from "three";
 import { World, init as initRapier } from "@dimforge/rapier3d-compat";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import TWEEN from "@tweenjs/tween.js";
 import Stats from "three/examples/jsm/libs/stats.module";
-import Wall from "./wall";
 import Floor from "./floor";
-import Sky from "./Sky";
 import initEventHandlers from "./event";
 import Camera from "./Camera";
 import initLight from "./light";
 import Enemy, { EnemyModel } from "./enemy";
-import Player from "./player";
 import PointerLockControls from "./utils/PointerLockControls";
-import Material from "./material";
 import Scene from "./Scene";
 import initSky from "./Sky";
 
