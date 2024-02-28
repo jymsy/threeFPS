@@ -1,4 +1,4 @@
-import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
+import PointerLockControlsCannon from "./utils/PointerLockControls";
 
 const initEventHandlers = (pointerControl: PointerLockControlsCannon) => {
   const instructions = document.getElementById("instructions")!;
@@ -15,7 +15,7 @@ const initEventHandlers = (pointerControl: PointerLockControlsCannon) => {
 
   pointerControl.addEventListener("unlock", () => {
     blocker.style.display = "block";
-    instructions.style.display = "";
+    instructions.style.display = "flex";
   });
 };
 

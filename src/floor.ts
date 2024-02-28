@@ -8,19 +8,14 @@ import {
   DoubleSide,
   Euler,
 } from "three";
-import { Body, Vec3, Material, World, Box, Plane } from "cannon-es";
+import { World, RigidBodyDesc, ColliderDesc } from "@dimforge/rapier3d-compat";
 
 class Floor {
   mesh;
+  bodyDesc;
   body;
 
-  constructor(
-    world: World,
-    cannonMaterial: Material,
-    scene: Scene,
-    width = 40,
-    height = 40
-  ) {
+  constructor(world: World, scene: Scene, width = 400, height = 400) {
     const geometry = new PlaneGeometry(width, height);
     const texLoader = new TextureLoader();
     const texture = texLoader.load("./img/ground.jpg");
@@ -38,26 +33,24 @@ class Floor {
     scene.add(this.mesh);
 
     // 物理地面
-    const plane = new Plane();
-    this.body = new Body({
-      mass: 0, // 质量为0，始终保持静止，不会受到力碰撞或加速度影响
-      shape: plane,
-      material: cannonMaterial,
-    });
+    this.bodyDesc = RigidBodyDesc.fixed();
+    this.body = world.createRigidBody(this.bodyDesc);
+    let colliderDesc = ColliderDesc.cuboid(width / 2, 0.1, height / 2);
+    world.createCollider(colliderDesc, this.body);
+
     // groundBody.position.y = -0.5;
     // 改变平面默认的方向，法线默认沿着z轴，旋转到平面向上朝着y方向
     // groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); //旋转规律类似threejs 平面
-    world.addBody(this.body);
   }
 
   setPosition = (x: number, y: number, z: number) => {
     this.mesh.position.set(x, y, z);
-    this.body.position.set(x, y, z);
+    this.body.setTranslation({ x, y, z }, false);
   };
 
   setRotation = (x: number, y: number, z: number) => {
     this.mesh.setRotationFromEuler(new Euler(x, y, z));
-    this.body.quaternion.setFromEuler(x, y, z);
+    // this.body.quaternion.setFromEuler(x, y, z);
   };
 }
 

@@ -8,12 +8,18 @@ import {
   Mesh,
   Raycaster,
   Object3D,
+  Audio,
+  Quaternion,
+  AxesHelper,
 } from "three";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import { EnemyModel } from "./enemy";
-import PointerLockControlsCannon from "./utils/pointerLockControlsCannon";
+import PointerLockControls from "./utils/PointerLockControls";
 import State from "./state";
-import WeaponLoader from "./utils/weaponLoader";
+import WeaponLoader, { weaponConfig } from "./utils/weaponLoader";
+import BulletHoleMesh from "./utils/BulletHoleMesh";
+import BulletStore from "./utils/BulletStore";
+import AudioLoader from "./utils/AudioLoader";
 
 class Weapon {
   model?: Group;
@@ -38,18 +44,25 @@ class Weapon {
   aimingEndAnimation: Tween<Vector3> | null = null;
   flashAnimation: Tween<{ opacity: number }> | null = null;
   flashMesh;
-  audio;
-  currentIndex = 0;
+  currentIndex = 1;
   loader = new WeaponLoader();
+  bulletHole = new BulletHoleMesh("decal");
+  scene: Scene;
+  audioLoader;
+  aimElement;
+  bulletRay;
+  tipsElement;
 
-  constructor(scene: Scene) {
-    this.audio = new Audio("./audio/single-shoot-ak47.wav");
+  constructor(scene: Scene, controls: PointerLockControls) {
+    this.audioLoader = new AudioLoader(controls);
     this.group = new Group();
     this.swayingGroup = new Group();
     this.recoilGroup = new Group();
+    this.scene = scene;
+    BulletStore.init();
 
-    const geometry = new PlaneGeometry(0.2, 0.2);
     const texLoader = new TextureLoader();
+    const geometry = new PlaneGeometry(0.2, 0.2);
     const texture = texLoader.load("./img/flash_shoot.png");
     const material = new MeshBasicMaterial({
       map: texture,
@@ -60,9 +73,19 @@ class Weapon {
     this.flashMesh = new Mesh(geometry, material);
     this.flashMesh.rotateY(Math.PI);
 
-    this.loader.load().then((weapons) => {
-      this.model = weapons[0].model;
-      const flashPosition = weapons[0].config.flashPosition;
+    this.aimElement = document.getElementById("aim");
+    this.bulletRay = new Raycaster(new Vector3(), new Vector3(), 0, 100);
+    this.tipsElement = document.getElementById("tips");
+  }
+
+  load() {
+    return new Promise(async (resolve) => {
+      const weapons = await this.loader.load();
+      const defaultWeapon = weapons[weaponConfig[this.currentIndex].name];
+      this.model = defaultWeapon.model;
+      // const axesHelper = new AxesHelper(150);
+      // this.model.add(axesHelper);
+      const flashPosition = defaultWeapon.config.flashPosition;
       this.flashMesh.position.set(
         flashPosition[0],
         flashPosition[1],
@@ -72,13 +95,22 @@ class Weapon {
       this.recoilGroup.add(this.model);
       this.swayingGroup.add(this.recoilGroup);
       this.group.add(this.swayingGroup);
-      scene.add(this.group);
+      this.scene.add(this.group);
+
+      await this.audioLoader.load("shooting", "./audio/single-shoot-ak47.wav");
+      await this.audioLoader.load("empty", "./audio/shoot-without-bullet.wav");
 
       // this.initSwayingAnimation();
       this.initRecoilAnimation();
       this.initAimingAnimation();
       this.initFlashAnimation();
+      resolve(1);
     });
+  }
+
+  reload() {
+    BulletStore.reload();
+    this.tipsElement!.innerHTML = "";
   }
 
   findEnemyId = (model: Object3D): number => {
@@ -91,37 +123,30 @@ class Weapon {
     return 0;
   };
 
-  isHitEnemy(controls: PointerLockControlsCannon, enemyArray: EnemyModel[]) {
-    const raycaster = new Raycaster(new Vector3(), new Vector3(), 0, 10);
-    raycaster.set(controls.yawObject.position, controls.getDirection());
-    const intersects = raycaster.intersectObjects(
-      enemyArray.map((item) => item.model.model!)
-    );
-    if (intersects.length > 0) {
-      const id = this.findEnemyId(intersects[0].object);
-      const enemy = enemyArray.find((item) => item.id === id);
-      enemy?.model.getShot();
-    }
-  }
+  beginAiming = () => {
+    this.isAiming = true;
+    this.aimElement?.classList.add("aiming");
+    // if (State.firstPerson) {
+    //   // this.swayingAnimation!.stop();
+    //   this.aimingStartAnimation!.start();
+    // }
+  };
 
-  handleMouseDown(button: number) {
-    if (button === 0) {
-      this.isShooting = true;
-    } else if (button === 2) {
-      this.isAiming = true;
-      // this.swayingAnimation!.stop();
-      this.aimingStartAnimation!.start();
-    }
-  }
+  endAiming = () => {
+    this.isAiming = false;
+    this.aimElement?.classList.remove("aiming");
+    // if (State.firstPerson) {
+    //   this.aimingEndAnimation!.start();
+    // }
+  };
 
-  handleMouseUp(button: number) {
-    if (button === 0) {
-      this.isShooting = false;
-    } else if (button === 2) {
-      this.isAiming = false;
-      this.aimingEndAnimation!.start();
-    }
-  }
+  beginShooting = () => {
+    this.isShooting = true;
+  };
+
+  endShooting = () => {
+    this.isShooting = false;
+  };
 
   generateRecoilPosition() {
     const amount = 0.01;
@@ -175,16 +200,16 @@ class Weapon {
       .easing(Easing.Quadratic.Out)
       .repeat(1)
       .yoyo(true)
-      .onUpdate(() => {
-        this.recoilGroup.rotation.x =
-          -(currentPosition.rotation * Math.PI) / 180;
-        this.recoilGroup.position.copy(
-          new Vector3(currentPosition.x, currentPosition.y, currentPosition.z)
-        );
-      })
-      // .onStart(() => {
-      //   this.recoilAnimationFinished = false;
+      // .onUpdate(() => {
+      //   this.recoilGroup.rotation.x =
+      //     -(currentPosition.rotation * Math.PI) / 180;
+      //   this.recoilGroup.position.copy(
+      //     new Vector3(currentPosition.x, currentPosition.y, currentPosition.z)
+      //   );
       // })
+      .onStart(() => {
+        this.recoilAnimationFinished = false;
+      })
       .onComplete(() => {
         this.recoilAnimationFinished = true;
       });
@@ -241,24 +266,49 @@ class Weapon {
     }
     this.currentIndex = index - 1;
     this.recoilGroup.remove(this.model!);
-    this.model = this.loader.weapons[this.currentIndex].model;
+    const weapon = this.loader.weapons[weaponConfig[this.currentIndex].name];
+    this.model = weapon.model;
     this.recoilGroup.add(this.model);
 
-    const flashPosition =
-      this.loader.weapons[this.currentIndex].config.flashPosition;
+    const flashPosition = weapon.config.flashPosition;
     this.flashMesh.position.set(
       flashPosition[0],
       flashPosition[1],
       flashPosition[2]
     );
-    
+  }
+
+  bulletCollision(controls: PointerLockControls, enemyArray: EnemyModel[]) {
+    this.bulletRay.set(
+      controls.camera.getWorldPosition(new Vector3()),
+      controls.getDirection()
+    );
+    const intersectsEnemy = this.bulletRay.intersectObjects(
+      enemyArray.map((item) => item.model.model!)
+    );
+    if (intersectsEnemy.length > 0) {
+      // shoot enemy
+      const id = this.findEnemyId(intersectsEnemy[0].object);
+      const enemy = enemyArray.find((item) => item.id === id);
+      enemy?.model.getShot();
+    } else {
+      const intersectsWorld = this.bulletRay.intersectObjects(
+        State.worldMapMeshes,
+        false
+      );
+      if (intersectsWorld.length > 0) {
+        console.log("hit");
+        // 击中world
+        this.bulletHole.create(intersectsWorld[0], this.scene!);
+      }
+    }
   }
 
   render(
-    controls: PointerLockControlsCannon,
+    controls: PointerLockControls,
     enemyArray: EnemyModel[],
     moveVelocity: Vector3,
-    handPosition: Vector3
+    rightHand: Object3D
   ) {
     if (this.model) {
       // if (!this.isMoving && moveVelocity.length() > 0) {
@@ -273,16 +323,26 @@ class Weapon {
       //   this.swayingAnimation.start();
       // }
       if (this.isShooting && this.recoilAnimationFinished) {
-        this.recoilAnimationFinished = false;
-        this.audio.currentTime = 0;
-        this.audio.play();
-        this.recoilAnimation!.start();
-        this.flashAnimation!.start();
-        this.isHitEnemy(controls, enemyArray);
+        if (BulletStore.count === 0) {
+          this.audioLoader.play("empty");
+          this.tipsElement!.innerText = "按 R 键更换弹夹";
+        } else {
+          this.audioLoader.play("shooting");
+          BulletStore.decrease();
+          this.recoilAnimation!.start();
+          this.flashAnimation!.start();
+          this.bulletCollision(controls, enemyArray);
+        }
       }
 
-      // this.group.rotation.copy(controls.yawObject.rotation);
+      const handPosition = new Vector3();
+      const handQuaternion = new Quaternion();
+      rightHand.getWorldPosition(handPosition);
+      rightHand.getWorldQuaternion(handQuaternion);
+      // this.group.rotation.copy(controls.cameraGroup.rotation);
       this.group.position.copy(handPosition); // 枪跟随手(tps)
+      this.group.quaternion.copy(handQuaternion);
+      this.group.rotateX(-Math.PI / 2).rotateZ(-Math.PI / 2);
     }
   }
 }
