@@ -13,7 +13,7 @@ import {
 import GUI from "lil-gui";
 import { World } from "@dimforge/rapier3d-compat";
 import PointerLockControls from "../utils/PointerLockControls";
-import Weapon from "../weapon";
+import Weapon from "../Weapon";
 import { EnemyModel } from "../enemy";
 import State from "../state";
 import PlayerState, { STATE } from "./State";

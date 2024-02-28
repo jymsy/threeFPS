@@ -64,7 +64,6 @@ const init = async () => {
   const scene = new ThreeScene();
   await initRapier();
   const world = new World({ x: 0.0, y: -9.81, z: 0.0 });
-  // const material = new Material(world);
   // const floor = new Floor(world, scene);
   // floor.setPosition(0, -2, 0);
   // floor.setRotation(-Math.PI / 2, 0, 0);
