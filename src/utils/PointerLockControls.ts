@@ -12,7 +12,7 @@ import {
   Mesh,
   Object3D,
 } from "three";
-import { Ray, World, Collider } from "@dimforge/rapier3d-compat";
+import { Ray, World, Collider, Ball } from "@dimforge/rapier3d-compat";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import State from "../state";
 
@@ -42,12 +42,6 @@ class PointerLockControls extends EventDispatcher {
 
     this.camera = camera;
     this.world = world;
-    // const geometry = new BoxGeometry(1, 0.1, 1);
-    // const material = new MeshLambertMaterial({
-    //   color: 0xff0000,
-    // });
-    // const box = new Mesh(geometry, material);
-
     this.euler.order = "YXZ";
     this.cameraGroup.add(camera);
     this.cameraGroup.add(this.cameraOrigin);
@@ -169,30 +163,34 @@ class PointerLockControls extends EventDispatcher {
 
   calculateSight = (position: Vector3, playerCollider: Collider) => {
     if (!State.firstPerson) {
+      const shape = new Ball(0.2);
+
       const dest = this.cameraOrigin.getWorldPosition(new Vector3());
       const origin = new Vector3(position.x, position.y + 1.2, position.z);
-      this.eyeRay.origin = origin;
-      this.eyeRay.dir = dest.sub(origin).normalize();
+      const dir = dest.sub(origin).normalize();
 
-      const hit = this.world.castRay(
-        this.eyeRay,
+      const hit = this.world.castShape(
+        origin,
+        { w: 1.0, x: 0.0, y: 0.0, z: 0.0 },
+        dir,
+        shape,
         1.7,
-        false,
+        true,
         undefined,
         undefined,
         playerCollider // ignore player collider
       );
+
       if (hit !== null) {
-        let hitPoint = this.eyeRay.pointAt(hit.toi);
         const newPostion = this.cameraGroup.worldToLocal(
-          new Vector3(hitPoint.x, hitPoint.y, hitPoint.z)
+          origin.add(dir.multiplyScalar(hit.toi))
         );
         this.camera.position.lerp(
           new Vector3(newPostion.x, newPostion.y, newPostion.z),
-          0.1
+          0.2
         );
       } else if (!this.camera.position.equals(this.cameraOrigin.position)) {
-        this.camera.position.lerp(this.cameraOrigin.position, 0.1);
+        this.camera.position.lerp(this.cameraOrigin.position, 0.2);
       }
     }
   };
