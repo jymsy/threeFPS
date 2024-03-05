@@ -1,5 +1,4 @@
 import {
-  LoadingManager,
   WebGLRenderer,
   Scene as ThreeScene,
   AxesHelper,
@@ -40,14 +39,6 @@ const init = async () => {
   // 渲染函数
   const render = () => {
     world.render();
-    // if (controls.enabled) {
-    //   world.step(); //更新物理计算
-    //   TWEEN.update();
-    //   // debugRapier(debugLines, scene, world);
-    //   player.render(enemyArray);
-    //   // enemy.render();
-
-    // }
     renderer.render(world.scene, camera.getCamera()); //执行渲染操作
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };

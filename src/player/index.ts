@@ -12,7 +12,6 @@ import {
 } from "three";
 import GUI from "lil-gui";
 import Weapon from "../Weapon";
-import { EnemyModel } from "../enemy";
 import State from "../state";
 import PlayerState, { STATE } from "./State";
 import CapsuleCollider from "../utils/CapsuleCollider";
