@@ -18,19 +18,13 @@ class ModelLoader {
   loader;
   scene;
   current = "";
-  models: Record<string, Object3D> = {};
 
   constructor(scene: Scene) {
     this.loader = new GLTFLoader();
     this.scene = scene;
   }
 
-  load = (
-    name: string,
-    path: string,
-    scale: number,
-    traverse?: (node: Object3D) => void
-  ) => {
+  load = (path: string, scale: number, traverse?: (node: Object3D) => void) => {
     return new Promise<LoadResult>(async (resolve) => {
       this.loader.load(path, async (gltf) => {
         // const helper = new SkeletonHelper(gltf.scene);
@@ -48,25 +42,10 @@ class ModelLoader {
           }
         });
 
-        this.models[name] = gltf.scene;
+        this.scene.add(gltf.scene);
         resolve({ model: gltf.scene, animations: gltf.animations });
       });
     });
-  };
-
-  use = (name: string) => {
-    Object.entries(this.models).forEach(([key, model]) => {
-      if (name === key) {
-        this.scene.add(model);
-        this.current = name;
-      } else {
-        this.scene.remove(model);
-      }
-    });
-  };
-
-  getCurrentModel = () => {
-    return this.models[this.current];
   };
 }
 

@@ -11,14 +11,13 @@ import {
   Quaternion,
 } from "three";
 import GUI from "lil-gui";
-import { World } from "@dimforge/rapier3d-compat";
-import PointerLockControls from "../utils/PointerLockControls";
 import Weapon from "../Weapon";
 import { EnemyModel } from "../enemy";
 import State from "../state";
 import PlayerState, { STATE } from "./State";
 import CapsuleCollider from "../utils/CapsuleCollider";
-import ModelLoader from "./ModelLoader";
+import IRenderItem from "../interfaces/IRenderItem";
+import World from '../World';
 
 const JUMP_VELOCITY = 0.11;
 const VELOCITY_FACTOR = 4;
@@ -27,11 +26,10 @@ const MOVING_BACKWARD = 2;
 const MOVING_LEFT = 4;
 const MOVING_RIGHT = 8;
 
-class Player {
+class Player implements IRenderItem {
   collider;
   moveBit = 0;
   clock = new Clock();
-  pointerControl;
   moveVelocity = new Vector3(0, -0.1, 0);
   weapon: Weapon;
   crouch = false; // 下蹲
@@ -45,20 +43,18 @@ class Player {
   gui = new GUI();
   state?: PlayerState;
   factor = 0;
-  scene;
   rayHit = false;
   rayCaster;
   delta = 0;
-  modelLoader;
   spine?: Object3D;
+  world;
+  model?: Object3D;
 
-  constructor(world: World, pointerControl: PointerLockControls, scene: Scene) {
-    this.scene = scene;
-    this.pointerControl = pointerControl;
-    this.collider = new CapsuleCollider(world);
+  constructor(world: World) {
+    this.world = world;
+    this.collider = new CapsuleCollider(world.physicsWorld);
 
-    this.weapon = new Weapon(scene, pointerControl);
-    this.modelLoader = new ModelLoader(scene);
+    this.weapon = new Weapon(world.scene, world.controls);
 
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
@@ -75,8 +71,7 @@ class Player {
 
   load() {
     return new Promise(async (resolve) => {
-      const { model, animations } = await this.modelLoader.load(
-        "third-view",
+      const { model, animations } = await this.world.modelLoader.load(
         "gltf/rifle.glb",
         0.7,
         (node) => {
@@ -93,8 +88,9 @@ class Player {
         }
       );
 
+      this.model = model;
+
       console.log(animations);
-      this.modelLoader.use("third-view");
       this.state = new PlayerState(
         animations,
         model,
@@ -152,10 +148,10 @@ class Player {
   }
 
   handleMouseDown = (event: MouseEvent) => {
-    if (this.pointerControl.enabled) {
+    if (this.world.controls.enabled) {
       if (event.button === 2) {
         this.weapon.beginAiming();
-        this.pointerControl.beginAiming();
+        this.world.controls.beginAiming();
       } else if (event.button === 0) {
         this.weapon.beginShooting();
         this.state?.playAnimation(
@@ -168,10 +164,10 @@ class Player {
   };
 
   handleMouseUp = (event: MouseEvent) => {
-    if (this.pointerControl.enabled) {
+    if (this.world.controls.enabled) {
       if (event.button === 2) {
         this.weapon.endAiming();
-        this.pointerControl.endAiming();
+        this.world.controls.endAiming();
         if (this.weapon.isShooting) {
           this.weapon.endShooting();
         }
@@ -184,7 +180,7 @@ class Player {
   };
 
   onKeyDown = (event: KeyboardEvent) => {
-    if (!this.pointerControl.enabled) {
+    if (!this.world.controls.enabled) {
       return;
     }
     switch (event.key) {
@@ -232,7 +228,7 @@ class Player {
 
   changeView = () => {
     State.firstPerson = !State.firstPerson;
-    this.pointerControl.changeView(this.weapon.isAiming);
+    this.world.controls.changeView(this.weapon.isAiming);
   };
 
   playAnimation() {
@@ -271,7 +267,7 @@ class Player {
   }
 
   onKeyUp = (event: KeyboardEvent) => {
-    if (!this.pointerControl.enabled) {
+    if (!this.world.controls.enabled) {
       return;
     }
     switch (event.key) {
@@ -304,7 +300,7 @@ class Player {
     return this.rayHit;
   };
 
-  render(enemyArray: EnemyModel[]) {
+  render() {
     this.delta = this.clock.getDelta();
     this.factor = VELOCITY_FACTOR * this.delta;
 
@@ -316,7 +312,7 @@ class Player {
     this.moveVelocity.x =
       (((this.moveBit >> 2) & 1) - ((this.moveBit >> 3) & 1)) * this.factor;
     this.moveVelocity.y -= 9.8 * this.factor * 0.01;
-    this.moveVelocity.applyEuler(new Euler(0, this.pointerControl.euler.y, 0));
+    this.moveVelocity.applyEuler(new Euler(0, this.world.controls.euler.y, 0));
 
     // update body position
     this.collider.controller.computeColliderMovement(
@@ -336,13 +332,12 @@ class Player {
     }
 
     // update model position
-    const model = this.modelLoader.getCurrentModel();
-    if (model) {
-      model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
-      model.rotation.y = this.pointerControl.euler.y;
+    if (this.model) {
+      this.model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
+      this.model.rotation.y = this.world.controls.euler.y;
 
       const axis = new Vector3(1, 0, 0).applyEuler(
-        new Euler(0, this.pointerControl.euler.y, 0)
+        new Euler(0, this.world.controls.euler.y, 0)
       );
       // this.spine!.updateWorldMatrix(true, true);
       const invWorldQuaternion = this.spine!.getWorldQuaternion(
@@ -351,18 +346,18 @@ class Player {
       axis.applyQuaternion(invWorldQuaternion);
 
       let deltaLocalQuaternion = new Quaternion();
-      deltaLocalQuaternion.setFromAxisAngle(axis, this.pointerControl.euler.x);
+      deltaLocalQuaternion.setFromAxisAngle(axis, this.world.controls.euler.x);
       this.spine!.quaternion.multiply(deltaLocalQuaternion);
     }
 
     this.weapon.render(
-      this.pointerControl,
-      enemyArray,
+      this.world.controls,
+      [],
       this.moveVelocity,
       this.rightHand!
     );
 
-    this.pointerControl.render(model.position, this.collider.collider);
+    this.world.controls.render(this.model!.position, this.collider.collider);
   }
 }
 
