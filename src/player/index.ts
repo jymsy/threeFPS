@@ -357,6 +357,8 @@ class Player implements IRenderItem {
     );
 
     this.world.controls.render(this.model!.position, this.collider.collider);
+
+    this.world.detectNpc(this.model!.position);
   }
 }
 

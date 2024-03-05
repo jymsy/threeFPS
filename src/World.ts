@@ -12,6 +12,7 @@ import {
   LineBasicMaterial,
   BufferGeometry,
   BufferAttribute,
+  Vector3,
 } from "three";
 import Stats from "three/examples/jsm/libs/stats.module";
 import PointerLockControls from "./utils/PointerLockControls";
@@ -57,6 +58,7 @@ class World {
   controls;
   renderList: IRenderItem[] = [];
   modelLoader;
+  npcList: Npc[] = [];
 
   constructor(path: string, camera: Camera) {
     this.path = path;
@@ -115,10 +117,18 @@ class World {
 
         const npc = new Npc(this);
         await npc.load();
+        this.npcList.push(npc);
         this.renderList.push(npc);
         resolve(player);
       });
     });
+  };
+
+  detectNpc = (playerPosition: Vector3) => {
+    const npc = this.npcList.find((npc) => npc.interactionArea(playerPosition));
+    if (npc) {
+      
+    }
   };
 
   render = () => {
