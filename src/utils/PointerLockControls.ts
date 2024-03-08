@@ -10,6 +10,7 @@ import {
   BoxGeometry,
   MeshLambertMaterial,
   Mesh,
+  AxesHelper,
   Object3D,
 } from "three";
 import { Ray, World, Collider, Ball } from "@dimforge/rapier3d-compat";
@@ -29,7 +30,7 @@ class PointerLockControls extends EventDispatcher {
   quaternion;
   enabled = false;
   clock = new Clock();
-  euler = new Euler();
+  euler = new Euler(0, 0, 0, "YXZ");
   offset = new Vector3();
   aimingStartAnimation: Tween<Vector3> | null = null;
   aimingEndAnimation: Tween<Vector3> | null = null;
@@ -42,9 +43,10 @@ class PointerLockControls extends EventDispatcher {
 
     this.camera = camera;
     this.world = world;
-    this.euler.order = "YXZ";
     this.cameraGroup.add(camera);
     this.cameraGroup.add(this.cameraOrigin);
+    // const axesHelper = new AxesHelper(150);
+    // this.camera.add(axesHelper);
     camera.position.copy(CAMERA_INIT_POSITION);
     this.cameraOrigin.position.copy(CAMERA_INIT_POSITION);
     this.quaternion = new Quaternion();

@@ -44,6 +44,8 @@ const init = async () => {
   };
 
   await world.load();
+
+  // loading finished
   const loading = document.getElementById("loading")!;
   loading.style.display = "none";
   const instructions = document.getElementById("instructions")!;
