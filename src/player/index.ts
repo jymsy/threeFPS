@@ -48,6 +48,7 @@ class Player implements IRenderItem {
   spine?: Object3D;
   world;
   model?: Object3D;
+  interactive = false; // 可交互
 
   constructor(world: World) {
     this.world = world;
@@ -207,6 +208,10 @@ class Player implements IRenderItem {
       case "r":
         this.weapon.reload();
         return;
+      case "f":
+        if (this.interactive) {
+        }
+        break;
       // case "c":
       //   this.crouch = true;
       //   this.pointerControl.setOffset(new Vector3(0, -0.2, 0));
@@ -357,8 +362,7 @@ class Player implements IRenderItem {
     );
 
     this.world.controls.render(this.model!.position, this.collider.collider);
-
-    this.world.detectNpc(this.model!.position);
+    this.interactive = this.world.detectNpc(this.model!.position);
   }
 }
 

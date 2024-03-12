@@ -59,6 +59,7 @@ class World {
   renderList: IRenderItem[] = [];
   modelLoader;
   npcList: Npc[] = [];
+  interactionElement;
 
   constructor(path: string, camera: Camera) {
     this.path = path;
@@ -80,6 +81,8 @@ class World {
     this.modelLoader = new ModelLoader(this.scene);
     this.stats = new Stats();
     document.body.appendChild(this.stats.domElement);
+
+    this.interactionElement = document.getElementById("interaction");
   }
 
   load = () => {
@@ -127,7 +130,11 @@ class World {
   detectNpc = (playerPosition: Vector3) => {
     const npc = this.npcList.find((npc) => npc.interactionArea(playerPosition));
     if (npc) {
-      
+      this.interactionElement!.style.visibility = "visible";
+      return true;
+    } else {
+      this.interactionElement!.style.visibility = "hidden";
+      return false;
     }
   };
 
@@ -138,7 +145,6 @@ class World {
     TWEEN.update();
     // debugRapier(debugLines, scene, world);
     this.renderList.forEach((item) => item.render());
-
     // }
   };
 }
