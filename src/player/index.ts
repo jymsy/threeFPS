@@ -17,6 +17,7 @@ import PlayerState, { STATE } from "./State";
 import CapsuleCollider from "../utils/CapsuleCollider";
 import IRenderItem from "../interfaces/IRenderItem";
 import World from '../World';
+import IInputListener from "../interfaces/IInputListener";
 
 const JUMP_VELOCITY = 0.11;
 const VELOCITY_FACTOR = 4;
@@ -25,7 +26,7 @@ const MOVING_BACKWARD = 2;
 const MOVING_LEFT = 4;
 const MOVING_RIGHT = 8;
 
-class Player implements IRenderItem {
+class Player implements IRenderItem, IInputListener {
   collider;
   moveBit = 0;
   clock = new Clock();
@@ -56,8 +57,6 @@ class Player implements IRenderItem {
 
     this.weapon = new Weapon(world.scene, world.controls);
 
-    document.addEventListener("keydown", this.onKeyDown);
-    document.addEventListener("keyup", this.onKeyUp);
     document.addEventListener("mousedown", this.handleMouseDown);
     document.addEventListener("mouseup", this.handleMouseUp);
 
@@ -67,6 +66,8 @@ class Player implements IRenderItem {
       0,
       0.64
     );
+
+    this.world.inputManager.register(this);
   }
 
   load() {
@@ -109,43 +110,43 @@ class Player implements IRenderItem {
     });
   }
 
-  initGui(bones: Bone[]) {
-    for (let i = 0; i < bones.length; i++) {
-      const bone = bones[i];
+  // initGui(bones: Bone[]) {
+  //   for (let i = 0; i < bones.length; i++) {
+  //     const bone = bones[i];
 
-      const folder = this.gui.addFolder("Bone " + bone.name);
+  //     const folder = this.gui.addFolder("Bone " + bone.name);
 
-      folder.add(
-        bone.position,
-        "x",
-        -100 + bone.position.x,
-        100 + bone.position.x
-      );
-      folder.add(
-        bone.position,
-        "y",
-        -100 + bone.position.y,
-        100 + bone.position.y
-      );
-      folder.add(
-        bone.position,
-        "z",
-        -100 + bone.position.z,
-        100 + bone.position.z
-      );
+  //     folder.add(
+  //       bone.position,
+  //       "x",
+  //       -100 + bone.position.x,
+  //       100 + bone.position.x
+  //     );
+  //     folder.add(
+  //       bone.position,
+  //       "y",
+  //       -100 + bone.position.y,
+  //       100 + bone.position.y
+  //     );
+  //     folder.add(
+  //       bone.position,
+  //       "z",
+  //       -100 + bone.position.z,
+  //       100 + bone.position.z
+  //     );
 
-      folder.add(bone.rotation, "x", -Math.PI, Math.PI);
-      folder.add(bone.rotation, "y", -Math.PI, Math.PI);
-      folder.add(bone.rotation, "z", -Math.PI, Math.PI);
-      folder.controllers[0].name("position.x");
-      folder.controllers[1].name("position.y");
-      folder.controllers[2].name("position.z");
+  //     folder.add(bone.rotation, "x", -Math.PI, Math.PI);
+  //     folder.add(bone.rotation, "y", -Math.PI, Math.PI);
+  //     folder.add(bone.rotation, "z", -Math.PI, Math.PI);
+  //     folder.controllers[0].name("position.x");
+  //     folder.controllers[1].name("position.y");
+  //     folder.controllers[2].name("position.z");
 
-      folder.controllers[3].name("rotation.x");
-      folder.controllers[4].name("rotation.y");
-      folder.controllers[5].name("rotation.z");
-    }
-  }
+  //     folder.controllers[3].name("rotation.x");
+  //     folder.controllers[4].name("rotation.y");
+  //     folder.controllers[5].name("rotation.z");
+  //   }
+  // }
 
   handleMouseDown = (event: MouseEvent) => {
     if (this.world.controls.enabled) {
@@ -179,11 +180,8 @@ class Player implements IRenderItem {
     }
   };
 
-  onKeyDown = (event: KeyboardEvent) => {
-    if (!this.world.controls.enabled) {
-      return;
-    }
-    switch (event.key) {
+  handleKeyDown = (key: string) => {
+    switch (key) {
       case "w":
         this.moveBit |= MOVING_FORWARD;
         break;
@@ -210,6 +208,8 @@ class Player implements IRenderItem {
         return;
       case "f":
         if (this.interactive) {
+          this.world.inputElement!.style.visibility = "visible";
+          this.world.inputElement!.focus();
         }
         break;
       // case "c":
@@ -218,11 +218,8 @@ class Player implements IRenderItem {
       //   break;
       case "1":
       case "2":
-        this.weapon.switchWeapon(Number(event.key));
+        this.weapon.switchWeapon(Number(key));
         return;
-      // this.updateArmRotations(
-      //   this.weapon.loader.weapons[this.weapon.currentIndex].config.type
-      // );
       default:
         break;
     }
@@ -270,11 +267,8 @@ class Player implements IRenderItem {
     }
   }
 
-  onKeyUp = (event: KeyboardEvent) => {
-    if (!this.world.controls.enabled) {
-      return;
-    }
-    switch (event.key) {
+  handleKeyUp = (key: string) => {
+    switch (key) {
       case "w":
         this.moveBit ^= MOVING_FORWARD;
         break;

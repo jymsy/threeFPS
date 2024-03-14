@@ -17,8 +17,8 @@ class CapsuleCollider {
     this.collider = world.createCollider(characterColliderDesc, this.body);
 
     this.controller = world.createCharacterController(0.03);
-    this.controller.enableAutostep(0.3, 0.1, true);
-    // this.controller.enableSnapToGround(0.1);
+    this.controller.enableAutostep(0.3, 0.2, true);
+    // this.controller.enableSnapToGround(0.3);
   }
 }
 

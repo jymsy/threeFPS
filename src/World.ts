@@ -26,6 +26,7 @@ import initEventHandlers from "./event";
 import IRenderItem from "./interfaces/IRenderItem";
 import ModelLoader from "./utils/ModelLoader";
 import Npc from "./npc";
+import InputManager from "./utils/InputManager";
 
 const debugRapier = (
   lines: LineSegments | null,
@@ -60,6 +61,8 @@ class World {
   modelLoader;
   npcList: Npc[] = [];
   interactionElement;
+  inputElement;
+  inputManager;
 
   constructor(path: string, camera: Camera) {
     this.path = path;
@@ -78,11 +81,14 @@ class World {
       this.physicsWorld
     );
     initEventHandlers(this.controls);
+    this.inputManager = new InputManager(this.controls);
+
     this.modelLoader = new ModelLoader(this.scene);
     this.stats = new Stats();
-    document.body.appendChild(this.stats.domElement);
+    document.body.appendChild(this.stats.dom);
 
     this.interactionElement = document.getElementById("interaction");
+    this.inputElement = document.getElementById("input");
   }
 
   load = () => {
@@ -140,12 +146,12 @@ class World {
 
   render = () => {
     this.stats.update();
-    // if (this.controls.enabled) {
-    this.physicsWorld.step(); //更新物理计算
-    TWEEN.update();
-    // debugRapier(debugLines, scene, world);
-    this.renderList.forEach((item) => item.render());
-    // }
+    if (this.controls.enabled) {
+      this.physicsWorld.step(); //更新物理计算
+      TWEEN.update();
+      // debugRapier(debugLines, scene, world);
+      this.renderList.forEach((item) => item.render());
+    }
   };
 }
 
