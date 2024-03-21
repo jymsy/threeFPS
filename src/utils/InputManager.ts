@@ -20,7 +20,7 @@ export default class InputManager {
       return;
     }
     this.inputListeners.forEach((listener) => {
-      listener.handleKeyDown?.(event.key);
+      listener.handleKeyDown?.(event.key, event);
     });
   };
 
@@ -29,7 +29,7 @@ export default class InputManager {
       return;
     }
     this.inputListeners.forEach((listener) => {
-      listener.handleKeyUp?.(event.key);
+      listener.handleKeyUp?.(event.key, event);
     });
   };
 }

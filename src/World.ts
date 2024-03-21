@@ -1,6 +1,6 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import {
-  World as PyhsicsWorld,
+  World as PhysicsWorld,
   RigidBodyDesc,
 } from "@dimforge/rapier3d-compat";
 import TWEEN from "@tweenjs/tween.js";
@@ -22,34 +22,32 @@ import Player from "./player";
 import State from "./state";
 import initSky from "./Sky";
 import Camera from "./Camera";
-import initEventHandlers from "./event";
 import IRenderItem from "./interfaces/IRenderItem";
 import ModelLoader from "./utils/ModelLoader";
 import Npc from "./npc";
 import InputManager from "./utils/InputManager";
 
-const debugRapier = (
-  lines: LineSegments | null,
-  scene: ThreeScene,
-  world: PyhsicsWorld
-) => {
-  if (!lines) {
+// for debug
+let debugLines: LineSegments | null = null;
+
+const debugRapier = (scene: ThreeScene, world: PhysicsWorld) => {
+  if (!debugLines) {
     let material = new LineBasicMaterial({
       color: 0xffffff,
       vertexColors: true,
     });
     let geometry = new BufferGeometry();
-    lines = new LineSegments(geometry, material);
-    scene.add(lines);
+    debugLines = new LineSegments(geometry, material);
+    scene.add(debugLines);
   }
 
   const { vertices, colors } = world.debugRender();
-  lines.geometry.setAttribute("position", new BufferAttribute(vertices, 3));
-  lines.geometry.setAttribute("color", new BufferAttribute(colors, 4));
+  debugLines.geometry.setAttribute(
+    "position",
+    new BufferAttribute(vertices, 3)
+  );
+  debugLines.geometry.setAttribute("color", new BufferAttribute(colors, 4));
 };
-
-// for debug
-let debugLines: LineSegments | null = null;
 
 class World {
   private path;
@@ -61,12 +59,13 @@ class World {
   modelLoader;
   npcList: Npc[] = [];
   interactionElement;
+  inputWrapperElement;
   inputElement;
   inputManager;
 
   constructor(path: string, camera: Camera) {
     this.path = path;
-    this.physicsWorld = new PyhsicsWorld({ x: 0.0, y: -9.81, z: 0.0 });
+    this.physicsWorld = new PhysicsWorld({ x: 0.0, y: -9.81, z: 0.0 });
     this.scene = new ThreeScene();
 
     initSky(this.scene);
@@ -80,7 +79,6 @@ class World {
       camera.getCamera(),
       this.physicsWorld
     );
-    initEventHandlers(this.controls);
     this.inputManager = new InputManager(this.controls);
 
     this.modelLoader = new ModelLoader(this.scene);
@@ -88,7 +86,24 @@ class World {
     document.body.appendChild(this.stats.dom);
 
     this.interactionElement = document.getElementById("interaction");
+    this.inputWrapperElement = document.getElementById("input-wrapper");
     this.inputElement = document.getElementById("input");
+    const instructions = document.getElementById("instructions")!;
+    const blocker = document.getElementById("blocker")!;
+
+    instructions.addEventListener("click", () => {
+      this.controls.lock();
+    });
+    
+    this.controls.addEventListener("lock", () => {
+      instructions.style.display = "none";
+      blocker.style.display = "none";
+    });
+  
+    this.controls.addEventListener("unlock", () => {
+      blocker.style.display = "block";
+      instructions.style.display = "flex";
+    });
   }
 
   load = () => {
@@ -149,7 +164,7 @@ class World {
     if (this.controls.enabled) {
       this.physicsWorld.step(); //更新物理计算
       TWEEN.update();
-      // debugRapier(debugLines, scene, world);
+      // debugRapier(scene, world);
       this.renderList.forEach((item) => item.render());
     }
   };

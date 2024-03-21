@@ -50,6 +50,7 @@ class Player implements IRenderItem, IInputListener {
   world;
   model?: Object3D;
   interactive = false; // 可交互
+  inputting = false;
 
   constructor(world: World) {
     this.world = world;
@@ -180,7 +181,12 @@ class Player implements IRenderItem, IInputListener {
     }
   };
 
-  handleKeyDown = (key: string) => {
+  handleKeyDown = (key: string, event: KeyboardEvent) => {
+    if (this.inputting) {
+      return;
+    } else {
+      event.preventDefault();
+    }
     switch (key) {
       case "w":
         this.moveBit |= MOVING_FORWARD;
@@ -208,18 +214,20 @@ class Player implements IRenderItem, IInputListener {
         return;
       case "f":
         if (this.interactive) {
-          this.world.inputElement!.style.visibility = "visible";
+          this.world.inputWrapperElement!.style.visibility = "visible";
           this.world.inputElement!.focus();
+          this.inputting = true;
+          this.world.controls.unlock();
         }
         break;
       // case "c":
       //   this.crouch = true;
       //   this.pointerControl.setOffset(new Vector3(0, -0.2, 0));
       //   break;
-      case "1":
-      case "2":
-        this.weapon.switchWeapon(Number(key));
-        return;
+      // case "1":
+      // case "2":
+      //   this.weapon.switchWeapon(Number(key));
+      //   return;
       default:
         break;
     }
@@ -268,6 +276,9 @@ class Player implements IRenderItem, IInputListener {
   }
 
   handleKeyUp = (key: string) => {
+    if (this.inputting) {
+      return;
+    }
     switch (key) {
       case "w":
         this.moveBit ^= MOVING_FORWARD;

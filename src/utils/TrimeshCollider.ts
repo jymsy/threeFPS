@@ -16,17 +16,6 @@ class TrimeshCollider {
     });
     let body = world.createRigidBody(bodyDesc);
 
-    // this.body = new Body({
-    //   mass: 0,
-    //   position: new Vec3(mesh.position.x, mesh.position.y, mesh.position.z),
-    //   quaternion: new Quaternion(
-    //     quaternion.x,
-    //     quaternion.y,
-    //     quaternion.z,
-    //     quaternion.w
-    //   ),
-    //   material,
-    // });
     // // mesh.material.color = new Color(1, 0, 0);
     // // mesh.material.wireframe = true;
     const position = mesh.geometry.attributes.position;
