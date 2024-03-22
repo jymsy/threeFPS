@@ -49,8 +49,7 @@ class Player implements IRenderItem, IInputListener {
   spine?: Object3D;
   world;
   model?: Object3D;
-  interactive = false; // 可交互
-  inputting = false;
+  nearNpc = false;
 
   constructor(world: World) {
     this.world = world;
@@ -182,7 +181,7 @@ class Player implements IRenderItem, IInputListener {
   };
 
   handleKeyDown = (key: string, event: KeyboardEvent) => {
-    if (this.inputting) {
+    if (this.world.interactive) {
       return;
     } else {
       event.preventDefault();
@@ -213,10 +212,10 @@ class Player implements IRenderItem, IInputListener {
         this.weapon.reload();
         return;
       case "f":
-        if (this.interactive) {
+        if (this.nearNpc) {
           this.world.inputWrapperElement!.style.visibility = "visible";
           this.world.inputElement!.focus();
-          this.inputting = true;
+          this.world.interactive = true;
           this.world.controls.unlock();
         }
         break;
@@ -276,7 +275,7 @@ class Player implements IRenderItem, IInputListener {
   }
 
   handleKeyUp = (key: string) => {
-    if (this.inputting) {
+    if (this.world.interactive) {
       return;
     }
     switch (key) {
@@ -367,7 +366,7 @@ class Player implements IRenderItem, IInputListener {
     );
 
     this.world.controls.render(this.model!.position, this.collider.collider);
-    this.interactive = this.world.detectNpc(this.model!.position);
+    this.nearNpc = this.world.detectNpc(this.model!.position);
   }
 }
 

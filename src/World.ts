@@ -58,6 +58,8 @@ class World {
   inputWrapperElement;
   inputElement;
   inputManager;
+  interactive = false;
+  submitBtn;
 
   constructor(path: string, aspect: number) {
     this.path = path;
@@ -84,6 +86,12 @@ class World {
     this.interactionElement = document.getElementById("interaction");
     this.inputWrapperElement = document.getElementById("input-wrapper");
     this.inputElement = document.getElementById("input");
+    this.submitBtn = document.getElementById("submit")!;
+    this.submitBtn.addEventListener("click", () => {
+      this.inputWrapperElement!.style.visibility = "hidden";
+      this.interactive = false;
+      this.controls.lock();
+    });
   }
 
   load = () => {
@@ -144,7 +152,7 @@ class World {
     });
 
     this.controls.addEventListener("unlock", () => {
-      if (player.inputting) {
+      if (this.interactive) {
         return;
       }
       blocker.style.display = "block";
@@ -165,7 +173,7 @@ class World {
 
   render = () => {
     this.stats.update();
-    if (this.controls.enabled) {
+    if (this.controls.enabled || this.interactive) {
       this.physicsWorld.step(); //更新物理计算
       TWEEN.update();
       // debugRapier(scene, world);
