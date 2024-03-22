@@ -38,16 +38,21 @@ class PointerLockControls extends EventDispatcher {
   world;
   cameraOrigin = new Object3D(); // for camera raycast
 
-  constructor(scene: Scene, camera: PerspectiveCamera, world: World) {
+  constructor(scene: Scene, world: World, aspect: number) {
     super();
 
-    this.camera = camera;
+    this.camera = new PerspectiveCamera(50, aspect, 0.05, 3000);
+    //相机在Three.js三维坐标系中的位置
+    // 根据需要设置相机位置具体值
+    this.camera.position.set(0, 0, 0);
+    this.camera.lookAt(0, 0, 1);
+
     this.world = world;
-    this.cameraGroup.add(camera);
+    this.cameraGroup.add(this.camera);
     this.cameraGroup.add(this.cameraOrigin);
     // const axesHelper = new AxesHelper(150);
     // this.camera.add(axesHelper);
-    camera.position.copy(CAMERA_INIT_POSITION);
+    this.camera.position.copy(CAMERA_INIT_POSITION);
     this.cameraOrigin.position.copy(CAMERA_INIT_POSITION);
     this.quaternion = new Quaternion();
 

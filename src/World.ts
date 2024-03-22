@@ -63,7 +63,7 @@ class World {
   inputElement;
   inputManager;
 
-  constructor(path: string, camera: Camera) {
+  constructor(path: string, aspect: number) {
     this.path = path;
     this.physicsWorld = new PhysicsWorld({ x: 0.0, y: -9.81, z: 0.0 });
     this.scene = new ThreeScene();
@@ -76,8 +76,8 @@ class World {
 
     this.controls = new PointerLockControls(
       this.scene,
-      camera.getCamera(),
-      this.physicsWorld
+      this.physicsWorld,
+      aspect
     );
     this.inputManager = new InputManager(this.controls);
 
@@ -88,22 +88,6 @@ class World {
     this.interactionElement = document.getElementById("interaction");
     this.inputWrapperElement = document.getElementById("input-wrapper");
     this.inputElement = document.getElementById("input");
-    const instructions = document.getElementById("instructions")!;
-    const blocker = document.getElementById("blocker")!;
-
-    instructions.addEventListener("click", () => {
-      this.controls.lock();
-    });
-    
-    this.controls.addEventListener("lock", () => {
-      instructions.style.display = "none";
-      blocker.style.display = "none";
-    });
-  
-    this.controls.addEventListener("unlock", () => {
-      blocker.style.display = "block";
-      instructions.style.display = "flex";
-    });
   }
 
   load = () => {
@@ -143,8 +127,32 @@ class World {
         await npc.load();
         this.npcList.push(npc);
         this.renderList.push(npc);
+
+        this.handleEvent(player);
         resolve(player);
       });
+    });
+  };
+
+  handleEvent = (player: Player) => {
+    const instructions = document.getElementById("instructions")!;
+    const blocker = document.getElementById("blocker")!;
+
+    instructions.addEventListener("click", () => {
+      this.controls.lock();
+    });
+
+    this.controls.addEventListener("lock", () => {
+      instructions.style.display = "none";
+      blocker.style.display = "none";
+    });
+
+    this.controls.addEventListener("unlock", () => {
+      if (player.inputting) {
+        return;
+      }
+      blocker.style.display = "block";
+      instructions.style.display = "flex";
     });
   };
 

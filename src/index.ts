@@ -13,7 +13,6 @@ import {
 import { init as initRapier } from "@dimforge/rapier3d-compat";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import Camera from "./Camera";
 import World from "./World";
 
 const init = async () => {
@@ -21,7 +20,6 @@ const init = async () => {
   const height = window.innerHeight; //窗口文档显示区的高度作为画布高度
   // 创建渲染器对象
   const renderer = new WebGLRenderer({ antialias: true }); // 抗锯齿
-  const camera = new Camera(width / height);
 
   renderer.setPixelRatio(window.devicePixelRatio); //设置设备像素比。通常用于避免HiDPI设备上绘图模糊
   renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
@@ -32,14 +30,14 @@ const init = async () => {
   renderer.shadowMap.type = PCFSoftShadowMap;
 
   await initRapier();
-  const world = new World("gltf/de_dust.glb", camera);
+  const world = new World("gltf/de_dust.glb", width / height);
 
   document.getElementById("webgl")!.appendChild(renderer.domElement);
 
   // 渲染函数
   const render = () => {
     world.render();
-    renderer.render(world.scene, camera.getCamera()); //执行渲染操作
+    renderer.render(world.scene, world.controls.camera); //执行渲染操作
     requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
   };
 
