@@ -1,8 +1,5 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import {
-  World as PhysicsWorld,
-  RigidBodyDesc,
-} from "@dimforge/rapier3d-compat";
+import { World as PhysicsWorld } from "@dimforge/rapier3d-compat";
 import TWEEN from "@tweenjs/tween.js";
 import {
   Scene as ThreeScene,
@@ -21,7 +18,6 @@ import initLight from "./light";
 import Player from "./player";
 import State from "./state";
 import initSky from "./Sky";
-import Camera from "./Camera";
 import IRenderItem from "./interfaces/IRenderItem";
 import ModelLoader from "./utils/ModelLoader";
 import Npc from "./npc";

@@ -1,14 +1,8 @@
 import {
   WebGLRenderer,
-  Scene as ThreeScene,
   AxesHelper,
-  Mesh,
-  LineBasicMaterial,
   ACESFilmicToneMapping,
   PCFSoftShadowMap,
-  BufferGeometry,
-  LineSegments,
-  BufferAttribute,
 } from "three";
 import { init as initRapier } from "@dimforge/rapier3d-compat";
 import GUI from "lil-gui";
