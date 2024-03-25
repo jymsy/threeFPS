@@ -343,11 +343,11 @@ class Player implements IRenderItem, IInputListener {
     if (this.model) {
       this.model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       this.model.rotation.y = this.world.controls.euler.y;
-
+      // this.spine!.updateMatrixWorld();
       const axis = new Vector3(1, 0, 0).applyEuler(
         new Euler(0, this.world.controls.euler.y, 0)
       );
-      // this.spine!.updateWorldMatrix(true, true);
+
       const invWorldQuaternion = this.spine!.getWorldQuaternion(
         new Quaternion()
       ).invert();

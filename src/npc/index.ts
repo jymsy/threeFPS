@@ -8,16 +8,25 @@ import {
   Bone,
   Object3D,
   Raycaster,
-  Quaternion,
+  SpriteMaterial,
+  TextureLoader,
+  Sprite,
 } from "three";
 import World from "../World";
 
 export default class Npc {
   world;
   model?: Object3D;
+  chatPop;
 
   constructor(world: World) {
     this.world = world;
+    const chatPop = new TextureLoader().load("img/chat_pop.png");
+    const material = new SpriteMaterial({
+      map: chatPop,
+    });
+    this.chatPop = new Sprite(material);
+    this.chatPop.scale.set(0.2, 0.2, 1);
   }
 
   load() {
@@ -28,6 +37,8 @@ export default class Npc {
       );
       this.model = model;
       this.model.position.set(0, 0, 1);
+      this.chatPop.position.set(0, 1.5, 1);
+      this.world.scene.add(this.chatPop);
       // this.state.playAnimation(STATE.AIM);
 
       resolve(1);
@@ -44,7 +55,7 @@ export default class Npc {
       }
     }
     return false;
-  }
+  };
 
   render = () => {};
 }
