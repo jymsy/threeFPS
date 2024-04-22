@@ -132,13 +132,13 @@ class World {
         this.npcList.push(npc);
         this.renderList.push(npc);
 
-        this.handleEvent(player);
+        this.handleEvent();
         resolve(player);
       });
     });
   };
 
-  handleEvent = (player: Player) => {
+  handleEvent = () => {
     const instructions = document.getElementById("instructions")!;
     const blocker = document.getElementById("blocker")!;
 
