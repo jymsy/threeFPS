@@ -341,6 +341,7 @@ class Player implements IRenderItem, IInputListener {
 
     // update model position
     if (this.model) {
+      console.log(newPos);
       this.model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       this.model.rotation.y = this.world.controls.euler.y;
       // this.spine!.updateMatrixWorld();

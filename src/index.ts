@@ -24,7 +24,7 @@ const init = async () => {
   renderer.shadowMap.type = PCFSoftShadowMap;
 
   await initRapier();
-  const world = new World("gltf/de_dust.glb", width / height);
+  const world = new World("gltf/de_dust2.glb", width / height);
 
   document.getElementById("webgl")!.appendChild(renderer.domElement);
 

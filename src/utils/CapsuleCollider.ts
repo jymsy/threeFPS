@@ -8,9 +8,9 @@ class CapsuleCollider {
   constructor(world: World) {
     // Character.
     let characterDesc = RigidBodyDesc.kinematicPositionBased().setTranslation(
-      1,
+      -19,
       3,
-      4
+      9
     );
     this.body = world.createRigidBody(characterDesc);
     let characterColliderDesc = ColliderDesc.capsule(0.4, 0.2);

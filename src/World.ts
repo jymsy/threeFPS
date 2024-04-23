@@ -22,6 +22,7 @@ import IRenderItem from "./interfaces/IRenderItem";
 import ModelLoader from "./utils/ModelLoader";
 import Npc from "./npc";
 import InputManager from "./utils/InputManager";
+import MiniMap from "./MiniMap";
 
 // for debug
 let debugLines: LineSegments | null = null;
@@ -104,9 +105,10 @@ class World {
       loader.load(this.path, async (gltf) => {
         // gltf.scene.scale.set(3, 3, 3);
         // gltf.scene.position.set(0, 0, 0);
-        const map = gltf.scene;
-        State.worldScale.copy(map.children[0].scale);
-        State.worldRotation.copy(map.children[0].rotation);
+        const map = gltf.scene.children[0];
+        map.position.set(0, 0, 0);
+        State.worldScale.copy(map.scale);
+        State.worldRotation.copy(map.rotation);
         map.traverse((node) => {
           if (node.type === "Mesh") {
             node.castShadow = true;
@@ -127,10 +129,13 @@ class World {
         await player.load();
         this.renderList.push(player);
 
-        const npc = new Npc(this);
-        await npc.load();
-        this.npcList.push(npc);
-        this.renderList.push(npc);
+        // const npc = new Npc(this);
+        // await npc.load();
+        // this.npcList.push(npc);
+        // this.renderList.push(npc);
+
+        const miniMap = new MiniMap(this.controls, player);
+        this.renderList.push(miniMap);
 
         this.handleEvent();
         resolve(player);

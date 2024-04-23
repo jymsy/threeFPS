@@ -103,6 +103,21 @@
       bottom: 20px;
       visibility: hidden;
     }
+
+    #map {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 200px;
+      width: 200px;
+      background-image: url('/img/map.png');
+      background-position: -50px 0;
+      background-repeat: no-repeat;
+      background-size: 500px 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 </head>
 
@@ -124,6 +139,7 @@
   <div id="bullet-count"><span id="bullet-num"></span> | 30</div>
   <div id="interaction">按 F 交谈</div>
   <div id="input-wrapper"><input id="input" /><button id="submit">提交</button></div>
+  <div id="map"><img id="cursor" src="/img/cursor.ico" /></div>
   <div id="webgl"></div>
   <script type="module" src="/src/index.ts"></script>
 </body>
