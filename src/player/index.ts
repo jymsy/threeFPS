@@ -50,10 +50,11 @@ class Player implements IRenderItem, IInputListener {
   world;
   model?: Object3D;
   nearNpc = false;
+  initPosition = new Vector3(-19, 3, 9);
 
   constructor(world: World) {
     this.world = world;
-    this.collider = new CapsuleCollider(world.physicsWorld);
+    this.collider = new CapsuleCollider(world.physicsWorld, this.initPosition);
 
     this.weapon = new Weapon(world.scene, world.controls);
 
@@ -341,7 +342,6 @@ class Player implements IRenderItem, IInputListener {
 
     // update model position
     if (this.model) {
-      console.log(newPos);
       this.model.position.set(newPos.x, newPos.y - 0.6, newPos.z);
       this.model.rotation.y = this.world.controls.euler.y;
       // this.spine!.updateMatrixWorld();

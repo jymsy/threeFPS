@@ -1,16 +1,17 @@
 import { World, RigidBodyDesc, ColliderDesc } from "@dimforge/rapier3d-compat";
+import { Vector3 } from "three";
 
 class CapsuleCollider {
   body;
   collider;
   controller;
 
-  constructor(world: World) {
+  constructor(world: World, initialPosition: Vector3) {
     // Character.
     let characterDesc = RigidBodyDesc.kinematicPositionBased().setTranslation(
-      -19,
-      3,
-      9
+      initialPosition.x,
+      initialPosition.y,
+      initialPosition.z
     );
     this.body = world.createRigidBody(characterDesc);
     let characterColliderDesc = ColliderDesc.capsule(0.4, 0.2);
